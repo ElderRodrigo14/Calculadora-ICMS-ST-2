@@ -3,82 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Fiscal Inteligente</title>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <title>Gemini Fiscal | ICMS-ST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a73e8;
-            --surface: #ffffff;
-            --background: #f8f9fa;
-            --text-primary: #1f1f1f;
-            --text-secondary: #70757a;
-            --accent-green: #188038;
+            --gemini-blue: #1a73e8;
+            --gemini-gradient: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            --bg: #f0f2f5;
         }
 
         body {
             font-family: 'Google Sans', sans-serif;
-            background-color: var(--background);
-            color: var(--text-primary);
+            background-color: var(--bg);
             margin: 0;
-            padding: 40px 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 1000px;
-        }
+        .container { width: 100%; max-width: 900px; }
 
-        .gemini-header {
-            text-align: left;
+        .header h1 {
+            background: var(--gemini-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
             margin-bottom: 30px;
         }
 
-        .gemini-header h1 {
-            font-size: 32px;
-            font-weight: 500;
-            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-        }
-
         .card {
-            background: var(--surface);
+            background: white;
             border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             margin-bottom: 24px;
-            border: 1px solid #e0e0e0;
         }
 
-        .input-wrapper {
-            position: relative;
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         textarea {
             width: 100%;
-            height: 180px;
+            height: 120px;
             border: 1px solid #dadce0;
             border-radius: 16px;
             padding: 20px;
             font-size: 16px;
-            font-family: 'Roboto Mono', monospace;
             resize: none;
-            box-sizing: border-box;
-            background-color: #fff;
-            transition: all 0.3s ease;
+            transition: 0.3s;
+            background: #f8f9fa;
         }
 
         textarea:focus {
             outline: none;
             border-color: #4285f4;
+            background: white;
             box-shadow: 0 0 0 4px rgba(66,133,244,0.1);
         }
 
-        .button-bar {
+        .actions {
             display: flex;
             gap: 12px;
             margin-top: 20px;
@@ -88,140 +74,144 @@
             padding: 12px 28px;
             border-radius: 100px;
             border: none;
-            font-family: 'Google Sans', sans-serif;
-            font-weight: 500;
             cursor: pointer;
-            font-size: 14px;
+            font-weight: 500;
+            font-family: 'Google Sans';
             transition: 0.2s;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
+        .btn-calc { background: var(--gemini-blue); color: white; font-size: 16px; }
+        .btn-calc:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-clear { background: #f1f3f4; color: #3c4043; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: #70757a; font-size: 12px; padding: 16px; border-bottom: 1px solid #e0e0e0; }
+        td { padding: 16px; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
+
+        .st-highlight {
+            color: #188038;
+            font-weight: 500;
+            background: #e6f4ea;
+            padding: 6px 12px;
+            border-radius: 8px;
         }
 
-        .btn-primary:hover { background-color: #1765cc; }
-
-        .btn-secondary {
-            background-color: transparent;
-            border: 1px solid #dadce0;
-            color: var(--primary);
-        }
-
-        .btn-secondary:hover { background-color: #f8f9fa; }
-
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
+        .total-card {
+            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: right;
             margin-top: 20px;
         }
 
-        .result-table th {
-            text-align: left;
-            padding: 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            border-bottom: 1px solid #e0e0e0;
-            text-transform: uppercase;
-        }
-
-        .result-table td {
-            padding: 16px;
-            font-size: 15px;
-            border-bottom: 1px solid #f1f3f4;
-        }
-
-        .badge-st {
-            background: #e6f4ea;
-            color: #137333;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .total-container {
-            margin-top: 30px;
-            padding: 24px;
-            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
-            border-radius: 20px;
-            text-align: right;
-            border: 1px solid #aecbfa;
-        }
-
-        .total-label { font-size: 14px; color: #1967d2; margin-bottom: 4px; }
-        .total-value { font-size: 28px; font-weight: 500; color: #185abc; }
-
-        .hint-text { font-size: 12px; color: var(--text-secondary); margin-top: 12px; }
+        .total-val { font-size: 32px; font-weight: 500; color: #174ea6; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="gemini-header">
-            <h1>Calculadora de Antecipação</h1>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>Calculadora Fiscal</h1>
+    </div>
 
-        <div class="card">
-            <div class="input-wrapper">
-                <textarea id="inputText" placeholder="Clique para colar dados do Excel (NCM | Valor | IPI)" onclick="colarSempre()"></textarea>
-            </div>
-            <p class="hint-text">✨ Clique no campo para adicionar novos itens sem apagar os atuais.</p>
-            <div class="button-bar">
-                <button class="btn-primary" onclick="processar()">Calcular Agora</button>
-                <button class="btn-secondary" onclick="resetar()">Limpar Tudo</button>
-            </div>
+    <div class="card">
+        <div class="input-group">
+            <label style="font-weight: 500; color: #444;">Área de entrada (Cole aqui)</label>
+            <textarea id="mainInput" placeholder="NCM | VALOR | IPI" onclick="colarEAdicionar()"></textarea>
         </div>
-
-        <div id="outputCard" class="card" style="display:none; padding: 0 0 32px 0;">
-            <div style="padding: 32px 32px 0 32px;">
-                <h3 style="margin: 0 0 20px 0; font-weight: 500;">Resultados do Lote</h3>
-                <div id="tableArea"></div>
-            </div>
-            <div style="padding: 0 32px;">
-                <div class="total-container">
-                    <div class="total-label">Valor Total ICMS-ST</div>
-                    <div class="total-value" id="grandTotal">R$ 0,00</div>
-                </div>
-            </div>
+        <div class="actions">
+            <button class="btn-calc" onclick="processar()">Calcular Tudo</button>
+            <button class="btn-clear" onclick="limpar()">Limpar</button>
         </div>
     </div>
 
-    <script>
-        // --- BASE DE DADOS EXTRAÍDA DO SEU CSV ---
-        const ncmData = {
-            "85365090": 0.6328, "85369040": 0.6328, "85389010": 0.6328, "85447010": 0.6328,
-            "85447090": 0.6328, "84433111": 0.5386, "84433113": 0.5386, "84433114": 0.5386,
-            "84433115": 0.5386, "84433199": 0.5386, "84433223": 0.5386, "84433229": 0.5386,
-            "84433231": 0.5386, "84433233": 0.5386, "84433235": 0.5386, "84818019": 0.4314,
-            "84818099": 0.4314, "73181500": 0.5412, "73181600": 0.5412, "85171100": 0.4033
-            // ... a lógica de cálculo aceita qualquer MVA padrão 40.33% se não estiver aqui
-        };
+    <div id="resultCard" class="card" style="display:none;">
+        <h3 style="margin-top:0">Resultados do Processamento</h3>
+        <div id="tableOutput"></div>
+        <div class="total-card">
+            <div style="font-size: 14px; color: #1967d2;">Total ICMS-ST a Recolher</div>
+            <div id="grandTotal" class="total-val">R$ 0,00</div>
+        </div>
+    </div>
+</div>
 
-        // FUNÇÃO COLAR (EMPILHANDO DADOS)
-        async function colarSempre() {
-            try {
-                const text = await navigator.clipboard.readText();
-                const area = document.getElementById('inputText');
-                if (text && !area.value.includes(text)) {
-                    area.value = area.value.trim() ? area.value + "\n" + text : text;
+<script>
+    let ncmMap = {};
+
+    // CARREGA O CSV QUE VOCÊ SUBIU NO GITHUB
+    fetch('BASE NCM.csv')
+        .then(response => response.text())
+        .then(data => {
+            const rows = data.split('\n');
+            rows.forEach(row => {
+                const cols = row.split(';');
+                if(cols[0]) {
+                    // Limpa o MVA (ex: "40,33%" vira 0.4033)
+                    let mvaRaw = cols[1] ? cols[1].replace('%', '').replace(',', '.') : "40.33";
+                    ncmMap[cols[0].trim()] = parseFloat(mvaRaw) / 100;
                 }
-            } catch (e) { console.log("Permissão para área de transferência necessária."); }
-        }
+            });
+            console.log("Base carregada!");
+        });
 
-        function processar() {
-            const input = document.getElementById('inputText').value.trim();
-            if (!input) return;
+    async function colarEAdicionar() {
+        try {
+            const text = await navigator.clipboard.readText();
+            const area = document.getElementById('mainInput');
+            if (text && !area.value.includes(text)) {
+                area.value = area.value ? area.value + "\n" + text : text;
+            }
+        } catch (e) {}
+    }
 
-            const lines = input.split('\n');
-            let totalGeneral = 0;
-            let tableHTML = `<table class="result-table">
-                <thead>
-                    <tr><th>NCM</th><th>MVA</th><th>Valor</th><th>IPI</th><th>Base ST</th><th>ICMS-ST</th></tr>
-                </thead><tbody>`;
+    function processar() {
+        const input = document.getElementById('mainInput').value.trim();
+        if(!input) return;
 
-            lines.forEach(line => {
-                const parts = line.split(/[\s\t|;]+/).filter(p => p.trim() !== "");
-                if (parts.length >= 2) {
-                    const ncm = parts[0].replace(/\D/g, "");
-                    const valor = parseFloat(parts[1].replace(',', '.')) || 0;
-                    const ipi = parseFloat(parts
+        const lines = input.split('\n');
+        let totalST = 0;
+        let html = `<table><thead><tr><th>NCM</th><th>MVA %</th><th>Vlr Prod</th><th>IPI</th><th>Base ST</th><th>ICMS-ST</th></tr></thead><tbody>`;
+
+        lines.forEach(line => {
+            const p = line.split(/[\s\t|]+/).filter(x => x.trim() !== "");
+            if(p.length >= 2) {
+                const ncm = p[0].replace(/\D/g, "");
+                const vlrProd = parseFloat(p[1].replace(',', '.')) || 0;
+                const vlrIpi = parseFloat(p[2]?.replace(',', '.')) || 0;
+                
+                // MVA da base ou padrão
+                const mva = ncmMap[ncm] || 0.4033;
+
+                // FÓRMULAS DAS IMAGENS
+                const baseST = (vlrProd + vlrIpi) * (1 + mva);
+                let stFinal = (baseST * 0.18) - (vlrProd * 0.12);
+                if(stFinal < 0) stFinal = 0;
+
+                totalST += stFinal;
+
+                html += `<tr>
+                    <td><b>${ncm}</b></td>
+                    <td>${(mva*100).toFixed(2)}%</td>
+                    <td>R$ ${vlrProd.toFixed(2)}</td>
+                    <td>R$ ${vlrIpi.toFixed(2)}</td>
+                    <td>R$ ${baseST.toFixed(2)}</td>
+                    <td><span class="st-highlight">R$ ${stFinal.toFixed(2)}</span></td>
+                </tr>`;
+            }
+        });
+
+        html += "</tbody></table>";
+        document.getElementById('tableOutput').innerHTML = html;
+        document.getElementById('grandTotal').innerText = `R$ ${totalST.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+        document.getElementById('resultCard').style.display = 'block';
+    }
+
+    function limpar() {
+        document.getElementById('mainInput').value = "";
+        document.getElementById('resultCard').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
