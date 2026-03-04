@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ST Gemini</title>
+    <title>Calculadora Fiscal Gemini</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root { --gemini-blue: #1a73e8; --bg: #f8f9fa; --border: #dadce0; }
-        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); margin: 0; padding: 40px 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 900px; }
-        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 24px; }
+        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: #202124; margin: 0; padding: 40px 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 950px; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 24px; text-align: center; }
         .card { background: white; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; }
         .input-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
         .field { display: flex; flex-direction: column; gap: 8px; }
@@ -29,10 +29,10 @@
 <body>
 
 <div class="container">
-    <h1>Cálculo ICMS-ST</h1>
+    <h1>Substituição Tributária</h1>
     <div class="card">
         <div class="input-row">
-            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 84818019"></div>
+            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85365090"></div>
             <div class="field"><label>Valor dos Produtos</label><input type="number" id="valor" step="0.01"></div>
             <div class="field"><label>Valor IPI</label><input type="number" id="ipi" step="0.01"></div>
         </div>
@@ -47,10 +47,10 @@
     </div>
 
     <div id="resultCard" class="card" style="display:none;">
-        <h3 style="margin-top:0">Detalhamento dos Itens</h3>
+        <h3 style="margin-top:0">Detalhamento</h3>
         <div id="listaItens"></div>
         <div class="total-box" id="totalGeral">Total ST: R$ 0,00</div>
-        <button onclick="limparTudo()" style="background:none; border:none; color:#d93025; cursor:pointer; margin-top:15px; font-weight:500;">Limpar lista completa</button>
+        <button onclick="limparTudo()" style="background:none; border:none; color:#d93025; cursor:pointer; margin-top:15px; font-weight:500;">Limpar Lista</button>
     </div>
 </div>
 
@@ -59,17 +59,21 @@
     let aliqInter = 0.04;
     let itens = [];
 
-    // Carrega a base CSV (NCM e MVA)
+    // Carregamento inteligente do CSV (Tratando ponto e vírgula e vírgula decimal)
     fetch('BASE NCM.csv')
         .then(r => r.text())
         .then(data => {
-            data.split('\n').forEach(line => {
-                const cols = line.split(';');
-                if(cols[0]) {
-                    let mva = cols[1]?.replace('%', '').replace(',', '.') || "40.33";
-                    ncmMap[cols[0].trim()] = parseFloat(mva) / 100;
+            const linhas = data.split(/\r?\n/);
+            linhas.forEach((linha, index) => {
+                if (index === 0) return; // Pula cabeçalho
+                const cols = linha.split(';');
+                if(cols[0] && cols[1]) {
+                    // Transforma "63,28%" em 0.6328
+                    let mvaLimpo = cols[1].replace('%', '').replace(',', '.').trim();
+                    ncmMap[cols[0].trim()] = parseFloat(mvaLimpo) / 100;
                 }
             });
+            console.log("Base carregada com sucesso!");
         });
 
     function setAliq(v) {
@@ -79,26 +83,62 @@
     }
 
     function adicionarItem() {
-        const ncm = document.getElementById('ncm').value.trim();
+        const ncmInput = document.getElementById('ncm').value.trim();
         const vlrProd = parseFloat(document.getElementById('valor').value) || 0;
         const vlrIpi = parseFloat(document.getElementById('ipi').value) || 0;
 
-        if(!ncm || vlrProd <= 0) return alert("Preencha o NCM e o Valor!");
+        if(!ncmInput || vlrProd <= 0) return alert("Preencha NCM e Valor!");
 
-        const mva = ncmMap[ncm] || 0.4033;
+        // Busca o MVA (se não achar no CSV, usa 40,33% como padrão do seu arquivo)
+        const mva = ncmMap[ncmInput] !== undefined ? ncmMap[ncmInput] : 0.4033;
 
-        // --- APLICAÇÃO DAS FÓRMULAS DOS PRINTS ---
-        // 1. BASE ICMS ST (Print 1) = (Valor Prod + IPI) * (1 + MVA)
+        // --- FÓRMULAS ---
         const baseST = (vlrProd + vlrIpi) * (1 + mva);
-        
-        // 2. VALOR ICMS ST (Print 2) = (Base ST * 18%) - (Valor Prod * Alíquota Interestadual)
         let stFinal = (baseST * 0.18) - (vlrProd * aliqInter);
         if(stFinal < 0) stFinal = 0;
 
-        itens.push({ ncm, mva, vlrProd, vlrIpi, baseST, stFinal });
+        itens.push({ ncm: ncmInput, mva, vlrProd, vlrIpi, baseST, stFinal });
         render();
 
-        // Limpa campos
         document.getElementById('ncm').value = "";
         document.getElementById('valor').value = "";
-        document.getElementById('ipi').value =
+        document.getElementById('ipi').value = "";
+        document.getElementById('ncm').focus();
+    }
+
+    function render() {
+        let total = 0;
+        let html = `<table><thead><tr>
+            <th>NCM</th>
+            <th>MVA</th>
+            <th>Valor Produtos</th>
+            <th>IPI</th>
+            <th>Base ICMS ST</th>
+            <th>Vlr ICMS ST</th>
+        </tr></thead><tbody>`;
+
+        itens.forEach(i => {
+            total += i.stFinal;
+            html += `<tr>
+                <td><b>${i.ncm}</b></td>
+                <td>${(i.mva*100).toFixed(2)}%</td>
+                <td>R$ ${i.vlrProd.toFixed(2)}</td>
+                <td>R$ ${i.vlrIpi.toFixed(2)}</td>
+                <td>R$ ${i.baseST.toFixed(2)}</td>
+                <td><span class="st-badge">R$ ${i.stFinal.toFixed(2)}</span></td>
+            </tr>`;
+        });
+
+        html += "</tbody></table>";
+        document.getElementById('listaItens').innerHTML = html;
+        document.getElementById('totalGeral').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+        document.getElementById('resultCard').style.display = 'block';
+    }
+
+    function limparTudo() {
+        itens = [];
+        document.getElementById('resultCard').style.display = 'none';
+    }
+</script>
+</body>
+</html>
