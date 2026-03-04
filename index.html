@@ -49,15 +49,17 @@
     </div>
 
     <script>
-        function calcular() {
+       function calcular() {
             const input = document.getElementById('inputText').value.trim();
             const resultDiv = document.getElementById('resultTable');
             if (!input) return alert("Cole os dados primeiro!");
 
             const lines = input.split('\n');
+            let totalGeralST = 0;
+            
             let tableHTML = `<table>
                 <thead>
-                    <tr><th>NCM</th><th>Valor</th><th>IPI</th><th>MVA%</th><th>ICMS ST</th></tr>
+                    <tr><th>NCM</th><th>Valor</th><th>IPI</th><th>MVA%</th><th>Base ST</th><th>ICMS ST</th></tr>
                 </thead>
                 <tbody>`;
 
@@ -65,32 +67,44 @@
                 const parts = line.split(/[\s\t|]+/).filter(p => p.trim() !== "");
                 if (parts.length >= 2) {
                     const ncm = parts[0];
-                    const valor = parseFloat(parts[1].replace(',', '.')) || 0;
+                    const valorUnitario = parseFloat(parts[1].replace(',', '.')) || 0;
                     const ipi = parseFloat(parts[2]?.replace(',', '.')) || 0;
-                    const mva = parseFloat(parts[3]?.replace(',', '.')) || 40;
+                    const mva = parseFloat(parts[3]?.replace(',', '.')) || 0;
+
+                    // --- AS FÓRMULAS AJUSTADAS ---
+                    // 1. Base de Cálculo ST = (Valor Produto + IPI) * (1 + MVA/100)
+                    const baseST = (valorUnitario + ipi) * (1 + (mva / 100));
                     
-                    // Lógica: Base ST = (Valor + IPI) * (1 + MVA/100)
-                    // ST = (Base * 0.18) - (Valor * 0.18)
-                    const baseST = (valor + ipi) * (1 + (mva / 100));
-                    const icmsST = (baseST * 0.18) - (valor * 0.18);
+                    // 2. Alíquota Interna (Exemplo 18%) e Alíquota Interestadual (Exemplo 12%)
+                    // Ajuste aqui se o seu estado usar outros valores (Ex: 0.18 e 0.12)
+                    const aliqInterna = 0.18; 
+                    const aliqInter = 0.12;
+
+                    // 3. Cálculo do ICMS ST Final: (Base ST * Aliq Interna) - (Valor Produto * Aliq Inter)
+                    let icmsSTFinal = (baseST * aliqInterna) - (valorUnitario * aliqInter);
+                    
+                    // Trava de segurança: ST não pode ser negativo
+                    if (icmsSTFinal < 0 || mva === 0) icmsSTFinal = 0;
+
+                    totalGeralST += icmsSTFinal;
 
                     tableHTML += `<tr>
                         <td>${ncm}</td>
-                        <td>R$ ${valor.toFixed(2)}</td>
+                        <td>R$ ${valorUnitario.toFixed(2)}</td>
                         <td>R$ ${ipi.toFixed(2)}</td>
-                        <td>${mva}%</td>
-                        <td class="res-val">R$ ${icmsST.toFixed(2)}</td>
+                        <td>${mva.toFixed(2)}%</td>
+                        <td>R$ ${baseST.toFixed(2)}</td>
+                        <td class="res-val">R$ ${icmsSTFinal.toFixed(2)}</td>
                     </tr>`;
                 }
             });
 
-            tableHTML += `</tbody></table>`;
+            tableHTML += `</tbody></table>
+            <div style="margin-top:15px; padding:10px; background:#eff6ff; border-radius:4px; font-weight:bold; color:#1e40af; text-align:right;">
+                TOTAL ST: R$ ${totalGeralST.toFixed(2)}
+            </div>`;
+            
             resultDiv.innerHTML = tableHTML;
-        }
-
-        function limpar() {
-            document.getElementById('inputText').value = "";
-            document.getElementById('resultTable').innerHTML = '<p style="color: #94a3b8; text-align: center; padding-top: 50px;">Insira os dados e clique em calcular.</p>';
         }
     </script>
 </body>
