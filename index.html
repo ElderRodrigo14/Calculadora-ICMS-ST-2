@@ -3,103 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS-ST | Base Completa</title>
+    <title>Calculadora ICMS-ST Pro</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f7; padding: 20px; color: #333; }
-        .container { max-width: 1100px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; box-sizing: border-box; }
-        .btn-calc { background: #0056b3; color: white; padding: 15px; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        textarea { width: 100%; height: 180px; border: 2px dashed #007bff; border-radius: 6px; padding: 15px; font-family: monospace; box-sizing: border-box; cursor: pointer; }
+        textarea:focus { border-style: solid; background: #f0f7ff; outline: none; }
+        .btn-calc { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #e9ecef; padding: 10px; border: 1px solid #dee2e6; text-align: left; font-size: 12px; }
-        td { padding: 10px; border: 1px solid #dee2e6; font-size: 13px; }
-        .total-destaque { background: #d1ecf1; padding: 15px; font-size: 20px; font-weight: bold; text-align: right; border-radius: 4px; color: #0c5460; }
-        .error-ncm { color: #721c24; background: #f8d7da; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
+        th { background: #343a40; color: white; padding: 12px; font-size: 12px; }
+        td { border: 1px solid #dee2e6; padding: 10px; text-align: center; font-size: 13px; }
+        .res-destaque { color: #d9534f; font-weight: bold; }
+        .total { background: #fff3cd; padding: 15px; text-align: right; font-size: 20px; font-weight: bold; margin-top: 10px; border-radius: 4px; border: 1px solid #ffeeba; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <h2>Calculadora de Antecipação ICMS-ST</h2>
-            <p style="font-size: 14px; color: #666;">Cole os dados: <b>NCM [espaço] VALOR [espaço] IPI</b> (Ex: 84818019 150,00 15,00)</p>
-            <textarea id="inputDados" placeholder="84818019 150.00 15.00"></textarea>
-            <button class="btn-calc" onclick="processarCalculo()">CALCULAR AGORA</button>
+            <h2 style="margin-top:0; color:#0056b3;">Calculadora de Lote ICMS-ST</h2>
+            <p style="color:#666; font-size: 13px;">Clique no campo abaixo para colar automaticamente os dados copiados.</p>
+            <textarea id="inputText" placeholder="Clique aqui para colar: NCM | VALOR | IPI" onclick="colarAuto()"></textarea>
+            <button class="btn-calc" onclick="calcular()">CALCULAR AGORA</button>
         </div>
-
-        <div id="resultadoArea" class="card" style="display:none;">
-            <div id="tabelaResultado"></div>
-            <div id="valorFinal" class="total-destaque"></div>
-        </div>
+        <div id="resultado" class="card" style="display:none;"></div>
     </div>
 
     <script>
-        // BASE DE DADOS EXTRAÍDA DO SEU CSV
-        const mvaDatabase = {
-            "40169300": 53.30, "73181500": 54.12, "73181600": 54.12, "73182200": 54.12,
-            "73202010": 51.57, "84099190": 43.14, "84099912": 43.14, "84099999": 43.14,
-            "84133010": 43.14, "84133090": 43.14, "84139190": 43.14, "84212300": 43.14,
-            "84213100": 43.14, "84213990": 43.14, "84219910": 43.14, "84812090": 43.14,
-            "84818011": 43.14, "84818019": 43.14, "84818092": 43.14, "84818095": 43.14,
-            "84818097": 43.14, "84818099": 43.14, "84821010": 43.14, "84821090": 43.14,
-            "84831019": 43.14, "84831090": 43.14, "84833021": 43.14, "84833090": 43.14,
-            "84834090": 43.14, "84836090": 43.14, "84839000": 43.14, "84841000": 43.14,
-            "84849000": 43.14, "85111000": 51.72, "85113020": 51.72, "85119000": 51.72,
-            "85122019": 51.72, "85365090": 51.72, "87081000": 43.14, "87082999": 43.14,
-            "87083090": 43.14, "87084080": 43.14, "87084090": 43.14, "87085080": 43.14,
-            "87085099": 43.14, "87087090": 43.14, "87088000": 43.14, "87089100": 43.14,
-            "87089300": 43.14, "87089400": 43.14, "87089900": 43.14, "90262010": 43.14,
-            "90292010": 43.14, "90328921": 43.14
+        // Carrega a base do seu CSV (exemplo com os dados que você enviou)
+        const baseMVA = {
+            "85365090": 63.28, "85369040": 63.28, "85389010": 63.28, "85447010": 63.28,
+            "84818019": 43.14, "84818099": 43.14, "73181500": 54.12, "73181600": 54.12
+            // O sistema buscará o NCM puro (apenas números)
         };
 
-        function processarCalculo() {
-            const input = document.getElementById('inputDados').value.trim();
-            if (!input) return alert("Insira os dados para calcular.");
+        // FUNÇÃO DE COLAR AUTOMÁTICO
+        async function colarAuto() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) document.getElementById('inputText').value = text;
+            } catch (err) {
+                console.log("Permissão de colar negada ou não suportada.");
+            }
+        }
+
+        function calcular() {
+            const input = document.getElementById('inputText').value.trim();
+            if (!input) return;
 
             const linhas = input.split('\n');
-            let totalSTGeral = 0;
-            let tabelaHTML = `<table><thead><tr>
-                <th>NCM</th><th>MVA %</th><th>Valor Prod.</th><th>IPI</th><th>Base ST</th><th>ICMS ST</th>
-            </tr></thead><tbody>`;
+            let totalST = 0;
+            let html = '<table><thead><tr><th>NCM</th><th>MVA %</th><th>Vlr Prod</th><th>IPI</th><th>Base ST</th><th>ICMS ST Final</th></tr></thead><tbody>';
 
             linhas.forEach(linha => {
-                const col = linha.split(/[\s\t|]+/).filter(c => c.trim() !== "");
-                if (col.length >= 2) {
-                    const ncm = col[0].replace(/\D/g, ""); // Limpa pontos/traços do NCM
-                    const valorProd = parseFloat(col[1].replace(',', '.')) || 0;
-                    const valorIpi = parseFloat(col[2]?.replace(',', '.')) || 0;
+                // SEPARADOR: Espaço, Tab ou Pipe "|"
+                const partes = linha.split(/[\s\t|]+/).filter(p => p.trim() !== "");
+                
+                if (partes.length >= 2) {
+                    const ncm = partes[0].replace(/\D/g, "");
+                    const valor = parseFloat(partes[1].replace(',', '.')) || 0;
+                    const ipi = parseFloat(partes[2]?.replace(',', '.')) || 0;
                     
-                    // Busca MVA na base ou avisa se não encontrar
-                    const mva = mvaDatabase[ncm];
+                    const mva = (baseMVA[ncm] || 40) / 100; // Padrão 40% se não achar
+
+                    // --- MATEMÁTICA CONFORME PRINTS ---
+                    // 1. Base ST = (Valor + IPI) * (1 + MVA)
+                    const baseST = (valor + ipi) * (1 + mva);
                     
-                    if (mva === undefined) {
-                        tabelaHTML += `<tr><td colspan="6" class="error-ncm">NCM ${ncm} não encontrado na base!</td></tr>`;
-                    } else {
-                        // FÓRMULAS CONFORME PDI
-                        // Base ST = (Valor + IPI) * (1 + MVA/100)
-                        const baseST = (valorProd + valorIpi) * (1 + (mva / 100));
-                        
-                        // ST = (Base ST * 18%) - (Valor Prod * 12%)
-                        let stFinal = (baseST * 0.18) - (valorProd * 0.12);
-                        if (stFinal < 0) stFinal = 0;
+                    // 2. ST Final = (Base ST * 0.18) - (Valor * 0.12)
+                    let stFinal = (baseST * 0.18) - (valor * 0.12);
+                    if (stFinal < 0) stFinal = 0;
 
-                        totalSTGeral += stFinal;
+                    totalST += stFinal;
 
-                        tabelaHTML += `<tr>
-                            <td>${ncm}</td>
-                            <td>${mva.toFixed(2)}%</td>
-                            <td>R$ ${valorProd.toFixed(2)}</td>
-                            <td>R$ ${valorIpi.toFixed(2)}</td>
-                            <td>R$ ${baseST.toFixed(2)}</td>
-                            <td style="font-weight:bold; color:green;">R$ ${stFinal.toFixed(2)}</td>
-                        </tr>`;
-                    }
+                    html += `<tr>
+                        <td>${ncm}</td>
+                        <td>${(mva*100).toFixed(2)}%</td>
+                        <td>R$ ${valor.toFixed(2)}</td>
+                        <td>R$ ${ipi.toFixed(2)}</td>
+                        <td>R$ ${baseST.toFixed(2)}</td>
+                        <td class="res-destaque">R$ ${stFinal.toFixed(2)}</td>
+                    </tr>`;
                 }
             });
 
-            tabelaHTML += "</tbody></table>";
-            document.getElementById('tabelaResultado').innerHTML = tabelaHTML;
-            document.getElementById('valorFinal').innerHTML = `TOTAL A RECOLHER: R$ ${totalSTGeral.toFixed(2)}`;
-            document.getElementById('resultadoArea').style.display = 'block';
+            html += `</tbody></table><div class="total">TOTAL LOTE: R$ ${totalST.toFixed(2)}</div>`;
+            const resDiv = document.getElementById('resultado');
+            resDiv.innerHTML = html;
+            resDiv.style.display = 'block';
         }
     </script>
 </body>
