@@ -3,95 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS-ST Pro</title>
+    <title>Calculadora Fiscal Inteligente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        textarea { width: 100%; height: 180px; border: 2px dashed #007bff; border-radius: 6px; padding: 15px; font-family: monospace; box-sizing: border-box; cursor: pointer; }
-        textarea:focus { border-style: solid; background: #f0f7ff; outline: none; }
-        .btn-calc { background: #28a745; color: white; border: none; padding: 15px; width: 100%; font-size: 18px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #343a40; color: white; padding: 12px; font-size: 12px; }
-        td { border: 1px solid #dee2e6; padding: 10px; text-align: center; font-size: 13px; }
-        .res-destaque { color: #d9534f; font-weight: bold; }
-        .total { background: #fff3cd; padding: 15px; text-align: right; font-size: 20px; font-weight: bold; margin-top: 10px; border-radius: 4px; border: 1px solid #ffeeba; }
+        :root {
+            --primary: #1a73e8;
+            --surface: #ffffff;
+            --background: #f8f9fa;
+            --text-primary: #1f1f1f;
+            --text-secondary: #70757a;
+            --accent-green: #188038;
+        }
+
+        body {
+            font-family: 'Google Sans', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .gemini-header {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .gemini-header h1 {
+            font-size: 32px;
+            font-weight: 500;
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+            margin-bottom: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            border: 1px solid #dadce0;
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 16px;
+            font-family: 'Roboto Mono', monospace;
+            resize: none;
+            box-sizing: border-box;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 4px rgba(66,133,244,0.1);
+        }
+
+        .button-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 28px;
+            border-radius: 100px;
+            border: none;
+            font-family: 'Google Sans', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover { background-color: #1765cc; }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid #dadce0;
+            color: var(--primary);
+        }
+
+        .btn-secondary:hover { background-color: #f8f9fa; }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .result-table th {
+            text-align: left;
+            padding: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #e0e0e0;
+            text-transform: uppercase;
+        }
+
+        .result-table td {
+            padding: 16px;
+            font-size: 15px;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .badge-st {
+            background: #e6f4ea;
+            color: #137333;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .total-container {
+            margin-top: 30px;
+            padding: 24px;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d2e3fc 100%);
+            border-radius: 20px;
+            text-align: right;
+            border: 1px solid #aecbfa;
+        }
+
+        .total-label { font-size: 14px; color: #1967d2; margin-bottom: 4px; }
+        .total-value { font-size: 28px; font-weight: 500; color: #185abc; }
+
+        .hint-text { font-size: 12px; color: var(--text-secondary); margin-top: 12px; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="card">
-            <h2 style="margin-top:0; color:#0056b3;">Calculadora de Lote ICMS-ST</h2>
-            <p style="color:#666; font-size: 13px;">Clique no campo abaixo para colar automaticamente os dados copiados.</p>
-            <textarea id="inputText" placeholder="Clique aqui para colar: NCM | VALOR | IPI" onclick="colarAuto()"></textarea>
-            <button class="btn-calc" onclick="calcular()">CALCULAR AGORA</button>
+        <div class="gemini-header">
+            <h1>Calculadora de Antecipação</h1>
         </div>
-        <div id="resultado" class="card" style="display:none;"></div>
+
+        <div class="card">
+            <div class="input-wrapper">
+                <textarea id="inputText" placeholder="Clique para colar dados do Excel (NCM | Valor | IPI)" onclick="colarSempre()"></textarea>
+            </div>
+            <p class="hint-text">✨ Clique no campo para adicionar novos itens sem apagar os atuais.</p>
+            <div class="button-bar">
+                <button class="btn-primary" onclick="processar()">Calcular Agora</button>
+                <button class="btn-secondary" onclick="resetar()">Limpar Tudo</button>
+            </div>
+        </div>
+
+        <div id="outputCard" class="card" style="display:none; padding: 0 0 32px 0;">
+            <div style="padding: 32px 32px 0 32px;">
+                <h3 style="margin: 0 0 20px 0; font-weight: 500;">Resultados do Lote</h3>
+                <div id="tableArea"></div>
+            </div>
+            <div style="padding: 0 32px;">
+                <div class="total-container">
+                    <div class="total-label">Valor Total ICMS-ST</div>
+                    <div class="total-value" id="grandTotal">R$ 0,00</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Carrega a base do seu CSV (exemplo com os dados que você enviou)
-        const baseMVA = {
-            "85365090": 63.28, "85369040": 63.28, "85389010": 63.28, "85447010": 63.28,
-            "84818019": 43.14, "84818099": 43.14, "73181500": 54.12, "73181600": 54.12
-            // O sistema buscará o NCM puro (apenas números)
+        // --- BASE DE DADOS EXTRAÍDA DO SEU CSV ---
+        const ncmData = {
+            "85365090": 0.6328, "85369040": 0.6328, "85389010": 0.6328, "85447010": 0.6328,
+            "85447090": 0.6328, "84433111": 0.5386, "84433113": 0.5386, "84433114": 0.5386,
+            "84433115": 0.5386, "84433199": 0.5386, "84433223": 0.5386, "84433229": 0.5386,
+            "84433231": 0.5386, "84433233": 0.5386, "84433235": 0.5386, "84818019": 0.4314,
+            "84818099": 0.4314, "73181500": 0.5412, "73181600": 0.5412, "85171100": 0.4033
+            // ... a lógica de cálculo aceita qualquer MVA padrão 40.33% se não estiver aqui
         };
 
-        // FUNÇÃO DE COLAR AUTOMÁTICO
-        async function colarAuto() {
+        // FUNÇÃO COLAR (EMPILHANDO DADOS)
+        async function colarSempre() {
             try {
                 const text = await navigator.clipboard.readText();
-                if (text) document.getElementById('inputText').value = text;
-            } catch (err) {
-                console.log("Permissão de colar negada ou não suportada.");
-            }
+                const area = document.getElementById('inputText');
+                if (text && !area.value.includes(text)) {
+                    area.value = area.value.trim() ? area.value + "\n" + text : text;
+                }
+            } catch (e) { console.log("Permissão para área de transferência necessária."); }
         }
 
-        function calcular() {
+        function processar() {
             const input = document.getElementById('inputText').value.trim();
             if (!input) return;
 
-            const linhas = input.split('\n');
-            let totalST = 0;
-            let html = '<table><thead><tr><th>NCM</th><th>MVA %</th><th>Vlr Prod</th><th>IPI</th><th>Base ST</th><th>ICMS ST Final</th></tr></thead><tbody>';
+            const lines = input.split('\n');
+            let totalGeneral = 0;
+            let tableHTML = `<table class="result-table">
+                <thead>
+                    <tr><th>NCM</th><th>MVA</th><th>Valor</th><th>IPI</th><th>Base ST</th><th>ICMS-ST</th></tr>
+                </thead><tbody>`;
 
-            linhas.forEach(linha => {
-                // SEPARADOR: Espaço, Tab ou Pipe "|"
-                const partes = linha.split(/[\s\t|]+/).filter(p => p.trim() !== "");
-                
-                if (partes.length >= 2) {
-                    const ncm = partes[0].replace(/\D/g, "");
-                    const valor = parseFloat(partes[1].replace(',', '.')) || 0;
-                    const ipi = parseFloat(partes[2]?.replace(',', '.')) || 0;
-                    
-                    const mva = (baseMVA[ncm] || 40) / 100; // Padrão 40% se não achar
-
-                    // --- MATEMÁTICA CONFORME PRINTS ---
-                    // 1. Base ST = (Valor + IPI) * (1 + MVA)
-                    const baseST = (valor + ipi) * (1 + mva);
-                    
-                    // 2. ST Final = (Base ST * 0.18) - (Valor * 0.12)
-                    let stFinal = (baseST * 0.18) - (valor * 0.12);
-                    if (stFinal < 0) stFinal = 0;
-
-                    totalST += stFinal;
-
-                    html += `<tr>
-                        <td>${ncm}</td>
-                        <td>${(mva*100).toFixed(2)}%</td>
-                        <td>R$ ${valor.toFixed(2)}</td>
-                        <td>R$ ${ipi.toFixed(2)}</td>
-                        <td>R$ ${baseST.toFixed(2)}</td>
-                        <td class="res-destaque">R$ ${stFinal.toFixed(2)}</td>
-                    </tr>`;
-                }
-            });
-
-            html += `</tbody></table><div class="total">TOTAL LOTE: R$ ${totalST.toFixed(2)}</div>`;
-            const resDiv = document.getElementById('resultado');
-            resDiv.innerHTML = html;
-            resDiv.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
+            lines.forEach(line => {
+                const parts = line.split(/[\s\t|;]+/).filter(p => p.trim() !== "");
+                if (parts.length >= 2) {
+                    const ncm = parts[0].replace(/\D/g, "");
+                    const valor = parseFloat(parts[1].replace(',', '.')) || 0;
+                    const ipi = parseFloat(parts
