@@ -3,114 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS-ST Profissional</title>
+    <title>Calculadora ICMS-ST | Base Completa</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        body { font-family: sans-serif; background-color: #f4f4f7; padding: 20px; color: #333; }
         .container { max-width: 1100px; margin: 0 auto; }
-        .header { background: #004a99; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        textarea { width: 100%; height: 250px; border: 1px solid #ccc; border-radius: 4px; padding: 10px; font-family: monospace; resize: none; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-calc { background: #28a745; color: white; font-size: 16px; }
-        .btn-calc:hover { background: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-        th { background: #f8f9fa; padding: 12px; border: 1px solid #dee2e6; text-align: left; font-size: 12px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        textarea { width: 100%; height: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; box-sizing: border-box; }
+        .btn-calc { background: #0056b3; color: white; padding: 15px; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #e9ecef; padding: 10px; border: 1px solid #dee2e6; text-align: left; font-size: 12px; }
         td { padding: 10px; border: 1px solid #dee2e6; font-size: 13px; }
-        .total-box { margin-top: 20px; padding: 20px; background: #fff3cd; border-left: 5px solid #ffc107; font-size: 18px; font-weight: bold; text-align: right; }
-        .highlight { color: #d9534f; font-weight: bold; }
+        .total-destaque { background: #d1ecf1; padding: 15px; font-size: 20px; font-weight: bold; text-align: right; border-radius: 4px; color: #0c5460; }
+        .error-ncm { color: #721c24; background: #f8d7da; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1 style="margin:0">Calculadora Automática ICMS-ST</h1>
-            <p style="margin:5px 0 0 0">Baseada no seu Banco de Dados Fiscal</p>
+        <div class="card">
+            <h2>Calculadora de Antecipação ICMS-ST</h2>
+            <p style="font-size: 14px; color: #666;">Cole os dados: <b>NCM [espaço] VALOR [espaço] IPI</b> (Ex: 84818019 150,00 15,00)</p>
+            <textarea id="inputDados" placeholder="84818019 150.00 15.00"></textarea>
+            <button class="btn-calc" onclick="processarCalculo()">CALCULAR AGORA</button>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <h3>1. Entrada de Dados</h3>
-                <p style="font-size: 12px; color: #666;">Cole os dados no formato:<br><b>NCM [espaço] VALOR [espaço] IPI</b></p>
-                <textarea id="inputText" placeholder="Exemplo:&#10;84818019 150.00 15.00&#10;84818099 200.00 24.00"></textarea>
-                <button class="btn-calc" onclick="calcular()">CALCULAR LOTE</button>
-                <button style="background:#6c757d; color:white;" onclick="limpar()">Limpar</button>
-            </div>
-
-            <div class="card">
-                <h3>2. Resultado Detalhado</h3>
-                <div id="resultado">
-                    <p style="text-align:center; color:#999; margin-top:50px;">Aguardando dados para processamento...</p>
-                </div>
-            </div>
+        <div id="resultadoArea" class="card" style="display:none;">
+            <div id="tabelaResultado"></div>
+            <div id="valorFinal" class="total-destaque"></div>
         </div>
     </div>
 
     <script>
-        // Dados extraídos diretamente do seu CSV
-        const database = {
-            "84818019": 43.14,
-            "84818099": 43.14,
-            "84818092": 43.14,
-            "84818095": 43.14,
-            "40169300": 53.30,
-            "73181500": 54.12,
-            "73181600": 54.12,
-            "73202010": 51.57,
-            "84099190": 43.14,
-            "84133090": 43.14,
-            "84812090": 43.14,
-            "84821010": 43.14,
-            "84833090": 43.14,
-            "85365090": 51.72
-            // A lista pode ser expandida conforme necessário
+        // BASE DE DADOS EXTRAÍDA DO SEU CSV
+        const mvaDatabase = {
+            "40169300": 53.30, "73181500": 54.12, "73181600": 54.12, "73182200": 54.12,
+            "73202010": 51.57, "84099190": 43.14, "84099912": 43.14, "84099999": 43.14,
+            "84133010": 43.14, "84133090": 43.14, "84139190": 43.14, "84212300": 43.14,
+            "84213100": 43.14, "84213990": 43.14, "84219910": 43.14, "84812090": 43.14,
+            "84818011": 43.14, "84818019": 43.14, "84818092": 43.14, "84818095": 43.14,
+            "84818097": 43.14, "84818099": 43.14, "84821010": 43.14, "84821090": 43.14,
+            "84831019": 43.14, "84831090": 43.14, "84833021": 43.14, "84833090": 43.14,
+            "84834090": 43.14, "84836090": 43.14, "84839000": 43.14, "84841000": 43.14,
+            "84849000": 43.14, "85111000": 51.72, "85113020": 51.72, "85119000": 51.72,
+            "85122019": 51.72, "85365090": 51.72, "87081000": 43.14, "87082999": 43.14,
+            "87083090": 43.14, "87084080": 43.14, "87084090": 43.14, "87085080": 43.14,
+            "87085099": 43.14, "87087090": 43.14, "87088000": 43.14, "87089100": 43.14,
+            "87089300": 43.14, "87089400": 43.14, "87089900": 43.14, "90262010": 43.14,
+            "90292010": 43.14, "90328921": 43.14
         };
 
-        function calcular() {
-            const text = document.getElementById('inputText').value.trim();
-            if(!text) return alert("Por favor, cole os dados!");
+        function processarCalculo() {
+            const input = document.getElementById('inputDados').value.trim();
+            if (!input) return alert("Insira os dados para calcular.");
 
-            const linhas = text.split('\n');
-            let totalST = 0;
-            let html = '<table><thead><tr><th>NCM</th><th>MVA %</th><th>Valor Prod.</th><th>IPI</th><th>Base ST</th><th>ICMS ST</th></tr></thead><tbody>';
+            const linhas = input.split('\n');
+            let totalSTGeral = 0;
+            let tabelaHTML = `<table><thead><tr>
+                <th>NCM</th><th>MVA %</th><th>Valor Prod.</th><th>IPI</th><th>Base ST</th><th>ICMS ST</th>
+            </tr></thead><tbody>`;
 
             linhas.forEach(linha => {
-                const colunas = linha.split(/[\s\t]+/).filter(c => c.trim() !== "");
-                if(colunas.length >= 2) {
-                    const ncm = colunas[0].trim();
-                    const valor = parseFloat(colunas[1].replace(',', '.')) || 0;
-                    const ipi = parseFloat(colunas[2]?.replace(',', '.')) || 0;
+                const col = linha.split(/[\s\t|]+/).filter(c => c.trim() !== "");
+                if (col.length >= 2) {
+                    const ncm = col[0].replace(/\D/g, ""); // Limpa pontos/traços do NCM
+                    const valorProd = parseFloat(col[1].replace(',', '.')) || 0;
+                    const valorIpi = parseFloat(col[2]?.replace(',', '.')) || 0;
                     
-                    // Busca MVA no banco de dados
-                    const mva = database[ncm] || 0;
+                    // Busca MVA na base ou avisa se não encontrar
+                    const mva = mvaDatabase[ncm];
                     
-                    // Fórmulas
-                    const baseST = (valor + ipi) * (1 + (mva/100));
-                    const icmsST = (baseST * 0.18) - (valor * 0.12);
-                    
-                    const resultadoFinal = icmsST > 0 ? icmsST : 0;
-                    totalST += resultadoFinal;
+                    if (mva === undefined) {
+                        tabelaHTML += `<tr><td colspan="6" class="error-ncm">NCM ${ncm} não encontrado na base!</td></tr>`;
+                    } else {
+                        // FÓRMULAS CONFORME PDI
+                        // Base ST = (Valor + IPI) * (1 + MVA/100)
+                        const baseST = (valorProd + valorIpi) * (1 + (mva / 100));
+                        
+                        // ST = (Base ST * 18%) - (Valor Prod * 12%)
+                        let stFinal = (baseST * 0.18) - (valorProd * 0.12);
+                        if (stFinal < 0) stFinal = 0;
 
-                    html += `<tr>
-                        <td>${ncm} ${mva === 0 ? '<span style="color:red">(!)</span>' : ''}</td>
-                        <td>${mva}%</td>
-                        <td>R$ ${valor.toFixed(2)}</td>
-                        <td>R$ ${ipi.toFixed(2)}</td>
-                        <td>R$ ${baseST.toFixed(2)}</td>
-                        <td class="highlight">R$ ${resultadoFinal.toFixed(2)}</td>
-                    </tr>`;
+                        totalSTGeral += stFinal;
+
+                        tabelaHTML += `<tr>
+                            <td>${ncm}</td>
+                            <td>${mva.toFixed(2)}%</td>
+                            <td>R$ ${valorProd.toFixed(2)}</td>
+                            <td>R$ ${valorIpi.toFixed(2)}</td>
+                            <td>R$ ${baseST.toFixed(2)}</td>
+                            <td style="font-weight:bold; color:green;">R$ ${stFinal.toFixed(2)}</td>
+                        </tr>`;
+                    }
                 }
             });
 
-            html += '</tbody></table>';
-            html += `<div class="total-box">VALOR TOTAL DE ICMS-ST: R$ ${totalST.toFixed(2)}</div>`;
-            
-            document.getElementById('resultado').innerHTML = html;
-        }
-
-        function limpar() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('resultado').innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Aguardando dados para processamento...</p>';
+            tabelaHTML += "</tbody></table>";
+            document.getElementById('tabelaResultado').innerHTML = tabelaHTML;
+            document.getElementById('valorFinal').innerHTML = `TOTAL A RECOLHER: R$ ${totalSTGeral.toFixed(2)}`;
+            document.getElementById('resultadoArea').style.display = 'block';
         }
     </script>
 </body>
