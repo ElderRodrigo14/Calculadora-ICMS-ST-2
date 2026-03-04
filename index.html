@@ -3,16 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS ST</title>
-    <link rel="stylesheet" href="global.css">
+    <title>Calculadora Inteligente ICMS-ST</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f5; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid #2563eb; }
+        .grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card { background: white; padding: 20px; border-radius: 8px; border: 1px solid #e4e4e7; flex: 1; min-width: 300px; }
+        textarea { width: 100%; height: 200px; border: 1px solid #e4e4e7; border-radius: 4px; padding: 10px; font-family: monospace; box-sizing: border-box; }
+        button { padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; transition: 0.2s; }
+        .btn-calc { background: #2563eb; color: white; flex: 2; }
+        .btn-clear { background: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; flex: 1; }
+        button:hover { opacity: 0.8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th { background: #f8fafc; text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+        .res-val { font-weight: bold; color: #16a34a; }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
-    
-    <script src="script.js"></script>
-    
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px;">Calculadora Inteligente ICMS-ST</h1>
+            <p style="color: #71717a; margin: 5px 0 0 0;">Cálculo em lote simplificado para Web</p>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3 style="margin-top: 0;">Entrada de Dados</h3>
+                <p style="font-size: 12px; color: #71717a;">Formato: NCM [espaço] Valor [espaço] IPI [espaço] MVA</p>
+                <textarea id="inputText" placeholder="Exemplo:&#10;84818019 150.00 15.00 45.00&#10;84818019 200.00 20.00 45.00"></textarea>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-clear" onclick="limpar()">Limpar</button>
+                    <button class="btn-calc" onclick="calcular()">Calcular Agora</button>
+                </div>
+            </div>
+
+            <div class="card" style="flex: 1.5;">
+                <h3 style="margin-top: 0;">Resultados</h3>
+                <div id="resultTable">
+                    <p style="color: #94a3b8; text-align: center; padding-top: 50px;">Insira os dados e clique em calcular.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        alert("Se a calculadora não carregar, verifique se os arquivos global.css e script.js estão na mesma pasta!");
+        function calcular() {
+            const input = document.getElementById('inputText').value.trim();
+            const resultDiv = document.getElementById('resultTable');
+            if (!input) return alert("Cole os dados primeiro!");
+
+            const lines = input.split('\n');
+            let tableHTML = `<table>
+                <thead>
+                    <tr><th>NCM</th><th>Valor</th><th>IPI</th><th>MVA%</th><th>ICMS ST</th></tr>
+                </thead>
+                <tbody>`;
+
+            lines.forEach(line => {
+                const parts = line.split(/[\s\t|]+/).filter(p => p.trim() !== "");
+                if (parts.length >= 2) {
+                    const ncm = parts[0];
+                    const valor = parseFloat(parts[1].replace(',', '.')) || 0;
+                    const ipi = parseFloat(parts[2]?.replace(',', '.')) || 0;
+                    const mva = parseFloat(parts[3]?.replace(',', '.')) || 40;
+                    
+                    // Lógica: Base ST = (Valor + IPI) * (1 + MVA/100)
+                    // ST = (Base * 0.18) - (Valor * 0.18)
+                    const baseST = (valor + ipi) * (1 + (mva / 100));
+                    const icmsST = (baseST * 0.18) - (valor * 0.18);
+
+                    tableHTML += `<tr>
+                        <td>${ncm}</td>
+                        <td>R$ ${valor.toFixed(2)}</td>
+                        <td>R$ ${ipi.toFixed(2)}</td>
+                        <td>${mva}%</td>
+                        <td class="res-val">R$ ${icmsST.toFixed(2)}</td>
+                    </tr>`;
+                }
+            });
+
+            tableHTML += `</tbody></table>`;
+            resultDiv.innerHTML = tableHTML;
+        }
+
+        function limpar() {
+            document.getElementById('inputText').value = "";
+            document.getElementById('resultTable').innerHTML = '<p style="color: #94a3b8; text-align: center; padding-top: 50px;">Insira os dados e clique em calcular.</p>';
+        }
     </script>
 </body>
 </html>
