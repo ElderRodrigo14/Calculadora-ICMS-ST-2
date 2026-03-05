@@ -2,113 +2,240 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Calculadora Fiscal Elder - Oficial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de ICMS-ST</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --blue: #1a73e8; --bg: #f8f9fa; }
-        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); padding: 20px; display: flex; justify-content: center; }
+        :root {
+            --bg-dark: #131314;
+            --card-dark: #1e1f20;
+            --text-main: #e3e3e3;
+            --text-sub: #b3b3b3;
+            --accent: #4285f4;
+            --border: #3c4043;
+            --input-bg: #131314;
+        }
+
+        body {
+            font-family: 'Google Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
         .container { width: 100%; max-width: 900px; }
-        .card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #dadce0; margin-bottom: 20px; }
-        h1 { color: var(--blue); font-size: 24px; text-align: center; margin-bottom: 25px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .field { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 13px; font-weight: 500; color: #5f6368; }
-        input { padding: 12px; border: 1px solid #dadce0; border-radius: 8px; font-size: 15px; outline: none; }
-        .btn-main { width: 100%; padding: 15px; background: var(--blue); color: white; border: none; border-radius: 50px; font-size: 16px; font-weight: 500; cursor: pointer; }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--card-dark);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 8px; }
+
+        label { font-size: 14px; color: var(--text-sub); margin-left: 4px; }
+
+        input {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        .btn-group { display: flex; gap: 12px; margin-bottom: 24px; }
+
+        .btn-aliq {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-aliq.active {
+            background: rgba(66, 133, 244, 0.15);
+            border-color: var(--accent);
+            color: #8ab4f8;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 10px; font-size: 11px; color: #5f6368; border-bottom: 1px solid #dadce0; }
-        td { padding: 12px 10px; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
-        .result-box { background: #e8f0fe; color: #174ea6; padding: 20px; border-radius: 15px; text-align: right; font-size: 22px; font-weight: 500; margin-top: 15px; }
+        th { text-align: left; color: var(--text-sub); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+        .st-badge {
+            background: rgba(129, 201, 149, 0.1);
+            color: #81c995;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .total-container {
+            margin-top: 24px;
+            padding: 24px;
+            background: rgba(138, 180, 248, 0.1);
+            border-radius: 20px;
+            text-align: right;
+        }
+
+        .total-label { color: #8ab4f8; font-size: 14px; margin-bottom: 4px; }
+        .total-value { font-size: 32px; color: #8ab4f8; font-weight: 500; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <h1>Calculadora de ICMS-ST</h1>
+    
     <div class="card">
-        <h1>Calculadora de Lote ICMS-ST</h1>
         <div class="grid">
             <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85044021"></div>
-            <div class="field"><label>Valor Produto</label><input type="text" id="vlr" placeholder="R$ 1.151,60"></div>
+            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="R$ 1.151,60"></div>
             <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="43,19"></div>
         </div>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <button id="b4" style="flex:1; padding:10px; cursor:pointer;" onclick="setAliq(0.04)">4%</button>
-            <button id="b7" style="flex:1; padding:10px; cursor:pointer;" onclick="setAliq(0.07)">7%</button>
+
+        <div class="field">
+            <label>Alíquota Interestadual</label>
+            <div class="btn-group">
+                <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+                <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+            </div>
         </div>
-        <button class="btn-main" onclick="calcular()">Calcular e Adicionar</button>
+
+        <button class="btn-main" onclick="processar()">Calcular e Adicionar à Lista</button>
     </div>
 
-    <div id="resultado" class="card" style="display:none;">
-        <div id="tabelaCont"></div>
-        <div class="result-box" id="totalFinal">Total ST: R$ 0,00</div>
+    <div id="resCard" class="card" style="display:none; padding-top: 10px;">
+        <div style="overflow-x: auto;">
+            <table id="tabela">
+                <thead>
+                    <tr>
+                        <th>NCM</th>
+                        <th>MVA</th>
+                        <th>Produtos</th>
+                        <th>Base ST</th>
+                        <th>ICMS ST</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+        <div class="total-container">
+            <div class="total-label">Total ICMS-ST acumulado</div>
+            <div class="total-value" id="totalSt">R$ 0,00</div>
+        </div>
     </div>
 </div>
 
 <script>
-    let ncmDb = {};
-    let aliqInter = 0.04;
-    let listaItens = [];
+    let dbNcm = {};
+    let aliqAtiva = 0.04;
+    let historico = [];
 
-    // Carregar Base NCM
+    // Carregar CSV
     fetch('BASE NCM.csv').then(r => r.text()).then(txt => {
         txt.split(/\r?\n/).forEach((linha, i) => {
             if(i === 0 || !linha.trim()) return;
-            const c = linha.split(';');
-            ncmDb[c[0].trim()] = {
-                mva: parseFloat(c[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                red: parseFloat(c[3]?.replace('%','').replace(',','.')) / 100 || 0
+            const col = linha.split(';');
+            dbNcm[col[0].trim()] = {
+                mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
             };
         });
     });
 
-    function limpar(v) {
-        if(!v) return 0;
-        return parseFloat(v.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+    function limparNum(t) {
+        if(!t) return 0;
+        // Remove R$, espaços e pontos de milhar, troca vírgula por ponto
+        let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(n) || 0;
     }
 
     function setAliq(v) {
-        aliqInter = v;
-        document.getElementById('b4').style.background = v === 0.04 ? '#e8f0fe' : 'white';
-        document.getElementById('b7').style.background = v === 0.07 ? '#e8f0fe' : 'white';
+        aliqAtiva = v;
+        document.getElementById('a4').classList.toggle('active', v === 0.04);
+        document.getElementById('a7').classList.toggle('active', v === 0.07);
     }
 
-    function calcular() {
+    function processar() {
         const ncm = document.getElementById('ncm').value.trim();
-        const vProd = limpar(document.getElementById('vlr').value);
-        const vIpi = limpar(document.getElementById('ipi').value);
-        const info = ncmDb[ncm] || { mva: 0, red: 0 };
+        const vProd = limparNum(document.getElementById('vlr').value);
+        const vIpi = limparNum(document.getElementById('ipi').value);
+        const info = dbNcm[ncm] || { mva: 0, red: 0 };
 
-        // FÓRMULA DO PRINT 1 (BASE ICMS ST)
-        // =((B2+C2)*(1+E2))*SE(F2=0;1;F2)
-        let fatorReducao = info.red === 0 ? 1 : info.red;
-        let baseST = (vProd + vIpi) * (1 + info.mva) * fatorReducao;
+        let fator = info.red === 0 ? 1 : info.red;
+        
+        // Base ICMS ST com arredondamento para 2 casas decimais
+        let baseSTRaw = (vProd + vIpi) * (1 + info.mva) * fator;
+        let baseST = Math.round(baseSTRaw * 100) / 100;
 
-        // FÓRMULA DO PRINT 2 (ICMS ST FINAL)
-        // =(G2*17%)-((B2*D2)*SE(F2=0;1;F2))
-        let icmsStFinal = (baseST * 0.17) - ((vProd * aliqInter) * fatorReducao);
+        // ICMS ST Final com arredondamento para 2 casas decimais
+        let stFinalRaw = (baseST * 0.17) - ((vProd * aliqAtiva) * fator);
+        let stFinal = Math.round(stFinalRaw * 100) / 100;
 
-        listaItens.push({ ncm, mva: info.mva, vProd, baseST, icmsStFinal });
-        desenhar();
+        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
+        atualizarTela();
     }
 
-    function desenhar() {
+    function atualizarTela() {
         let total = 0;
-        let h = `<table><thead><tr><th>NCM</th><th>MVA</th><th>PRODUTOS</th><th>BASE ST</th><th>ICMS ST</th></tr></thead><tbody>`;
-        listaItens.forEach(i => {
-            total += i.icmsStFinal;
-            h += `<tr>
-                <td>${i.ncm}</td>
-                <td>${(i.mva*100).toFixed(2)}%</td>
-                <td>R$ ${i.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td>R$ ${i.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td><b>R$ ${i.icmsStFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</b></td>
+        let html = '';
+        historico.forEach(item => {
+            total += item.stFinal;
+            html += `<tr>
+                <td>${item.ncm}</td>
+                <td>${(item.mva*100).toFixed(2)}%</td>
+                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</span></td>
             </tr>`;
         });
-        document.getElementById('tabelaCont').innerHTML = h + '</tbody></table>';
-        document.getElementById('totalFinal').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-        document.getElementById('resultado').style.display = 'block';
+        document.getElementById('corpoTabela').innerHTML = html;
+        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        document.getElementById('resCard').style.display = 'block';
     }
-    setAliq(0.04);
 </script>
+
 </body>
 </html>
