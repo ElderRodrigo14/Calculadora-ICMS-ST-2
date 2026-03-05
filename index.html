@@ -2,25 +2,23 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gemini Fiscal Pro</title>
+    <title>Calculadora ST Gemini Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root { --blue: #1a73e8; --bg: #f8f9fa; --border: #dadce0; }
         body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 950px; }
-        .card { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; }
-        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 24px; }
+        .card { background: white; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 24px; text-align: center; }
         .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .field { display: flex; flex-direction: column; gap: 8px; }
         label { font-size: 14px; font-weight: 500; color: #5f6368; }
         input { padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
-        .aliq-btns { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 25px; }
-        .btn-opt { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 100px; background: white; cursor: pointer; font-weight: 500; }
-        .btn-opt.active { background: #e8f0fe; border-color: var(--blue); color: var(--blue); }
-        .btn-main { width: 100%; padding: 16px; background: var(--blue); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: 500; cursor: pointer; }
+        .btn-aliq { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 100px; background: white; cursor: pointer; font-weight: 500; }
+        .btn-aliq.active { background: #e8f0fe; border-color: var(--blue); color: var(--blue); }
+        .btn-main { width: 100%; padding: 16px; background: var(--blue); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-        th { text-align: left; padding: 12px; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        th { text-align: left; padding: 12px; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); }
         td { padding: 15px 12px; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
         .badge { background: #e6f4ea; color: #137333; padding: 6px 10px; border-radius: 8px; font-weight: 600; }
         .total-box { margin-top: 20px; padding: 25px; background: #e8f0fe; border-radius: 20px; text-align: right; font-size: 26px; font-weight: 500; color: #174ea6; }
@@ -29,7 +27,7 @@
 <body>
 
 <div class="container">
-    <h1>Cálculo de Substituição Tributária</h1>
+    <h1>Substituição Tributária</h1>
     <div class="card">
         <div class="grid">
             <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 84733042"></div>
@@ -38,9 +36,9 @@
         </div>
         <div class="field">
             <label>Alíquota Interestadual</label>
-            <div class="aliq-btns">
-                <button class="btn-opt active" id="a4" onclick="setAliq(0.04)">4%</button>
-                <button class="btn-opt" id="a7" onclick="setAliq(0.07)">7%</button>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+                <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
             </div>
         </div>
         <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
@@ -57,10 +55,11 @@
     let currentAliq = 0.04;
     let list = [];
 
-    // Carregar CSV e tratar MVA e Redução
+    // Carregar CSV tratando separador ; e vírgula decimal brasileira
     fetch('BASE NCM.csv').then(r => r.text()).then(text => {
-        text.split('\n').forEach((line, idx) => {
-            if(idx === 0) return;
+        const rows = text.split(/\r?\n/);
+        rows.forEach((line, idx) => {
+            if(idx === 0 || !line.trim()) return;
             const c = line.split(';');
             if(c[0]) {
                 ncmData[c[0].trim()] = {
@@ -69,19 +68,20 @@
                 };
             }
         });
+        console.log("Base carregada!");
     });
 
-    // Função para limpar número brasileiro (13.719,00 -> 13719.00)
     function cleanNum(val) {
         if(!val) return 0;
-        let clean = val.toString().replace(/\./g, '').replace(',', '.');
+        // Remove pontos de milhar e troca vírgula por ponto
+        let clean = val.toString().replace(/\./g, '').replace(',', '.').trim();
         return parseFloat(clean) || 0;
     }
 
     function setAliq(v) {
         currentAliq = v;
-        document.getElementById('a4').className = v === 0.04 ? 'btn-opt active' : 'btn-opt';
-        document.getElementById('a7').className = v === 0.07 ? 'btn-opt active' : 'btn-opt';
+        document.getElementById('a4').className = v === 0.04 ? 'btn-aliq active' : 'btn-aliq';
+        document.getElementById('a7').className = v === 0.07 ? 'btn-aliq active' : 'btn-aliq';
     }
 
     function processar() {
@@ -91,19 +91,22 @@
         
         const info = ncmData[ncm] || { mva: 0.4033, reducao: 0 };
         
-        // 1. Base ST Bruta = (Produtos + IPI) * (1 + MVA)
+        // 1. Base ST Bruta
         let baseST = (v + i) * (1 + info.mva);
         
-        // 2. Aplicar Redução de Base se houver (Ex: 8.690,19 do seu exemplo)
+        // 2. Aplicar Redução (Ex: 41,17% vira multiplicar por 0,5883)
         if(info.reducao > 0) {
             baseST = baseST * (1 - info.reducao);
         }
 
-        // 3. Cálculo do Imposto Final
+        // 3. Imposto Final
         const icmsSt = (baseST * 0.18) - (v * currentAliq);
 
         list.push({ ncm, mva: info.mva, v, i, baseST, icmsSt });
-        
+        render();
+    }
+
+    function render() {
         let total = 0;
         let h = `<table><thead><tr><th>NCM</th><th>MVA</th><th>Produtos</th><th>IPI</th><th>Base ST</th><th>Valor ICMS ST</th></tr></thead><tbody>`;
         list.forEach(item => {
@@ -112,12 +115,11 @@
                 <td>${item.ncm}</td>
                 <td>${(item.mva*100).toFixed(2)}%</td>
                 <td>R$ ${item.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                <td>R$ ${item.i.toFixed(2)}</td>
+                <td>R$ ${item.i.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                 <td>R$ ${item.baseST.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                 <td><span class="badge">R$ ${item.icmsSt.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></td>
             </tr>`;
         });
-        
         document.getElementById('tabela').innerHTML = h + '</tbody></table>';
         document.getElementById('total').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
         document.getElementById('res').style.display = 'block';
