@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de ICMS-ST Smart</title>
+    <title>Calculadora ICMS-ST Smart Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -64,9 +64,10 @@
             color: var(--text-main);
             font-size: 16px;
             outline: none;
+            cursor: pointer;
         }
 
-        input:focus { border-color: var(--accent); }
+        input:focus { border-color: var(--accent); background: #1a1a1c; }
 
         .btn-group { display: flex; gap: 12px; margin-bottom: 24px; }
 
@@ -78,185 +79,8 @@
             border-radius: 100px;
             color: var(--text-main);
             cursor: pointer;
-            transition: 0.2s;
         }
 
         .btn-aliq.active {
             background: rgba(66, 133, 244, 0.15);
             border-color: var(--accent);
-            color: #8ab4f8;
-        }
-
-        .btn-main {
-            width: 100%;
-            padding: 18px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 100px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; color: var(--text-sub); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
-        td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
-
-        .st-badge {
-            background: rgba(129, 201, 149, 0.1);
-            color: #81c995;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
-
-        .total-container {
-            margin-top: 24px;
-            padding: 24px;
-            background: rgba(138, 180, 248, 0.1);
-            border-radius: 20px;
-            text-align: right;
-        }
-
-        .total-value { font-size: 32px; color: #8ab4f8; font-weight: 500; }
-        .hint { font-size: 11px; color: #8ab4f8; margin-top: 4px; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Calculadora de ICMS-ST Smart</h1>
-    
-    <div class="card">
-        <div class="grid">
-            <div class="field">
-                <label>NCM</label>
-                <input type="text" id="ncm" placeholder="Cole a linha do sistema aqui...">
-                <span class="hint">Auto-Paste habilitado ✨</span>
-            </div>
-            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
-            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
-        </div>
-
-        <div class="field">
-            <label>Alíquota Interestadual</label>
-            <div class="btn-group">
-                <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
-                <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
-            </div>
-        </div>
-
-        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
-    </div>
-
-    <div id="resCard" class="card" style="display:none;">
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>NCM</th>
-                        <th>MVA</th>
-                        <th>Produtos</th>
-                        <th>Base ST</th>
-                        <th>ICMS ST</th>
-                    </tr>
-                </thead>
-                <tbody id="corpoTabela"></tbody>
-            </table>
-        </div>
-        <div class="total-container">
-            <div id="totalSt" class="total-value">R$ 0,00</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    let dbNcm = {};
-    let aliqAtiva = 0.04;
-    let historico = [];
-
-    // Carregar CSV de forma segura
-    fetch('BASE NCM.csv')
-        .then(r => r.text())
-        .then(txt => {
-            txt.split(/\r?\n/).forEach((linha, i) => {
-                if(i === 0 || !linha.trim()) return;
-                const col = linha.split(';');
-                dbNcm[col[0].trim()] = {
-                    mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                    red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
-                };
-            });
-        }).catch(err => console.log("Aguardando arquivo CSV..."));
-
-    // LÓGICA DE AUTO-PASTE
-    document.getElementById('ncm').addEventListener('paste', (e) => {
-        // Pega o texto que você está colando
-        const data = e.clipboardData.getData('text');
-        
-        // Verifica se é uma linha de sistema (contém tabs ou múltiplos espaços)
-        if (data.includes('\t') || data.split(/\s{2,}/).length > 1) {
-            e.preventDefault(); // Impede que o texto gigante fique no campo NCM
-            
-            // Divide a linha em partes ignorando espaços extras
-            const partes = data.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
-            
-            // Distribui nos campos (NCM, Valor, IPI)
-            if (partes.length >= 1) document.getElementById('ncm').value = partes[0].trim();
-            if (partes.length >= 2) document.getElementById('vlr').value = partes[1].trim();
-            if (partes.length >= 3) document.getElementById('ipi').value = partes[2].trim();
-        }
-    });
-
-    function limparNum(t) {
-        if(!t) return 0;
-        let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
-        return parseFloat(n) || 0;
-    }
-
-    function setAliq(v) {
-        aliqAtiva = v;
-        document.getElementById('a4').classList.toggle('active', v === 0.04);
-        document.getElementById('a7').classList.toggle('active', v === 0.07);
-    }
-
-    function processar() {
-        const ncm = document.getElementById('ncm').value.trim();
-        const vProd = limparNum(document.getElementById('vlr').value);
-        const vIpi = limparNum(document.getElementById('ipi').value);
-        const info = dbNcm[ncm] || { mva: 0, red: 0 };
-
-        // Fórmulas exatas do Excel
-        let fator = info.red === 0 ? 1 : info.red;
-        
-        // Base ICMS ST = ((Produto + IPI) * (1 + MVA)) * Fator Redução
-        let baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
-        
-        // ICMS ST Final = (Base ST * 17%) - ((Produto * Alíquota Interestadual) * Fator Redução)
-        let stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
-
-        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
-        atualizarTela();
-    }
-
-    function atualizarTela() {
-        let total = 0;
-        let html = '';
-        historico.forEach(item => {
-            total += item.stFinal;
-            html += `<tr>
-                <td>${item.ncm}</td>
-                <td>${(item.mva*100).toFixed(2)}%</td>
-                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></td>
-            </tr>`;
-        });
-        document.getElementById('corpoTabela').innerHTML = html;
-        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-        document.getElementById('resCard').style.display = 'block';
-    }
-</script>
-</body>
-</html>
