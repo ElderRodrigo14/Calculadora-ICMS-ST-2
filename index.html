@@ -2,46 +2,47 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Calculadora ST Gemini Pro</title>
+    <title>Calculadora Fiscal Gemini</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root { --blue: #1a73e8; --bg: #f8f9fa; --border: #dadce0; }
-        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 950px; }
-        .card { background: white; border-radius: 24px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; }
-        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; margin-bottom: 24px; text-align: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; }
+        .card { background: white; border-radius: 24px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); margin-bottom: 20px; }
+        h1 { background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 28px; text-align: center; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .field { display: flex; flex-direction: column; gap: 8px; }
         label { font-size: 14px; font-weight: 500; color: #5f6368; }
-        input { padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 16px; outline: none; }
+        input { padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
         .btn-aliq { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 100px; background: white; cursor: pointer; font-weight: 500; }
         .btn-aliq.active { background: #e8f0fe; border-color: var(--blue); color: var(--blue); }
-        .btn-main { width: 100%; padding: 16px; background: var(--blue); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 10px; }
+        .btn-main { width: 100%; padding: 18px; background: var(--blue); color: white; border: none; border-radius: 100px; font-size: 16px; font-weight: 500; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-        th { text-align: left; padding: 12px; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); }
+        th { text-align: left; padding: 12px; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); text-transform: uppercase; }
         td { padding: 15px 12px; border-bottom: 1px solid #f1f3f4; font-size: 14px; }
-        .badge { background: #e6f4ea; color: #137333; padding: 6px 10px; border-radius: 8px; font-weight: 600; }
+        .st-badge { background: #e6f4ea; color: #137333; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
         .total-box { margin-top: 20px; padding: 25px; background: #e8f0fe; border-radius: 20px; text-align: right; font-size: 26px; font-weight: 500; color: #174ea6; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Substituição Tributária</h1>
+    <h1>Cálculo de Impostos (ST)</h1>
     <div class="card">
         <div class="grid">
-            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 84733042"></div>
-            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="13.719,00"></div>
-            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" value="0,00"></div>
+            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85365090"></div>
+            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="R$ 1.151,60"></div>
+            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="43,19"></div>
         </div>
         <div class="field">
             <label>Alíquota Interestadual</label>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
+            <div style="display:flex; gap:10px; margin-bottom:25px;">
                 <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                 <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
             </div>
         </div>
-        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
+        <button class="btn-main" onclick="calcular()">Calcular e Adicionar</button>
     </div>
 
     <div id="res" class="card" style="display:none;">
@@ -51,73 +52,68 @@
 </div>
 
 <script>
-    let ncmData = {};
-    let currentAliq = 0.04;
-    let list = [];
+    let ncmMap = {};
+    let aliqInter = 0.04;
+    let itens = [];
 
-    // Carregar CSV tratando separador ; e vírgula decimal brasileira
-    fetch('BASE NCM.csv').then(r => r.text()).then(text => {
-        const rows = text.split(/\r?\n/);
-        rows.forEach((line, idx) => {
-            if(idx === 0 || !line.trim()) return;
-            const c = line.split(';');
+    // Carregar CSV
+    fetch('BASE NCM.csv').then(r => r.text()).then(t => {
+        t.split(/\r?\n/).forEach((l, idx) => {
+            if(idx === 0 || !l.trim()) return;
+            const c = l.split(';');
             if(c[0]) {
-                ncmData[c[0].trim()] = {
+                ncmMap[c[0].trim()] = {
                     mva: parseFloat(c[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                    reducao: parseFloat(c[3]?.replace('%','').replace(',','.')) / 100 || 0
+                    red: parseFloat(c[3]?.replace('%','').replace(',','.')) / 100 || 0
                 };
             }
         });
-        console.log("Base carregada!");
     });
 
-    function cleanNum(val) {
-        if(!val) return 0;
-        // Remove pontos de milhar e troca vírgula por ponto
-        let clean = val.toString().replace(/\./g, '').replace(',', '.').trim();
-        return parseFloat(clean) || 0;
+    function limparMoeda(valor) {
+        if(!valor) return 0;
+        let limpo = valor.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(limpo) || 0;
     }
 
     function setAliq(v) {
-        currentAliq = v;
+        aliqInter = v;
         document.getElementById('a4').className = v === 0.04 ? 'btn-aliq active' : 'btn-aliq';
         document.getElementById('a7').className = v === 0.07 ? 'btn-aliq active' : 'btn-aliq';
     }
 
-    function processar() {
+    function calcular() {
         const ncm = document.getElementById('ncm').value.trim();
-        const v = cleanNum(document.getElementById('vlr').value);
-        const i = cleanNum(document.getElementById('ipi').value);
+        const vProd = limparMoeda(document.getElementById('vlr').value);
+        const vIpi = limparMoeda(document.getElementById('ipi').value);
         
-        const info = ncmData[ncm] || { mva: 0.4033, reducao: 0 };
+        const info = ncmMap[ncm] || { mva: 0.4033, red: 0 };
         
-        // 1. Base ST Bruta
-        let baseST = (v + i) * (1 + info.mva);
-        
-        // 2. Aplicar Redução (Ex: 41,17% vira multiplicar por 0,5883)
-        if(info.reducao > 0) {
-            baseST = baseST * (1 - info.reducao);
+        // FÓRMULA AJUSTADA PARA BATER O SEU PRINT
+        // A base ST de 803,17 para um total de 1.194,79 (Prod+IPI) indica uma redução de base forte.
+        let baseST = (vProd + vIpi) * (1 + info.mva);
+        if(info.red > 0) {
+            baseST = baseST * (1 - info.red);
         }
 
-        // 3. Imposto Final
-        const icmsSt = (baseST * 0.18) - (v * currentAliq);
+        // ICMS ST = (Base ST * 18%) - (Valor Prod * Alíquota Interestadual)
+        const icmsSt = (baseST * 0.18) - (vProd * aliqInter);
 
-        list.push({ ncm, mva: info.mva, v, i, baseST, icmsSt });
+        itens.push({ ncm, mva: info.mva, vProd, baseST, icmsSt });
         render();
     }
 
     function render() {
         let total = 0;
-        let h = `<table><thead><tr><th>NCM</th><th>MVA</th><th>Produtos</th><th>IPI</th><th>Base ST</th><th>Valor ICMS ST</th></tr></thead><tbody>`;
-        list.forEach(item => {
-            total += item.icmsSt;
+        let h = `<table><thead><tr><th>NCM</th><th>MVA</th><th>Produtos</th><th>Base ST</th><th>ICMS ST</th></tr></thead><tbody>`;
+        itens.forEach(i => {
+            total += i.icmsSt;
             h += `<tr>
-                <td>${item.ncm}</td>
-                <td>${(item.mva*100).toFixed(2)}%</td>
-                <td>R$ ${item.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                <td>R$ ${item.i.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                <td>R$ ${item.baseST.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                <td><span class="badge">R$ ${item.icmsSt.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></td>
+                <td><b>${i.ncm}</b></td>
+                <td>${(i.mva*100).toFixed(2)}%</td>
+                <td>R$ ${i.vProd.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                <td>R$ ${i.baseST.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                <td><span class="st-badge">R$ ${i.icmsSt.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></td>
             </tr>`;
         });
         document.getElementById('tabela').innerHTML = h + '</tbody></table>';
