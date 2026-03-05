@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de ICMS-ST</title>
+    <title>Calculadora de ICMS-ST Smart</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -119,20 +119,24 @@
             text-align: right;
         }
 
-        .total-label { color: #8ab4f8; font-size: 14px; margin-bottom: 4px; }
         .total-value { font-size: 32px; color: #8ab4f8; font-weight: 500; }
+        .hint { font-size: 11px; color: #8ab4f8; margin-top: 4px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Calculadora de ICMS-ST</h1>
+    <h1>Calculadora de ICMS-ST Smart</h1>
     
     <div class="card">
         <div class="grid">
-            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85044021"></div>
-            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="R$ 1.151,60"></div>
-            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="43,19"></div>
+            <div class="field">
+                <label>NCM</label>
+                <input type="text" id="ncm" placeholder="Cole a linha do sistema aqui...">
+                <span class="hint">Auto-Paste habilitado ✨</span>
+            </div>
+            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
         </div>
 
         <div class="field">
@@ -143,12 +147,12 @@
             </div>
         </div>
 
-        <button class="btn-main" onclick="processar()">Calcular e Adicionar à Lista</button>
+        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
     </div>
 
-    <div id="resCard" class="card" style="display:none; padding-top: 10px;">
+    <div id="resCard" class="card" style="display:none;">
         <div style="overflow-x: auto;">
-            <table id="tabela">
+            <table>
                 <thead>
                     <tr>
                         <th>NCM</th>
@@ -162,8 +166,7 @@
             </table>
         </div>
         <div class="total-container">
-            <div class="total-label">Total ICMS-ST acumulado</div>
-            <div class="total-value" id="totalSt">R$ 0,00</div>
+            <div id="totalSt" class="total-value">R$ 0,00</div>
         </div>
     </div>
 </div>
@@ -173,21 +176,41 @@
     let aliqAtiva = 0.04;
     let historico = [];
 
-    // Carregar CSV
-    fetch('BASE NCM.csv').then(r => r.text()).then(txt => {
-        txt.split(/\r?\n/).forEach((linha, i) => {
-            if(i === 0 || !linha.trim()) return;
-            const col = linha.split(';');
-            dbNcm[col[0].trim()] = {
-                mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
-            };
-        });
+    // Carregar CSV de forma segura
+    fetch('BASE NCM.csv')
+        .then(r => r.text())
+        .then(txt => {
+            txt.split(/\r?\n/).forEach((linha, i) => {
+                if(i === 0 || !linha.trim()) return;
+                const col = linha.split(';');
+                dbNcm[col[0].trim()] = {
+                    mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                    red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
+                };
+            });
+        }).catch(err => console.log("Aguardando arquivo CSV..."));
+
+    // LÓGICA DE AUTO-PASTE
+    document.getElementById('ncm').addEventListener('paste', (e) => {
+        // Pega o texto que você está colando
+        const data = e.clipboardData.getData('text');
+        
+        // Verifica se é uma linha de sistema (contém tabs ou múltiplos espaços)
+        if (data.includes('\t') || data.split(/\s{2,}/).length > 1) {
+            e.preventDefault(); // Impede que o texto gigante fique no campo NCM
+            
+            // Divide a linha em partes ignorando espaços extras
+            const partes = data.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+            
+            // Distribui nos campos (NCM, Valor, IPI)
+            if (partes.length >= 1) document.getElementById('ncm').value = partes[0].trim();
+            if (partes.length >= 2) document.getElementById('vlr').value = partes[1].trim();
+            if (partes.length >= 3) document.getElementById('ipi').value = partes[2].trim();
+        }
     });
 
     function limparNum(t) {
         if(!t) return 0;
-        // Remove R$, espaços e pontos de milhar, troca vírgula por ponto
         let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
         return parseFloat(n) || 0;
     }
@@ -204,15 +227,14 @@
         const vIpi = limparNum(document.getElementById('ipi').value);
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
 
+        // Fórmulas exatas do Excel
         let fator = info.red === 0 ? 1 : info.red;
         
-        // Base ICMS ST com arredondamento para 2 casas decimais
-        let baseSTRaw = (vProd + vIpi) * (1 + info.mva) * fator;
-        let baseST = Math.round(baseSTRaw * 100) / 100;
-
-        // ICMS ST Final com arredondamento para 2 casas decimais
-        let stFinalRaw = (baseST * 0.17) - ((vProd * aliqAtiva) * fator);
-        let stFinal = Math.round(stFinalRaw * 100) / 100;
+        // Base ICMS ST = ((Produto + IPI) * (1 + MVA)) * Fator Redução
+        let baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
+        
+        // ICMS ST Final = (Base ST * 17%) - ((Produto * Alíquota Interestadual) * Fator Redução)
+        let stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
 
         historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
         atualizarTela();
@@ -226,16 +248,15 @@
             html += `<tr>
                 <td>${item.ncm}</td>
                 <td>${(item.mva*100).toFixed(2)}%</td>
-                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
-                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
-                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</span></td>
+                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></td>
             </tr>`;
         });
         document.getElementById('corpoTabela').innerHTML = html;
-        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
         document.getElementById('resCard').style.display = 'block';
     }
 </script>
-
 </body>
 </html>
