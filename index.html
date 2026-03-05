@@ -24,6 +24,7 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
         }
 
         .container { width: 100%; max-width: 850px; }
@@ -32,7 +33,9 @@
             font-size: 24px;
             font-weight: 400;
             margin-bottom: 25px;
-            color: #8ab4f8;
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .card {
@@ -51,31 +54,26 @@
         }
 
         .field { display: flex; flex-direction: column; gap: 8px; }
-
         label { font-size: 13px; color: var(--text-sub); }
 
         input {
             background: var(--input-bg);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px;
+            padding: 14px;
             color: var(--text-main);
             font-size: 15px;
             outline: none;
+            transition: 0.2s;
         }
 
-        input:focus { border-color: var(--accent); }
+        input:focus { border-color: var(--accent); background: #1a1a1c; }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-
         .btn-aliq {
-            flex: 1;
-            padding: 10px;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            color: var(--text-main);
-            cursor: pointer;
+            flex: 1; padding: 12px;
+            background: transparent; border: 1px solid var(--border);
+            border-radius: 50px; color: var(--text-main); cursor: pointer;
         }
 
         .btn-aliq.active {
@@ -85,15 +83,10 @@
         }
 
         .btn-main {
-            width: 100%;
-            padding: 15px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
+            width: 100%; padding: 16px;
+            background: var(--accent); color: #000;
+            border: none; border-radius: 50px;
+            font-size: 16px; font-weight: 500; cursor: pointer;
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -103,18 +96,16 @@
         .st-badge {
             background: rgba(129, 201, 149, 0.15);
             color: #81c995;
-            padding: 4px 8px;
-            border-radius: 5px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
         .total-box {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 20px; padding: 20px;
             background: rgba(138, 180, 248, 0.1);
-            border-radius: 15px;
-            text-align: right;
-            font-size: 24px;
-            color: #8ab4f8;
+            border-radius: 15px; text-align: right;
+            font-size: 26px; color: #8ab4f8;
         }
     </style>
 </head>
@@ -126,8 +117,8 @@
     <div class="card">
         <div class="grid">
             <div class="field">
-                <label>NCM (Clique para colar)</label>
-                <input type="text" id="ncm" placeholder="Clique para colar...">
+                <label>NCM (Clique para auto-colar)</label>
+                <input type="text" id="ncm" placeholder="Clique aqui ou dê Ctrl+V">
             </div>
             <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
             <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
@@ -142,7 +133,7 @@
     </div>
 
     <div id="resCard" class="card" style="display:none;">
-        <table>
+        <table id="tabela">
             <thead>
                 <tr>
                     <th>NCM</th>
@@ -163,48 +154,73 @@
     let aliqAtiva = 0.04;
     let historico = [];
 
-    // Carregar CSV sem travar o site
-    fetch('BASE NCM.csv')
-        .then(r => r.ok ? r.text() : "")
-        .then(txt => {
-            if(!txt) return;
-            txt.split(/\r?\n/).forEach((linha, i) => {
-                if(i === 0 || !linha.trim()) return;
-                const col = linha.split(';');
-                dbNcm[col[0].trim()] = {
-                    mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                    red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
-                };
-            });
-        }).catch(() => console.log("CSV não encontrado, usando entrada manual."));
+    // Carregar CSV
+    async function init() {
+        try {
+            const r = await fetch('BASE NCM.csv');
+            if (r.ok) {
+                const txt = await r.text();
+                txt.split(/\r?\n/).forEach((linha, i) => {
+                    if(i === 0 || !linha.trim()) return;
+                    const col = linha.split(';');
+                    dbNcm[col[0].trim()] = {
+                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
+                    };
+                });
+            }
+        } catch (e) { console.warn("Modo sem CSV ativado."); }
+    }
 
-    // AUTO-PASTE NO CLIQUE (FOCUS)
-    document.getElementById('ncm').addEventListener('focus', async () => {
-        if (!navigator.clipboard) return; // Segurança: se não houver acesso, não faz nada
+    // AUTO-PASTE NO CLIQUE COM DIAGNÓSTICO
+    document.getElementById('ncm').addEventListener('click', async function() {
+        // Verifica se o navegador bloqueou o recurso por não ser HTTPS
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+            console.warn("Auto-colar bloqueado pelo navegador (necessário HTTPS). Use Ctrl+V.");
+            return;
+        }
         
         try {
             const text = await navigator.clipboard.readText();
-            if (text && (text.includes('\t') || text.split(/\s{2,}/).length > 1)) {
+            if (text) {
                 const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
-                if (partes.length >= 1) document.getElementById('ncm').value = partes[0].trim();
-                if (partes.length >= 2) document.getElementById('vlr').value = partes[1].trim();
-                if (partes.length >= 3) document.getElementById('ipi').value = partes[2].trim();
-                document.activeElement.blur(); // Tira o foco para evitar repetição
+                
+                if (partes.length >= 3) {
+                    document.getElementById('ncm').value = partes[0].trim();
+                    document.getElementById('vlr').value = partes[1].trim();
+                    document.getElementById('ipi').value = partes[2].trim();
+                } else {
+                    document.getElementById('ncm').value = text.trim();
+                }
             }
-        } catch (err) {
-            console.log("Permissão de colar negada.");
+        } catch (err) { 
+            console.error("Permissão negada ou erro ao ler a área de transferência:", err);
+            alert("Não foi possível colar automaticamente. Por favor, dê Ctrl+V.");
         }
     });
 
-    function limparNum(t) {
-        if(!t) return 0;
-        return parseFloat(t.toString().replace(/\./g, '').replace(',', '.')) || 0;
-    }
+    // AUTO-PASTE SE O USUÁRIO APERTAR CTRL+V (Plano B)
+    document.getElementById('ncm').addEventListener('paste', function(e) {
+        const text = e.clipboardData.getData('text');
+        if (text && (text.includes('\t') || text.split(/\s{2,}/).length > 1)) {
+            e.preventDefault();
+            const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+            if (partes.length >= 1) document.getElementById('ncm').value = partes[0].trim();
+            if (partes.length >= 2) document.getElementById('vlr').value = partes[1].trim();
+            if (partes.length >= 3) document.getElementById('ipi').value = partes[2].trim();
+        }
+    });
 
     function setAliq(v) {
         aliqAtiva = v;
-        document.getElementById('a4').className = v === 0.04 ? 'btn-aliq active' : 'btn-aliq';
-        document.getElementById('a7').className = v === 0.07 ? 'btn-aliq active' : 'btn-aliq';
+        document.getElementById('a4').classList.toggle('active', v === 0.04);
+        document.getElementById('a7').classList.toggle('active', v === 0.07);
+    }
+
+    function limparNum(t) {
+        if(!t) return 0;
+        let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(n) || 0;
     }
 
     function processar() {
@@ -213,8 +229,9 @@
         const vIpi = limparNum(document.getElementById('ipi').value);
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
 
-        // Fórmulas exatas do seu Excel
         let fator = info.red === 0 ? 1 : info.red;
+        
+        // Mantendo 2 casas decimais e sua fórmula
         let baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
         let stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
 
@@ -237,6 +254,9 @@
         document.getElementById('totalSt').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
         document.getElementById('resCard').style.display = 'block';
     }
+
+    init();
 </script>
+
 </body>
 </html>
