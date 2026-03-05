@@ -82,4 +82,157 @@
         }
 
         .btn-aliq.active {
-            background:
+            background: rgba(66, 133, 244, 0.15);
+            border-color: var(--accent);
+            color: #8ab4f8;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; color: var(--text-sub); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+        td { padding: 16px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+
+        .st-badge {
+            background: rgba(129, 201, 149, 0.1);
+            color: #81c995;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .total-container {
+            margin-top: 24px;
+            padding: 24px;
+            background: rgba(138, 180, 248, 0.1);
+            border-radius: 20px;
+            text-align: right;
+        }
+
+        .total-value { font-size: 32px; color: #8ab4f8; font-weight: 500; }
+        .hint { font-size: 11px; color: #8ab4f8; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora de ICMS-ST Smart</h1>
+    
+    <div class="card">
+        <div class="grid">
+            <div class="field">
+                <label>NCM</label>
+                <input type="text" id="ncm" placeholder="Cole a linha aqui...">
+                <span class="hint">Autopreenchimento ativo</span>
+            </div>
+            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+        </div>
+
+        <div class="field">
+            <label>Alíquota Interestadual</label>
+            <div class="btn-group">
+                <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+                <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
+    </div>
+
+    <div id="resCard" class="card" style="display:none;">
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NCM</th>
+                        <th>MVA</th>
+                        <th>Produtos</th>
+                        <th>Base ST</th>
+                        <th>ICMS ST</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+        <div class="total-container">
+            <div id="totalSt" class="total-value">R$ 0,00</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dbNcm = {};
+    let aliqAtiva = 0.04;
+    let historico = [];
+
+    // Carregar CSV com tratamento de erro
+    async function carregarDados() {
+        try {
+            const r = await fetch('BASE NCM.csv');
+            if (!r.ok) throw new Error('Arquivo não encontrado');
+            const txt = await r.text();
+            txt.split(/\r?\n/).forEach((linha, i) => {
+                if(i === 0 || !linha.trim()) return;
+                const col = linha.split(';');
+                if (col[0]) {
+                    dbNcm[col[0].trim()] = {
+                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
+                    };
+                }
+            });
+            console.log("Base NCM carregada com sucesso.");
+        } catch (err) {
+            console.error("Erro ao carregar CSV:", err);
+            alert("Atenção: O arquivo BASE NCM.csv não foi encontrado ou está com erro.");
+        }
+    }
+
+    carregarDados();
+
+    // Monitora o campo NCM para o Auto-Paste
+    document.getElementById('ncm').addEventListener('paste', (e) => {
+        const data = e.clipboardData.getData('text');
+        // Se houver múltiplos espaços ou tabulações, identificamos como linha de sistema
+        if (data.includes('\t') || data.split(/\s{2,}/).length > 1) {
+            e.preventDefault();
+            const partes = data.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+            
+            if (partes.length >= 3) {
+                document.getElementById('ncm').value = partes[0].trim();
+                document.getElementById('vlr').value = partes[1].trim();
+                document.getElementById('ipi').value = partes[2].trim();
+            }
+        }
+    });
+
+    function limparNum(t) {
+        if(!t) return 0;
+        let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(n) || 0;
+    }
+
+    function setAliq(v) {
+        aliqAtiva = v;
+        document.getElementById('a4').classList.add('active');
+        document.getElementById('a7').classList.remove('active');
+        if(v === 0.07) {
+            document.getElementById('a7').classList.add('active');
+            document.getElementById('a4').classList.remove('active');
+        }
+    }
+
+    function processar() {
+        const ncm = document.getElementById('ncm').value.trim();
+        const vProd = limparNum(
