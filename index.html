@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS-ST Smart Pro</title>
+    <title>Calculadora ICMS-ST Smart</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -21,66 +21,222 @@
             background-color: var(--bg-dark);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px;
             display: flex;
             justify-content: center;
         }
 
-        .container { width: 100%; max-width: 900px; }
+        .container { width: 100%; max-width: 850px; }
 
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 400;
-            margin-bottom: 30px;
-            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            color: #8ab4f8;
         }
 
         .card {
             background: var(--card-dark);
-            border-radius: 24px;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 25px;
             border: 1px solid var(--border);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .grid {
             display: grid;
             grid-template-columns: 1.2fr 1fr 1fr;
-            gap: 16px;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
         .field { display: flex; flex-direction: column; gap: 8px; }
 
-        label { font-size: 14px; color: var(--text-sub); margin-left: 4px; }
+        label { font-size: 13px; color: var(--text-sub); }
 
         input {
             background: var(--input-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
+            border-radius: 10px;
+            padding: 12px;
             color: var(--text-main);
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
-            cursor: pointer;
         }
 
-        input:focus { border-color: var(--accent); background: #1a1a1c; }
+        input:focus { border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 12px; margin-bottom: 24px; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
 
         .btn-aliq {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             background: transparent;
             border: 1px solid var(--border);
-            border-radius: 100px;
+            border-radius: 50px;
             color: var(--text-main);
             cursor: pointer;
         }
 
         .btn-aliq.active {
-            background: rgba(66, 133, 244, 0.15);
+            background: rgba(66, 133, 244, 0.2);
             border-color: var(--accent);
+            color: #8ab4f8;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: var(--text-sub); font-size: 11px; padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+        .st-badge {
+            background: rgba(129, 201, 149, 0.15);
+            color: #81c995;
+            padding: 4px 8px;
+            border-radius: 5px;
+        }
+
+        .total-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(138, 180, 248, 0.1);
+            border-radius: 15px;
+            text-align: right;
+            font-size: 24px;
+            color: #8ab4f8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora de ICMS-ST Smart</h1>
+    
+    <div class="card">
+        <div class="grid">
+            <div class="field">
+                <label>NCM (Clique para colar)</label>
+                <input type="text" id="ncm" placeholder="Clique para colar...">
+            </div>
+            <div class="field"><label>Valor dos Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+            <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+        </div>
+
+        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
+    </div>
+
+    <div id="resCard" class="card" style="display:none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>NCM</th>
+                    <th>MVA</th>
+                    <th>PRODUTOS</th>
+                    <th>BASE ST</th>
+                    <th>ICMS ST</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+        <div class="total-box" id="totalSt">Total ST: R$ 0,00</div>
+    </div>
+</div>
+
+<script>
+    let dbNcm = {};
+    let aliqAtiva = 0.04;
+    let historico = [];
+
+    // Carregar CSV sem travar o site
+    fetch('BASE NCM.csv')
+        .then(r => r.ok ? r.text() : "")
+        .then(txt => {
+            if(!txt) return;
+            txt.split(/\r?\n/).forEach((linha, i) => {
+                if(i === 0 || !linha.trim()) return;
+                const col = linha.split(';');
+                dbNcm[col[0].trim()] = {
+                    mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                    red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
+                };
+            });
+        }).catch(() => console.log("CSV não encontrado, usando entrada manual."));
+
+    // AUTO-PASTE NO CLIQUE (FOCUS)
+    document.getElementById('ncm').addEventListener('focus', async () => {
+        if (!navigator.clipboard) return; // Segurança: se não houver acesso, não faz nada
+        
+        try {
+            const text = await navigator.clipboard.readText();
+            if (text && (text.includes('\t') || text.split(/\s{2,}/).length > 1)) {
+                const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+                if (partes.length >= 1) document.getElementById('ncm').value = partes[0].trim();
+                if (partes.length >= 2) document.getElementById('vlr').value = partes[1].trim();
+                if (partes.length >= 3) document.getElementById('ipi').value = partes[2].trim();
+                document.activeElement.blur(); // Tira o foco para evitar repetição
+            }
+        } catch (err) {
+            console.log("Permissão de colar negada.");
+        }
+    });
+
+    function limparNum(t) {
+        if(!t) return 0;
+        return parseFloat(t.toString().replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
+    function setAliq(v) {
+        aliqAtiva = v;
+        document.getElementById('a4').className = v === 0.04 ? 'btn-aliq active' : 'btn-aliq';
+        document.getElementById('a7').className = v === 0.07 ? 'btn-aliq active' : 'btn-aliq';
+    }
+
+    function processar() {
+        const ncm = document.getElementById('ncm').value.trim();
+        const vProd = limparNum(document.getElementById('vlr').value);
+        const vIpi = limparNum(document.getElementById('ipi').value);
+        const info = dbNcm[ncm] || { mva: 0, red: 0 };
+
+        // Fórmulas exatas do seu Excel
+        let fator = info.red === 0 ? 1 : info.red;
+        let baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
+        let stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
+
+        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
+        
+        let total = 0;
+        let html = '';
+        historico.forEach(item => {
+            total += item.stFinal;
+            html += `<tr>
+                <td>${item.ncm}</td>
+                <td>${(item.mva*100).toFixed(2)}%</td>
+                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></td>
+            </tr>`;
+        });
+        
+        document.getElementById('corpoTabela').innerHTML = html;
+        document.getElementById('totalSt').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('resCard').style.display = 'block';
+    }
+</script>
+</body>
+</html>
