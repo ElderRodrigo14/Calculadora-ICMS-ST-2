@@ -64,11 +64,9 @@
             color: var(--text-main);
             font-size: 15px;
             outline: none;
-            transition: 0.2s;
-            cursor: pointer;
         }
 
-        input:focus { border-color: var(--accent); background: #1a1a1c; }
+        input:focus { border-color: var(--accent); }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-aliq {
@@ -91,3 +89,164 @@
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: var(--text-sub); font-size: 11px; padding: 10px; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+        .st-badge {
+            background: rgba(129, 201, 149, 0.15);
+            color: #81c995;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+        .total-box {
+            margin-top: 20px; padding: 20px;
+            background: rgba(138, 180, 248, 0.1);
+            border-radius: 15px; text-align: right;
+            font-size: 26px; color: #8ab4f8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora de ICMS-ST Smart</h1>
+    
+    <div class="card">
+        <div class="grid">
+            <div class="field">
+                <label>NCM</label>
+                <input type="text" id="ncm" placeholder="Clique para colar">
+            </div>
+            <div class="field"><label>Valor Produtos</label><input type="text" id="vlr" placeholder="Clique para colar"></div>
+            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="Clique para colar"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+            <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+        </div>
+
+        <button class="btn-main" onclick="processar()">Calcular e Adicionar</button>
+    </div>
+
+    <div id="resCard" class="card" style="display:none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>NCM</th>
+                    <th>MVA</th>
+                    <th>PRODUTOS</th>
+                    <th>BASE ST</th>
+                    <th>ICMS ST</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabela"></tbody>
+        </table>
+        <div class="total-box" id="totalSt">Total ST: R$ 0,00</div>
+    </div>
+</div>
+
+<script>
+    // Inicialização básica para evitar tela preta
+    let dbNcm = {};
+    let aliqAtiva = 0.04;
+    let historico = [];
+
+    // Carregar CSV de forma assíncrona para não travar o carregamento inicial
+    window.onload = function() {
+        fetch('BASE NCM.csv')
+            .then(r => r.text())
+            .then(txt => {
+                txt.split(/\r?\n/).forEach((linha, i) => {
+                    if(i === 0 || !linha.trim()) return;
+                    const col = linha.split(';');
+                    dbNcm[col[0].trim()] = {
+                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0
+                    };
+                });
+            }).catch(e => console.log("CSV ausente."));
+
+        // Lógica de colagem aplicada em todos os campos
+        ['ncm', 'vlr', 'ipi'].forEach(id => {
+            const el = document.getElementById(id);
+            
+            // Tenta o Auto-Paste no CLIQUE
+            el.onclick = async function() {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        distribuirValores(text);
+                    } catch (err) { console.log("Acesso negado."); }
+                }
+            };
+
+            // Tenta o Auto-Paste no CTRL+V
+            el.onpaste = function(e) {
+                const text = e.clipboardData.getData('text');
+                distribuirValores(text);
+                e.preventDefault();
+            };
+        });
+    };
+
+    function distribuirValores(text) {
+        if (!text) return;
+        const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+        if (partes.length >= 3) {
+            document.getElementById('ncm').value = partes[0].trim();
+            document.getElementById('vlr').value = partes[1].trim();
+            document.getElementById('ipi').value = partes[2].trim();
+        } else {
+            // Se for valor único, cola no campo que o usuário interagiu (se possível identificar) ou apenas cola o valor
+            document.activeElement.value = text.trim();
+        }
+    }
+
+    function setAliq(v) {
+        aliqAtiva = v;
+        document.getElementById('a4').classList.toggle('active', v === 0.04);
+        document.getElementById('a7').classList.toggle('active', v === 0.07);
+    }
+
+    function limparNum(t) {
+        if(!t) return 0;
+        let n = t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        return parseFloat(n) || 0;
+    }
+
+    function processar() {
+        const ncm = document.getElementById('ncm').value.trim();
+        const vProd = limparNum(document.getElementById('vlr').value);
+        const vIpi = limparNum(document.getElementById('ipi').value);
+        const info = dbNcm[ncm] || { mva: 0, red: 0 };
+        let fator = info.red === 0 ? 1 : info.red;
+        
+        let baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
+        let stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
+
+        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
+        atualizarTabela();
+    }
+
+    function atualizarTabela() {
+        let total = 0;
+        let html = '';
+        historico.forEach(item => {
+            total += item.stFinal;
+            html += `<tr>
+                <td>${item.ncm}</td>
+                <td>${(item.mva*100).toFixed(2)}%</td>
+                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><span class="st-badge">R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></td>
+            </tr>`;
+        });
+        document.getElementById('corpoTabela').innerHTML = html;
+        document.getElementById('totalSt').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('resCard').style.display = 'block';
+    }
+</script>
+</body>
+</html>
