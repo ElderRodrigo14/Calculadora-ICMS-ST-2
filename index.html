@@ -235,13 +235,18 @@
                 const vProdNode = item.getElementsByTagName("vProd")[0];
                 const vIpiNodes = item.getElementsByTagName("vIPI");
                 
-                // NOVIDADE: Extrai a alíquota específica do item no XML
                 const pIcmsNodes = item.getElementsByTagName("pICMS");
-                let aliqItem = aliqAtiva; // Se o XML não tiver, usa o do botão
+                let aliqItem = aliqAtiva; 
+                
                 if (pIcmsNodes.length > 0) {
                     const pIcmsVal = parseFloat(pIcmsNodes[0].textContent);
                     if (!isNaN(pIcmsVal) && pIcmsVal > 0) {
-                        aliqItem = pIcmsVal / 100;
+                        // REGRA DO BENEFÍCIO BIT: Se for 12%, reduz para 7%
+                        if (pIcmsVal === 12) {
+                            aliqItem = 0.07;
+                        } else {
+                            aliqItem = pIcmsVal / 100;
+                        }
                     }
                 }
                 
@@ -293,7 +298,6 @@
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
         
-        // Recalcula apenas itens manuais (respeita a alíquota de quem veio do XML)
         if (historico.length > 0) {
             historico = historico.map(item => {
                 if (item.origem === 'manual') {
