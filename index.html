@@ -17,6 +17,7 @@
             --btn-hover: #1a1a1c;
             --danger: #f28b82;
             --success: #81c995;
+            --warning: #fdd663;
         }
 
         [data-theme="light"] {
@@ -30,20 +31,10 @@
             --btn-hover: #e8eaed;
             --danger: #d93025;
             --success: #137333;
+            --warning: #f9ab00;
         }
 
-        body {
-            font-family: 'Google Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            transition: 0.3s;
-        }
-
+        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; transition: 0.3s; }
         .container { width: 100%; max-width: 900px; }
 
         .header { display: flex; justify-content: center; align-items: center; margin-bottom: 25px; position: relative; }
@@ -54,24 +45,14 @@
 
         .card { background: var(--card-bg); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; transition: 0.3s; }
 
-        .drop-zone {
-            border: 2px dashed var(--border);
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            color: var(--text-sub);
-            transition: 0.2s;
-            background: var(--input-bg);
-        }
+        .drop-zone { border: 2px dashed var(--border); border-radius: 15px; padding: 25px; text-align: center; margin-bottom: 20px; cursor: pointer; color: var(--text-sub); transition: 0.2s; background: var(--input-bg); }
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); color: var(--accent); background: rgba(66, 133, 244, 0.05); }
 
         .grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .field { display: flex; flex-direction: column; gap: 8px; }
         label { font-size: 13px; color: var(--text-sub); }
 
-        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.2s; cursor: pointer; }
+        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; color: var(--text-main); font-size: 15px; outline: none; transition: 0.2s; cursor: text; }
         input[type="text"]:focus { border-color: var(--accent); background: var(--btn-hover); }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -95,9 +76,26 @@
         .icon-btn:hover { background: var(--border); color: var(--text-main); }
         .icon-btn.delete:hover { background: rgba(217, 48, 37, 0.1); color: var(--danger); }
 
-        .total-box { margin-top: 20px; padding: 20px; background: rgba(66, 133, 244, 0.08); border-radius: 15px; text-align: right; font-size: 26px; color: var(--accent); font-weight: 500; }
-        svg { fill: currentColor; width: 16px; height: 16px; }
+        .total-wrapper { background: rgba(66, 133, 244, 0.05); border-radius: 15px; padding: 25px; margin-top: 20px; border: 1px solid var(--border); }
+        .total-linha { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .total-linha:last-child { margin-bottom: 0; }
         
+        .credito-badge { 
+            background: rgba(249, 171, 0, 0.15); 
+            color: var(--warning); 
+            padding: 10px 15px; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            font-size: 15px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            border: 1px solid rgba(249, 171, 0, 0.3);
+        }
+
+        .total-box { font-size: 26px; color: var(--accent); font-weight: 500; text-align: right; }
+        
+        svg { fill: currentColor; width: 16px; height: 16px; }
         .isento-txt { color: var(--text-sub); font-style: italic; }
     </style>
 </head>
@@ -157,7 +155,27 @@
                 <tbody id="corpoTabela"></tbody>
             </table>
         </div>
-        <div class="total-box" id="totalSt">Total ST: R$ 0,00</div>
+        
+        <div class="total-wrapper">
+            <div class="total-linha">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-weight: 500; color: var(--text-main);">ST Destacado na Nota Fiscal (R$):</label>
+                    <input type="text" id="vlrStNota" placeholder="0,00" onkeyup="atualizarTabela()" style="width: 180px; padding: 10px; font-size: 16px;">
+                </div>
+                
+                <div style="text-align: right;">
+                    <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 5px;">Total Calculado:</div>
+                    <div class="total-box" id="totalSt" style="margin: 0; padding: 0; background: none; border: none;">R$ 0,00</div>
+                </div>
+            </div>
+            
+            <div class="total-linha" id="boxCredito" style="display: none; justify-content: flex-end; margin-top: 15px;">
+                <div class="credito-badge" id="txtCredito">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    IMPOSTO RECOLHIDO A MAIS (R$ 0,00)
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -222,6 +240,16 @@
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
             
+            // 1. Extrai o Total de ST da Nota Fiscal
+            const icmsTotNode = xmlDoc.getElementsByTagName("ICMSTot")[0];
+            if (icmsTotNode) {
+                const vSTNota = parseFloat(icmsTotNode.getElementsByTagName("vST")[0]?.textContent || 0);
+                if(vSTNota > 0) {
+                    document.getElementById('vlrStNota').value = vSTNota.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                }
+            }
+
+            // 2. Extrai os Itens
             const itens = xmlDoc.getElementsByTagName("det");
             if (itens.length === 0) {
                 alert("Nenhum produto encontrado neste XML.");
@@ -241,22 +269,15 @@
                 if (pIcmsNodes.length > 0) {
                     const pIcmsVal = parseFloat(pIcmsNodes[0].textContent);
                     if (!isNaN(pIcmsVal) && pIcmsVal > 0) {
-                        // REGRA DO BENEFÍCIO BIT: Se for 12%, reduz para 7%
-                        if (pIcmsVal === 12) {
-                            aliqItem = 0.07;
-                        } else {
-                            aliqItem = pIcmsVal / 100;
-                        }
+                        if (pIcmsVal === 12) aliqItem = 0.07;
+                        else aliqItem = pIcmsVal / 100;
                     }
                 }
                 
                 const ncm = ncmNode ? ncmNode.textContent : "";
                 const vProd = vProdNode ? parseFloat(vProdNode.textContent) : 0;
                 let vIpi = 0;
-                
-                if (vIpiNodes.length > 0) {
-                    vIpi = parseFloat(vIpiNodes[0].textContent);
-                }
+                if (vIpiNodes.length > 0) vIpi = parseFloat(vIpiNodes[0].textContent);
 
                 if (ncm && vProd > 0) {
                     executarCalculoInterno(ncm, vProd, vIpi, aliqItem, 'xml');
@@ -322,11 +343,8 @@
         const ncm = document.getElementById('ncm').value.trim();
         const vProd = limparNum(document.getElementById('vlr').value);
         const vIpi = limparNum(document.getElementById('ipi').value);
-        
         if (!ncm) return;
-        
         executarCalculoInterno(ncm, vProd, vIpi, aliqAtiva, 'manual');
-        
         document.getElementById('ncm').value = '';
         document.getElementById('vlr').value = '';
         document.getElementById('ipi').value = '';
@@ -352,6 +370,7 @@
         document.getElementById('ncm').value = '';
         document.getElementById('vlr').value = '';
         document.getElementById('ipi').value = '';
+        document.getElementById('vlrStNota').value = '';
         document.getElementById('resCard').style.display = 'none';
     }
 
@@ -403,9 +422,26 @@
                 </td>
             </tr>`;
         });
+        
         document.getElementById('corpoTabela').innerHTML = html;
-        document.getElementById('totalSt').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
         document.getElementById('resCard').style.display = 'block';
+
+        // LÓGICA DO ALERTA DE CRÉDITO
+        let stNotaStr = document.getElementById('vlrStNota').value;
+        let stNota = limparNum(stNotaStr);
+        let diferenca = stNota - total;
+        
+        let boxCredito = document.getElementById('boxCredito');
+        let txtCredito = document.getElementById('txtCredito');
+
+        // Se o valor da nota for maior que o calculado (com folga de 1 centavo pra arredondamento)
+        if (stNota > 0 && diferenca > 0.01) {
+            boxCredito.style.display = 'flex';
+            txtCredito.innerHTML = `<svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${diferenca.toLocaleString('pt-BR', {minimumFractionDigits:2})})`;
+        } else {
+            boxCredito.style.display = 'none';
+        }
     }
 </script>
 </body>
