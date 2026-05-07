@@ -54,7 +54,6 @@
 
         .card { background: var(--card-bg); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; transition: 0.3s; }
 
-        /* Estilo da Área de XML */
         .drop-zone {
             border: 2px dashed var(--border);
             border-radius: 15px;
@@ -129,7 +128,7 @@
         </div>
 
         <div class="field" style="margin-bottom: 20px;">
-            <label>Alíquota Interestadual</label>
+            <label>Alíquota Interestadual (Para lançamentos manuais)</label>
             <div class="btn-group" style="margin-bottom: 0; margin-top: 8px;">
                 <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                 <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
@@ -236,6 +235,16 @@
                 const vProdNode = item.getElementsByTagName("vProd")[0];
                 const vIpiNodes = item.getElementsByTagName("vIPI");
                 
+                // NOVIDADE: Extrai a alíquota específica do item no XML
+                const pIcmsNodes = item.getElementsByTagName("pICMS");
+                let aliqItem = aliqAtiva; // Se o XML não tiver, usa o do botão
+                if (pIcmsNodes.length > 0) {
+                    const pIcmsVal = parseFloat(pIcmsNodes[0].textContent);
+                    if (!isNaN(pIcmsVal) && pIcmsVal > 0) {
+                        aliqItem = pIcmsVal / 100;
+                    }
+                }
+                
                 const ncm = ncmNode ? ncmNode.textContent : "";
                 const vProd = vProdNode ? parseFloat(vProdNode.textContent) : 0;
                 let vIpi = 0;
@@ -245,7 +254,7 @@
                 }
 
                 if (ncm && vProd > 0) {
-                    executarCalculoInterno(ncm, vProd, vIpi);
+                    executarCalculoInterno(ncm, vProd, vIpi, aliqItem, 'xml');
                     importados++;
                 }
             }
@@ -284,16 +293,16 @@
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
         
+        // Recalcula apenas itens manuais (respeita a alíquota de quem veio do XML)
         if (historico.length > 0) {
             historico = historico.map(item => {
-                const info = dbNcm[item.ncm] || { mva: 0, red: 0 };
-                let stFinal = 0;
-                // Só recalcula se tiver MVA > 0
-                if (info.mva > 0) {
-                    let fator = info.red === 0 ? 1 : info.red;
-                    stFinal = Number(((item.baseST * 0.17) - ((item.vProd * aliqAtiva) * fator)).toFixed(2));
+                if (item.origem === 'manual') {
+                    item.aliq = aliqAtiva;
+                    if (item.mva > 0) {
+                        item.stFinal = Number(((item.baseST * 0.17) - ((item.vProd * item.aliq) * item.fator)).toFixed(2));
+                    }
                 }
-                return { ...item, stFinal };
+                return item;
             });
             atualizarTabela();
         }
@@ -312,27 +321,25 @@
         
         if (!ncm) return;
         
-        executarCalculoInterno(ncm, vProd, vIpi);
+        executarCalculoInterno(ncm, vProd, vIpi, aliqAtiva, 'manual');
         
         document.getElementById('ncm').value = '';
         document.getElementById('vlr').value = '';
         document.getElementById('ipi').value = '';
     }
 
-    // A MÁGICA ACONTECE AQUI: Trava para MVA 0%
-    function executarCalculoInterno(ncm, vProd, vIpi) {
+    function executarCalculoInterno(ncm, vProd, vIpi, aliq, origem) {
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
         let baseST = 0;
         let stFinal = 0;
+        let fator = info.red === 0 ? 1 : info.red;
 
-        // Se tiver MVA (ou seja, tem ST), ele calcula. Se for 0, fica tudo R$ 0,00.
         if (info.mva > 0) {
-            let fator = info.red === 0 ? 1 : info.red;
             baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
-            stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtiva) * fator)).toFixed(2));
+            stFinal = Number(((baseST * 0.17) - ((vProd * aliq) * fator)).toFixed(2));
         }
 
-        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal });
+        historico.push({ ncm, mva: info.mva, vProd, baseST, stFinal, aliq, origem, fator });
         atualizarTabela();
     }
 
@@ -367,7 +374,6 @@
         let html = '';
         historico.forEach((item, index) => {
             total += item.stFinal;
-            // Destaca visualmente se estiver zerado/isento
             const isZero = item.mva === 0;
             
             html += `<tr>
