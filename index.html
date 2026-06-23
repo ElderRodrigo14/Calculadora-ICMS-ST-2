@@ -25,80 +25,86 @@
         }
 
         * { box-sizing: border-box; }
-        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; display: flex; min-height: 100vh; transition: 0.3s; }
+        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; display: flex; min-height: 100vh; transition: 0.3s; line-height: 1.25; }
         
+        /* Menu Lateral */
         .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--card-bg); border-right: 1px solid var(--border); transition: 0.3s; z-index: 1000; padding: 20px 0; }
         .sidebar.open { left: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .overlay.active { display: block; }
         
-        .menu-item { padding: 15px 25px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 15px; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-item { padding: 12px 24px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 500; transition: 0.2s; font-size: 14px; }
         .menu-item:hover { background: var(--input-bg); color: var(--accent); }
         .menu-item.active { border-left: 4px solid var(--accent); color: var(--accent); background: var(--accent-bg); }
-        .menu-title { padding: 0 25px; margin-bottom: 20px; font-size: 18px; font-weight: 700; color: var(--accent); }
+        .menu-title { padding: 0 24px; margin-bottom: 20px; font-size: 16px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
 
-        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .btn-menu { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 5px; }
-        h1 { font-size: 20px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn-theme { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-family: inherit;}
+        /* Topbar */
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .btn-menu { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 4px; display: flex; align-items: center; }
+        h1 { font-size: 18px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-theme { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-family: inherit; font-weight: 500; }
 
+        /* Estrutura de Módulos */
         .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; }
-        .module { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .module { display: none; padding: 16px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .module.active { display: block; }
-
-        .card { background: var(--card-bg); border-radius: 10px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        .card { background: var(--card-bg); border-radius: 8px; padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; }
         
-        .drop-zone { border: 1px dashed var(--border); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; flex: 1;}
+        /* Drop Zone Minimalista */
+        .drop-zone { border: 1px dashed var(--border); border-radius: 6px; padding: 12px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; flex: 1; }
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
-        .drop-zone-text h3 { margin: 0; font-size: 14px; font-weight: 500; color: var(--text-main); }
-        .drop-zone-text p { margin: 2px 0 0 0; font-size: 11px; opacity: 0.8; }
+        .drop-zone-text h3 { margin: 0; font-size: 13px; font-weight: 500; color: var(--text-main); }
+        .drop-zone-text p { margin: 1px 0 0 0; font-size: 11px; opacity: 0.7; }
 
+        /* Tabelas */
         .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
-        th { text-align: left; color: var(--text-sub); padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
-        td { padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 12px; }
+        th { text-align: left; color: var(--text-sub); padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500; }
+        td { padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; color: var(--text-main); }
         
-        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 13px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
+        /* Componentes de Input e Botões */
+        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; color: var(--text-main); font-size: 13px; outline: none; width: 100%; transition: 0.2s; font-family: inherit; }
         input[type="text"]:focus { border-color: var(--accent); }
-        .btn-main { padding: 9px 16px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; font-family: inherit;}
+        .btn-main { padding: 8px 14px; background: var(--accent); color: var(--bg); border: none; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s; font-family: inherit; }
         .btn-main:hover { opacity: 0.9; }
-        .btn-secondary { padding: 9px 16px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; font-family: inherit;}
+        .btn-secondary { padding: 8px 14px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; transition: 0.2s; font-family: inherit; }
         .btn-secondary:hover { background: var(--input-bg); }
         
         .icon-print-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 50%; padding: 6px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-print-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-aliq { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500; font-size: 13px;}
+        .btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .btn-aliq { flex: 1; padding: 8px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500; font-size: 12px; }
         .btn-aliq.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
-        .st-badge { background: var(--success-bg); color: var(--success); padding: 4px 8px; border-radius: 6px; font-weight: 600; }
-        .val-container { display: flex; align-items: center; gap: 8px; }
-        .icon-btn { background: transparent; border: none; color: var(--text-sub); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .st-badge { background: var(--success-bg); color: var(--success); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+        .val-container { display: flex; align-items: center; gap: 6px; }
+        .icon-btn { background: transparent; border: none; color: var(--text-sub); cursor: pointer; padding: 2px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .icon-btn:hover { background: var(--border); color: var(--text-main); }
         .icon-btn.delete:hover { background: var(--danger-bg); color: var(--danger); }
-        svg { fill: currentColor; width: 16px; height: 16px; }
+        svg { fill: currentColor; width: 14px; height: 14px; }
 
-        /* NCM Banco Design Minimalista */
-        .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 15px; }
-        .uf-badge { border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-sub); }
-        .st-tag-bg { background: var(--warning-bg); color: var(--warning); padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-        .ncm-tag { background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; color: var(--text-main); }
+        /* Módulo NCM Minimalista */
+        .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 12px; }
+        .ncm-header-mini { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .ncm-header-mini h2 { font-size: 18px; margin: 0; font-weight: 500; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .ncm-cest-mini { font-size: 11px; color: var(--text-sub); background: var(--input-bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border); font-family: monospace; }
         
-        .mva-section-title { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; }
-        .mva-grid-pro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .mva-box-pro { background: var(--tag-bg); border-radius: 8px; padding: 10px; text-align: center; }
-        .mva-box-label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 4px; }
-        .mva-box-val { font-size: 15px; font-weight: 700; color: var(--text-main); }
+        .ncm-tags-mini { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .tag-mini { background: var(--input-bg); padding: 3px 8px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-main); border: 1px solid var(--border); }
+        .tag-mini.st { background: var(--warning-bg); color: var(--warning); border-color: rgba(253, 226, 147, 0.2); font-weight: 500; }
+        
+        .mva-grid-mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+        .mva-box-mini { background: var(--tag-bg); border-radius: 6px; padding: 8px; text-align: center; border: 1px solid var(--border); }
+        .mva-label-mini { font-size: 9px; color: var(--text-sub); display: block; margin-bottom: 2px; text-transform: uppercase; }
+        .mva-val-mini { font-size: 13px; font-weight: 700; color: var(--text-main); }
 
-        .total-box { margin-top: 15px; padding: 12px; background: var(--accent-bg); border-radius: 8px; text-align: right; font-size: 20px; color: var(--accent); font-weight: 500; }
-        .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .total-box { margin-top: 12px; padding: 10px; background: var(--accent-bg); border-radius: 6px; text-align: right; font-size: 18px; color: var(--accent); font-weight: 500; }
+        .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
         
-        .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
-        .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(242, 139, 130, 0.3);}
-        
-        .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        .isento-txt { color: var(--text-sub); font-style: italic; }
+        /* Alertas de ST */
+        .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(253, 226, 147, 0.2);}
+        .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(242, 139, 130, 0.2);}
     </style>
 </head>
 <body>
@@ -122,49 +128,47 @@
 
 <div class="main-content">
     <div class="topbar">
-        <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
             <button class="btn-menu" onclick="toggleMenu()">
-                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                <svg viewBox="0 0 24 24" style="width:18px; height:18px;"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
             </button>
             <h1>Calculadora ST Pro</h1>
         </div>
         <button class="btn-theme" onclick="toggleTema()" id="btnTema">Claro</button>
     </div>
 
-    <!-- MÓDULO 1: IMPORTAR XML -->
     <main class="module active" id="module-xml">
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px;">
             <div id="drop-zone" class="drop-zone">
-                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <svg viewBox="0 0 24 24" style="width:20px; height:20px;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
                     <h3>Arraste XMLs da NF-e aqui</h3>
-                    <p>Ou clique para selecionar (até 20 arquivos)</p>
+                    <p>Ou clique para selecionar múltiplos arquivos (Até 20)</p>
                 </div>
                 <input type="file" id="xml-input" accept=".xml" multiple style="display: none;">
             </div>
-            <button class="btn-secondary" onclick="limparNotas()" style="color: var(--danger); border-color: var(--danger); padding: 15px;">Limpar Tudo</button>
+            <button class="btn-secondary" onclick="limparNotas()" style="color: var(--danger); border-color: var(--danger); padding: 10px 14px;">Limpar Tudo</button>
         </div>
         <div id="notas-container"></div>
     </main>
 
-    <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
             <div class="grid-manual">
-                <div class="field"><label style="font-size:12px; color:var(--text-sub);">NCM</label><input type="text" id="ncm" placeholder="Clique p/ colar"></div>
-                <div class="field"><label style="font-size:12px; color:var(--text-sub);">Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
-                <div class="field"><label style="font-size:12px; color:var(--text-sub);">Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+                <div class="field"><label style="font-size:11px; color:var(--text-sub);">NCM</label><input type="text" id="ncm" placeholder="Clique para auto-colar"></div>
+                <div class="field"><label style="font-size:11px; color:var(--text-sub);">Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+                <div class="field"><label style="font-size:11px; color:var(--text-sub);">Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
             </div>
 
-            <div class="field" style="margin-bottom: 15px;">
-                <label style="font-size:12px; color:var(--text-sub);">Alíquota Interestadual</label>
-                <div class="btn-group" style="margin-top: 5px;">
+            <div class="field" style="margin-bottom: 12px;">
+                <label style="font-size:11px; color:var(--text-sub);">Alíquota Interestadual</label>
+                <div class="btn-group" style="margin-top: 4px;">
                     <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                     <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
                 <button class="btn-main" style="flex: 2;" onclick="processarManual()">Calcular Manual</button>
                 <button class="btn-secondary" style="flex: 1;" onclick="limparManual()">Limpar Tabela</button>
             </div>
@@ -181,38 +185,36 @@
         </div>
     </main>
 
-    <!-- MÓDULO 3: BANCO NCM -->
     <main class="module" id="module-ncm">
-        <div class="card">
-            <div style="display: flex; gap: 10px;">
+        <div class="card" style="padding: 14px;">
+            <div style="display: flex; gap: 8px;">
                 <input type="text" id="search-ncm" placeholder="Pesquisar NCM..." style="flex: 1;">
                 <button class="btn-main" onclick="buscarNCM()">Buscar</button>
                 <button class="btn-secondary" onclick="abrirModalNCM(null, false)">+ Adicionar</button>
             </div>
             <div id="ncm-result">
-                <p style="color: var(--text-sub); text-align: center; margin-top: 40px; font-size: 13px;">Consulte um NCM para visualizar as regras tributárias.</p>
+                <p style="color: var(--text-sub); text-align: center; margin-top: 30px; font-size: 12px;">Consulte um NCM para visualizar as regras tributárias.</p>
             </div>
         </div>
     </main>
 </div>
 
-<!-- Modal NCM -->
 <div class="overlay" id="modal-overlay"></div>
-<div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
-    <h3 style="margin-top: 0; margin-bottom: 15px; font-weight: 500;" id="modal-title">Adicionar/Editar NCM</h3>
-    <div style="display: flex; flex-direction: column; gap: 12px;">
+<div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;">
+    <h3 style="margin-top: 0; margin-bottom: 12px; font-weight: 500; font-size: 15px;" id="modal-title">Adicionar/Editar NCM</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
         <div><label style="font-size: 11px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm" placeholder="Ex: 85444200"></div>
         <div><label style="font-size: 11px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest" placeholder="Ex: 12.009.00"></div>
         <div><label style="font-size: 11px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat" placeholder="Ex: Materiais elétricos"></div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div><label style="font-size: 11px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Ex: 41.17"></div>
             <div><label style="font-size: 11px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva" placeholder="Ex: 63.28"></div>
             <div><label style="font-size: 11px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata" placeholder="0"></div>
             <div><label style="font-size: 11px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out" placeholder="0"></div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
             <button class="btn-main" style="flex: 1;" onclick="salvarNCM()">Salvar</button>
             <button class="btn-secondary" style="flex: 1;" onclick="fecharModal()">Cancelar</button>
         </div>
@@ -220,7 +222,7 @@
 </div>
 
 <script>
-    // --- ICONES ---
+    // --- ICONES COMPACTOS ---
     const svgCopy = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
     const svgDel = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
     const svgCheck = `<svg viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
@@ -246,32 +248,55 @@
         return v;
     }
 
+    // --- CORREÇÃO TÉCNICA CRÍTICA: DETECTOR DE DELIMITADOR (VÍRGULA OU PONTO E VÍRGULA) ---
     window.onload = async function() {
         try {
             const r = await fetch('BASE NCM.csv');
             if (r.ok) {
                 const txt = await r.text();
-                txt.split(/\r?\n/).forEach((linha, i) => {
-                    if(i === 0 || !linha.trim()) return;
-                    const col = linha.split(';');
-                    if(col.length < 9) return;
-                    
-                    dbNcm[col[0].trim()] = {
-                        cest: col[1]?.trim() || '---',
-                        red: parseNumCSV(col[3]),
-                        categoria: col[5]?.trim() || 'Não informada',
-                        mvaOut: parseNumCSV(col[6]),
-                        mvaAta: parseNumCSV(col[7]),
-                        mva: parseNumCSV(col[8])
-                    };
-                });
+                const linhas = txt.split(/\r?\n/);
+                if(linhas.length > 0) {
+                    const primeiraLinha = linhas[0];
+                    const semicolons = (primeiraLinha.match(/;/g) || []).length;
+                    const commas = (primeiraLinha.match(/,/g) || []).length;
+                    const delimiter = semicolons > commas ? ';' : ',';
+
+                    linhas.forEach((linha, i) => {
+                        if(i === 0 || !linha.trim()) return;
+                        
+                        const col = [];
+                        let current = '';
+                        let inQuotes = false;
+                        for (let j = 0; j < linha.length; j++) {
+                            let char = linha[j];
+                            if (char === '"') inQuotes = !inQuotes;
+                            else if (char === delimiter && !inQuotes) { col.push(current); current = ''; }
+                            else current += char;
+                        }
+                        col.push(current);
+
+                        if(col.length < 9) return;
+                        
+                        const ncmChave = col[0].replace(/"/g, '').trim();
+                        if(!ncmChave) return;
+
+                        dbNcm[ncmChave] = {
+                            cest: col[1]?.replace(/"/g, '').trim() || '---',
+                            red: parseNumCSV(col[3]),
+                            categoria: col[5]?.replace(/"/g, '').trim() || 'Não informada',
+                            mvaOut: parseNumCSV(col[6]),
+                            mvaAta: parseNumCSV(col[7]),
+                            mva: parseNumCSV(col[8])
+                        };
+                    });
+                }
             }
-        } catch (e) { console.log("Aviso: CSV não encontrado."); }
+        } catch (e) { console.log("Aviso: Falha ao inicializar a base CSV."); }
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
         dbNcm = { ...dbNcm, ...customDb };
 
-        // AUTO-PASTE MANUAL
+        // AUTO-PASTE MÓDULO MANUAL
         ['ncm', 'vlr', 'ipi'].forEach(id => {
             const el = document.getElementById(id);
             el.onclick = async function() {
@@ -452,17 +477,18 @@
                 </tr>
             `).join('');
 
+            // LÓGICA DE AUDITORIA: DIFERENÇA RECOLHIDA ANTECIPADAMENTE / COMPLEMENTO
             let diff = nota.vStTotalCalculado - nota.vSTNota;
             let auditoriaHtml = '';
             if (nota.vSTNota > 0) {
                 if (diff > 0.01) {
                     auditoriaHtml = `<div class="badge-recolher" style="margin-top: 10px;">
-                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                         IMPOSTO A RECOLHER (R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})})
                     </div>`;
                 } else if (diff < -0.01) {
                     auditoriaHtml = `<div class="badge-credito" style="margin-top: 10px;">
-                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                         IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})})
                     </div>`;
                 }
@@ -473,8 +499,8 @@
             card.innerHTML = `
                 <div class="header-nota">
                     <div>
-                        <h3 style="margin:0; font-weight: 500; font-size: 16px; color: var(--accent);">Nota: ${nota.nNF}</h3>
-                        <p style="margin:4px 0 0 0; font-size:11px; color:var(--text-sub);">
+                        <h3 style="margin:0; font-weight: 500; font-size: 15px; color: var(--accent);">Nota: ${nota.nNF}</h3>
+                        <p style="margin:2px 0 0 0; font-size:11px; color:var(--text-sub);">
                             ${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}
                         </p>
                     </div>
@@ -498,7 +524,7 @@
                     </table>
                     <div style="text-align: right;">${auditoriaHtml}</div>
                     
-                    <h4 style="font-size: 12px; color: var(--text-sub); margin: 15px 0 8px 0; font-weight: 500;">Itens da Nota</h4>
+                    <h4 style="font-size: 12px; color: var(--text-sub); margin: 12px 0 6px 0; font-weight: 500;">Itens da Nota</h4>
                     <table>
                         <thead>
                             <tr>
@@ -586,11 +612,6 @@
     }
 
     // --- MÓDULO 2: CÁLCULO MANUAL ---
-    function limparNum(t) {
-        if(!t) return 0;
-        return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
-    }
-
     function setAliq(v) {
         aliqAtivaManual = v;
         document.getElementById('a4').classList.toggle('active', v === 0.04);
@@ -664,7 +685,7 @@
         document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
     }
 
-    // --- MÓDULO 3: BANCO NCM ---
+    // --- MÓDULO 3: BANCO NCM MINIMALISTA ---
     function buscarNCM() {
         const query = document.getElementById('search-ncm').value.trim();
         const resDiv = document.getElementById('ncm-result');
@@ -680,44 +701,44 @@
 
             resDiv.innerHTML = `
                 <div class="ncm-card-pro">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h2 style="margin: 0; font-size: 20px; font-weight: 500; display: flex; align-items: center; gap: 10px;">
+                    <div class="ncm-header-mini">
+                        <h2>
                             ${query} 
-                            <span style="font-size: 11px; font-weight: 400; color: var(--text-sub); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px;">CEST: ${info.cest || 'Não inf.'}</span>
+                            <span class="ncm-cest-mini">CEST: ${info.cest || '---'}</span>
                         </h2>
                         <span class="uf-badge">MT</span>
                     </div>
                     
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
-                        <span class="st-tag-bg">${svgScale} Substituição Tributária</span>
-                        <span class="ncm-tag">${svgTag} ${categoria}</span>
-                        <span class="ncm-tag">${svgPerc} Redução BC: ${redBc}%</span>
+                    <div class="ncm-tags-mini">
+                        <span class="tag-mini st">${svgScale} Substituição Tributária</span>
+                        <span class="tag-mini">${svgTag} ${categoria}</span>
+                        <span class="tag-mini">${svgPerc} Redução BC: ${redBc}%</span>
                     </div>
 
-                    <div class="mva-section-title">MVA / CRÉDITO</div>
-                    <div class="mva-grid-pro">
-                        <div class="mva-box-pro">
-                            <span class="mva-box-label">Créd. Outorgado</span>
-                            <span class="mva-box-val">${mvaOut}</span>
+                    <div class="mva-section-title">MVA por Segmento</div>
+                    <div class="mva-grid-mini">
+                        <div class="mva-box-mini">
+                            <span class="mva-label-mini">Créd. Outorgado</span>
+                            <span class="mva-val-mini">${mvaOut}</span>
                         </div>
-                        <div class="mva-box-pro">
-                            <span class="mva-box-label">Atacadista</span>
-                            <span class="mva-box-val">${mvaAta}</span>
+                        <div class="mva-box-mini">
+                            <span class="mva-label-mini">Atacadista</span>
+                            <span class="mva-val-mini">${mvaAta}</span>
                         </div>
-                        <div class="mva-box-pro" style="background: var(--accent-bg); color: var(--accent);">
-                            <span class="mva-box-label" style="color: inherit;">Demais (Padrão)</span>
-                            <span class="mva-box-val" style="color: inherit;">${mvaDemais}</span>
+                        <div class="mva-box-mini" style="background: var(--accent-bg); color: var(--accent); border-color: var(--accent);">
+                            <span class="mva-label-mini" style="color: inherit;">Demais (Padrão)</span>
+                            <span class="mva-val-mini" style="color: inherit;">${mvaDemais}</span>
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
-                        <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="abrirModalNCM('${query}', true)">Clonar</button>
-                        <button class="btn-main" style="padding: 6px 12px; font-size: 12px;" onclick="abrirModalNCM('${query}', false)">Editar</button>
+                    <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="abrirModalNCM('${query}', true)">Clonar</button>
+                        <button class="btn-main" style="padding: 4px 10px; font-size: 11px;" onclick="abrirModalNCM('${query}', false)">Editar</button>
                     </div>
                 </div>
             `;
         } else {
-            resDiv.innerHTML = `<p style="color: var(--danger); text-align:center;">NCM não encontrado. <br><br> <button class="btn-secondary" onclick="abrirModalNCM('${query}', false)">Adicionar Novo</button></p>`;
+            resDiv.innerHTML = `<p style="color: var(--danger); text-align:center; font-size:12px; margin-top:15px;">NCM não encontrado. <br><br> <button class="btn-secondary" onclick="abrirModalNCM('${query}', false)">+ Criar Registro</button></p>`;
         }
     }
 
