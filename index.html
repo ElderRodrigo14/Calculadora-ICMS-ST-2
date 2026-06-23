@@ -27,7 +27,6 @@
         * { box-sizing: border-box; }
         body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; display: flex; min-height: 100vh; transition: 0.3s; }
         
-        /* Sidebar (Menu Lateral) */
         .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--card-bg); border-right: 1px solid var(--border); transition: 0.3s; z-index: 1000; padding: 20px 0; }
         .sidebar.open { left: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
@@ -38,44 +37,39 @@
         .menu-item.active { border-left: 4px solid var(--accent); color: var(--accent); background: var(--accent-bg); }
         .menu-title { padding: 0 25px; margin-bottom: 20px; font-size: 18px; font-weight: 700; color: var(--accent); }
 
-        /* Topbar */
         .topbar { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .btn-menu { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 5px; }
         h1 { font-size: 20px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-theme { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-family: inherit;}
 
-        /* Main Content */
         .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; }
         .module { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .module.active { display: block; }
 
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        .card { background: var(--card-bg); border-radius: 10px; padding: 18px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         
-        /* Drop Zone Minimalista */
-        .drop-zone { border: 1px dashed var(--border); border-radius: 10px; padding: 15px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; }
+        .drop-zone { border: 1px dashed var(--border); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; flex: 1;}
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
-        .drop-zone-text h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--text-main); }
-        .drop-zone-text p { margin: 2px 0 0 0; font-size: 12px; opacity: 0.8; }
+        .drop-zone-text h3 { margin: 0; font-size: 14px; font-weight: 500; color: var(--text-main); }
+        .drop-zone-text p { margin: 2px 0 0 0; font-size: 11px; opacity: 0.8; }
 
-        /* Tables & Lists */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
-        th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
-        td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        th { text-align: left; color: var(--text-sub); padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
+        td { padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
         
-        /* Inputs & Buttons */
-        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
+        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-main); font-size: 13px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
         input[type="text"]:focus { border-color: var(--accent); }
-        .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-main { padding: 9px 16px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; font-family: inherit;}
         .btn-main:hover { opacity: 0.9; }
-        .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-secondary { padding: 9px 16px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.2s; font-family: inherit;}
         .btn-secondary:hover { background: var(--input-bg); }
         
-        .icon-print-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 50%; padding: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .icon-print-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 50%; padding: 6px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-print-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-aliq { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500;}
+        .btn-aliq { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500; font-size: 13px;}
         .btn-aliq.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
         .st-badge { background: var(--success-bg); color: var(--success); padding: 4px 8px; border-radius: 6px; font-weight: 600; }
@@ -83,35 +77,27 @@
         .icon-btn { background: transparent; border: none; color: var(--text-sub); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .icon-btn:hover { background: var(--border); color: var(--text-main); }
         .icon-btn.delete:hover { background: var(--danger-bg); color: var(--danger); }
-        svg { fill: currentColor; width: 18px; height: 18px; }
+        svg { fill: currentColor; width: 16px; height: 16px; }
 
-        /* NCM Banco Design */
-        .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-top: 15px; position: relative; }
-        .ncm-header-pro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
-        .ncm-header-pro h2 { font-size: 24px; margin: 0; font-weight: 500; color: var(--text-main); }
-        .uf-badge { border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-sub); }
-        .ncm-cest-pro { color: var(--text-sub); margin-bottom: 20px; font-size: 14px; }
+        /* NCM Banco Design Minimalista */
+        .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-top: 15px; }
+        .uf-badge { border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-sub); }
+        .st-tag-bg { background: var(--warning-bg); color: var(--warning); padding: 4px 10px; border-radius: 8px; font-weight: 500; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .ncm-tag { background: var(--input-bg); padding: 4px 10px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; color: var(--text-main); }
         
-        .ncm-tags { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-        .tag-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-main); }
-        .st-tag-bg { background: var(--warning-bg); color: var(--warning); padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-        
-        .mva-section-title { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; text-transform: uppercase; }
-        .mva-grid-pro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .mva-box-pro { background: var(--tag-bg); border-radius: 8px; padding: 12px; text-align: center; }
-        .mva-box-label { font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 5px; }
-        .mva-box-val { font-size: 16px; font-weight: 700; color: var(--text-main); }
+        .mva-section-title { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; }
+        .mva-grid-pro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .mva-box-pro { background: var(--tag-bg); border-radius: 8px; padding: 10px; text-align: center; }
+        .mva-box-label { font-size: 10px; color: var(--text-sub); display: block; margin-bottom: 4px; }
+        .mva-box-val { font-size: 15px; font-weight: 700; color: var(--text-main); }
 
-        .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
-
-        .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
+        .total-box { margin-top: 15px; padding: 12px; background: var(--accent-bg); border-radius: 8px; text-align: right; font-size: 20px; color: var(--accent); font-weight: 500; }
         .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
-        /* Badges de Auditoria ST */
         .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
         .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(242, 139, 130, 0.3);}
         
-        .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .isento-txt { color: var(--text-sub); font-style: italic; }
     </style>
 </head>
@@ -145,33 +131,33 @@
         <button class="btn-theme" onclick="toggleTema()" id="btnTema">Claro</button>
     </div>
 
+    <!-- MÓDULO 1: IMPORTAR XML -->
     <main class="module active" id="module-xml">
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
-            <div id="drop-zone" class="drop-zone" style="flex: 1; min-width: 300px;">
-                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div id="drop-zone" class="drop-zone">
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
                     <h3>Arraste XMLs da NF-e aqui</h3>
                     <p>Ou clique para selecionar (até 20 arquivos)</p>
                 </div>
                 <input type="file" id="xml-input" accept=".xml" multiple style="display: none;">
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-secondary" onclick="limparNotas()" style="color: var(--danger); border-color: var(--danger);">Limpar Tudo</button>
-            </div>
+            <button class="btn-secondary" onclick="limparNotas()" style="color: var(--danger); border-color: var(--danger); padding: 15px;">Limpar Tudo</button>
         </div>
         <div id="notas-container"></div>
     </main>
 
+    <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
             <div class="grid-manual">
-                <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Clique para auto-colar"></div>
-                <div class="field"><label>Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
-                <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+                <div class="field"><label style="font-size:12px; color:var(--text-sub);">NCM</label><input type="text" id="ncm" placeholder="Clique p/ colar"></div>
+                <div class="field"><label style="font-size:12px; color:var(--text-sub);">Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+                <div class="field"><label style="font-size:12px; color:var(--text-sub);">Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
             </div>
 
             <div class="field" style="margin-bottom: 15px;">
-                <label>Alíquota Interestadual</label>
+                <label style="font-size:12px; color:var(--text-sub);">Alíquota Interestadual</label>
                 <div class="btn-group" style="margin-top: 5px;">
                     <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                     <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
@@ -187,9 +173,7 @@
         <div id="resManualCard" class="card" style="display:none;">
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr><th>NCM</th><th>MVA</th><th>PRODUTOS</th><th>BASE ST</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
-                    </thead>
+                    <thead><tr><th>NCM</th><th>MVA</th><th>PRODUTOS</th><th>BASE ST</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr></thead>
                     <tbody id="corpoTabelaManual"></tbody>
                 </table>
             </div>
@@ -197,34 +181,35 @@
         </div>
     </main>
 
+    <!-- MÓDULO 3: BANCO NCM -->
     <main class="module" id="module-ncm">
         <div class="card">
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px;">
                 <input type="text" id="search-ncm" placeholder="Pesquisar NCM..." style="flex: 1;">
                 <button class="btn-main" onclick="buscarNCM()">Buscar</button>
                 <button class="btn-secondary" onclick="abrirModalNCM(null, false)">+ Adicionar</button>
             </div>
             <div id="ncm-result">
-                <p style="color: var(--text-sub); text-align: center; margin-top: 40px;">Consulte um NCM para visualizar as regras tributárias de MT.</p>
+                <p style="color: var(--text-sub); text-align: center; margin-top: 40px; font-size: 13px;">Consulte um NCM para visualizar as regras tributárias.</p>
             </div>
         </div>
     </main>
 </div>
 
+<!-- Modal NCM -->
 <div class="overlay" id="modal-overlay"></div>
 <div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
     <h3 style="margin-top: 0; margin-bottom: 15px; font-weight: 500;" id="modal-title">Adicionar/Editar NCM</h3>
     <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div><label style="font-size: 12px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm" placeholder="Ex: 85444200"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest" placeholder="Ex: 12.009.00"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat" placeholder="Ex: Materiais elétricos"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">Fundamento Legal</label><input type="text" id="form-fund" placeholder="Ex: Art. 53, Anexo V, RCIMS MT"></div>
+        <div><label style="font-size: 11px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm" placeholder="Ex: 85444200"></div>
+        <div><label style="font-size: 11px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest" placeholder="Ex: 12.009.00"></div>
+        <div><label style="font-size: 11px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat" placeholder="Ex: Materiais elétricos"></div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Ex: 41.17"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva" placeholder="Ex: 63.28"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata" placeholder="0"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out" placeholder="0"></div>
+            <div><label style="font-size: 11px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Ex: 41.17"></div>
+            <div><label style="font-size: 11px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva" placeholder="Ex: 63.28"></div>
+            <div><label style="font-size: 11px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata" placeholder="0"></div>
+            <div><label style="font-size: 11px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out" placeholder="0"></div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -244,11 +229,22 @@
     const svgPerc = `<svg viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zM10.16 16c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm5.68 3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm-4.32-2.1l4.08-4.08 1.28 1.28-4.08 4.08-1.28-1.28z"/></svg>`;
     const svgPrint = `<svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>`;
 
-    // --- ESTADO GLOBAL ---
     let dbNcm = {};
     let notasFiscais = [];
     let historicoManual = [];
     let aliqAtivaManual = 0.04;
+
+    function parseNumCSV(val) {
+        if(!val) return 0;
+        let str = val.toString().trim();
+        if(str === '-' || str === 'D/C' || str === 'NT' || str.includes('#REF')) return 0;
+        let isPercent = str.includes('%');
+        let v = parseFloat(str.replace('%', '').replace(',', '.'));
+        if(isNaN(v)) return 0;
+        if(isPercent) return v / 100;
+        if(v > 1) return v / 100; 
+        return v;
+    }
 
     window.onload = async function() {
         try {
@@ -258,15 +254,15 @@
                 txt.split(/\r?\n/).forEach((linha, i) => {
                     if(i === 0 || !linha.trim()) return;
                     const col = linha.split(';');
-                    // Mapeamento dinâmico das colunas CSV (ajustado para incluir Atacadista e Outorgado se houver)
+                    if(col.length < 9) return;
+                    
                     dbNcm[col[0].trim()] = {
-                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                        mvaAta: parseFloat(col[2]?.replace('%','').replace(',','.')) / 100 || 0,
-                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0,
-                        mvaOut: parseFloat(col[4]?.replace('%','').replace(',','.')) / 100 || 0,
+                        cest: col[1]?.trim() || '---',
+                        red: parseNumCSV(col[3]),
                         categoria: col[5]?.trim() || 'Não informada',
-                        fundamento: 'Conforme Legislação',
-                        cest: '---'
+                        mvaOut: parseNumCSV(col[6]),
+                        mvaAta: parseNumCSV(col[7]),
+                        mva: parseNumCSV(col[8])
                     };
                 });
             }
@@ -302,7 +298,6 @@
         }
     }
 
-    // --- UI GERAL ---
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('active');
@@ -441,13 +436,13 @@
                     <td>
                         <div class="val-container">
                             R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                            ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)" title="Copiar">${svgCopy}</button>` : ''}
+                            ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}
                         </div>
                     </td>
                     <td>
                         <div class="val-container">
                             <span class="${it.stFinal > 0 ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
-                            ${it.stFinal > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)" title="Copiar">${svgCopy}</button>` : ''}
+                            ${it.stFinal > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}
                         </div>
                     </td>
                     <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
@@ -457,18 +452,17 @@
                 </tr>
             `).join('');
 
-            // Auditoria de Diferença
             let diff = nota.vStTotalCalculado - nota.vSTNota;
             let auditoriaHtml = '';
             if (nota.vSTNota > 0) {
                 if (diff > 0.01) {
-                    auditoriaHtml = `<div class="badge-recolher" style="margin-top: 15px;">
-                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    auditoriaHtml = `<div class="badge-recolher" style="margin-top: 10px;">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                         IMPOSTO A RECOLHER (R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})})
                     </div>`;
                 } else if (diff < -0.01) {
-                    auditoriaHtml = `<div class="badge-credito" style="margin-top: 15px;">
-                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    auditoriaHtml = `<div class="badge-credito" style="margin-top: 10px;">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                         IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})})
                     </div>`;
                 }
@@ -479,15 +473,15 @@
             card.innerHTML = `
                 <div class="header-nota">
                     <div>
-                        <h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3>
-                        <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">
+                        <h3 style="margin:0; font-weight: 500; font-size: 16px; color: var(--accent);">Nota: ${nota.nNF}</h3>
+                        <p style="margin:4px 0 0 0; font-size:11px; color:var(--text-sub);">
                             ${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}
                         </p>
                     </div>
                     <button class="icon-print-btn" onclick="imprimirNota(${nota.id})" title="Imprimir Relatório">${svgPrint}</button>
                 </div>
                 <div class="table-responsive">
-                    <table style="margin-bottom: 5px; border-bottom: 2px solid var(--border);">
+                    <table style="margin-bottom: 5px; border-bottom: 1px solid var(--border);">
                         <thead>
                             <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado NFe</th><th>BC ST Calc.</th><th>Valor ST Calc.</th></tr>
                         </thead>
@@ -496,7 +490,7 @@
                                 <td>R$ ${nota.vBC_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>R$ ${nota.vICMS_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>R$ ${nota.vIPI_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td><strong>R$ ${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                                <td><strong style="color:var(--warning);">R$ ${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                                 <td>R$ ${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td><strong style="color:var(--success);">R$ ${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                             </tr>
@@ -504,7 +498,7 @@
                     </table>
                     <div style="text-align: right;">${auditoriaHtml}</div>
                     
-                    <h4 style="font-size: 13px; color: var(--text-sub); margin: 20px 0 10px 0; font-weight: 500;">Itens da Nota</h4>
+                    <h4 style="font-size: 12px; color: var(--text-sub); margin: 15px 0 8px 0; font-weight: 500;">Itens da Nota</h4>
                     <table>
                         <thead>
                             <tr>
@@ -678,41 +672,47 @@
 
         const info = dbNcm[query];
         if (info) {
-            const mvaDemais = (info.mva * 100).toFixed(2);
-            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : (info.mvaOutorgado ? Number(info.mvaOutorgado).toFixed(2) : '-');
-            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : (info.mvaAtacadista ? Number(info.mvaAtacadista).toFixed(2) : '-');
+            const mvaDemais = (info.mva * 100).toFixed(2) + '%';
+            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) + '%' : '-';
+            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) + '%' : '-';
             const redBc = (info.red * 100).toFixed(2);
             const categoria = info.categoria || 'Não informada';
-            const fundamento = info.fundamento || 'Não informado';
 
             resDiv.innerHTML = `
                 <div class="ncm-card-pro">
-                    <div class="ncm-header-pro">
-                        <h2>${query}</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 500; display: flex; align-items: center; gap: 10px;">
+                            ${query} 
+                            <span style="font-size: 11px; font-weight: 400; color: var(--text-sub); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px;">CEST: ${info.cest || 'Não inf.'}</span>
+                        </h2>
                         <span class="uf-badge">MT</span>
                     </div>
-                    <div class="ncm-cest-pro">CEST: ${info.cest || 'Não inf.'}</div>
                     
-                    <div class="ncm-tags">
-                        <div class="tag-row">
-                            <div class="st-tag-bg">${svgScale} Substituição Tributária</div>
-                        </div>
-                        <div class="tag-row">${svgTag} ${categoria}</div>
-                        <div class="tag-row">${svgPerc} % Redução BC: ${redBc}%</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                        <span class="st-tag-bg">${svgScale} Substituição Tributária</span>
+                        <span class="ncm-tag">${svgTag} ${categoria}</span>
+                        <span class="ncm-tag">${svgPerc} Redução BC: ${redBc}%</span>
                     </div>
 
-                    <div>
-                        <div class="mva-section-title">MVA / CRÉDITO</div>
-                        <div class="mva-grid-pro">
-                            <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOut !== '-' ? mvaOut + '%' : '-'}</span></div>
-                            <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAta !== '-' ? mvaAta + '%' : '-'}</span></div>
-                            <div class="mva-box-pro"><span class="mva-box-label">Demais</span><span class="mva-box-val">${mvaDemais}%</span></div>
+                    <div class="mva-section-title">MVA / CRÉDITO</div>
+                    <div class="mva-grid-pro">
+                        <div class="mva-box-pro">
+                            <span class="mva-box-label">Créd. Outorgado</span>
+                            <span class="mva-box-val">${mvaOut}</span>
+                        </div>
+                        <div class="mva-box-pro">
+                            <span class="mva-box-label">Atacadista</span>
+                            <span class="mva-box-val">${mvaAta}</span>
+                        </div>
+                        <div class="mva-box-pro" style="background: var(--accent-bg); color: var(--accent);">
+                            <span class="mva-box-label" style="color: inherit;">Demais (Padrão)</span>
+                            <span class="mva-box-val" style="color: inherit;">${mvaDemais}</span>
                         </div>
                     </div>
 
-                    <div class="ncm-actions-pro">
-                        <button class="btn-secondary" onclick="abrirModalNCM('${query}', true)">Clonar</button>
-                        <button class="btn-main" onclick="abrirModalNCM('${query}', false)">Editar</button>
+                    <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                        <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="abrirModalNCM('${query}', true)">Clonar</button>
+                        <button class="btn-main" style="padding: 6px 12px; font-size: 12px;" onclick="abrirModalNCM('${query}', false)">Editar</button>
                     </div>
                 </div>
             `;
@@ -730,19 +730,17 @@
             document.getElementById('form-ncm').value = isClone ? '' : ncmBase;
             document.getElementById('form-cest').value = inf.cest || '';
             document.getElementById('form-cat').value = inf.categoria || '';
-            document.getElementById('form-fund').value = inf.fundamento || '';
-            document.getElementById('form-mva').value = (inf.mva * 100).toFixed(2);
             document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
-            document.getElementById('form-mva-ata').value = inf.mvaAta > 0 ? (inf.mvaAta * 100).toFixed(2) : (inf.mvaAtacadista || '');
-            document.getElementById('form-mva-out').value = inf.mvaOut > 0 ? (inf.mvaOut * 100).toFixed(2) : (inf.mvaOutorgado || '');
+            document.getElementById('form-mva').value = (inf.mva * 100).toFixed(2);
+            document.getElementById('form-mva-ata').value = inf.mvaAta > 0 ? (inf.mvaAta * 100).toFixed(2) : '';
+            document.getElementById('form-mva-out').value = inf.mvaOut > 0 ? (inf.mvaOut * 100).toFixed(2) : '';
             document.getElementById('modal-title').innerText = isClone ? `Clonando de ${ncmBase}` : `Editando ${ncmBase}`;
         } else {
             document.getElementById('form-ncm').value = ncmBase || '';
             document.getElementById('form-cest').value = '';
             document.getElementById('form-cat').value = '';
-            document.getElementById('form-fund').value = '';
-            document.getElementById('form-mva').value = '';
             document.getElementById('form-red').value = '';
+            document.getElementById('form-mva').value = '';
             document.getElementById('form-mva-ata').value = '';
             document.getElementById('form-mva-out').value = '';
             document.getElementById('modal-title').innerText = 'Adicionar Novo NCM';
@@ -760,13 +758,12 @@
         const red = parseFloat(document.getElementById('form-red').value.replace(',','.')) / 100 || 0;
         const cest = document.getElementById('form-cest').value.trim();
         const categoria = document.getElementById('form-cat').value.trim();
-        const fundamento = document.getElementById('form-fund').value.trim();
-        const mvaAtacadista = document.getElementById('form-mva-ata').value.trim().replace(',','.');
-        const mvaOutorgado = document.getElementById('form-mva-out').value.trim().replace(',','.');
+        const mvaAta = parseFloat(document.getElementById('form-mva-ata').value.replace(',','.')) / 100 || 0;
+        const mvaOut = parseFloat(document.getElementById('form-mva-out').value.replace(',','.')) / 100 || 0;
 
         if (!ncm) { alert("Preencha o NCM!"); return; }
 
-        const payload = { mva, red, cest, categoria, fundamento, mvaAtacadista, mvaOutorgado };
+        const payload = { mva, red, cest, categoria, mvaAta, mvaOut };
         dbNcm[ncm] = payload;
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
