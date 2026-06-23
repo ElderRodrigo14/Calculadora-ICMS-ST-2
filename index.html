@@ -3,239 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora ICMS-ST Smart</title>
+    <title>Calculadora ICMS-ST Smart Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #131314;
-            --card-bg: #1e1f20;
-            --text-main: #e3e3e3;
-            --text-sub: #b3b3b3;
-            --accent: #a8c7fa;
-            --accent-bg: rgba(168, 199, 250, 0.1);
-            --border: #3c4043;
-            --input-bg: #131314;
-            --btn-hover: #1a1a1c;
-            --danger: #f28b82;
-            --danger-bg: rgba(242, 139, 130, 0.15);
-            --success: #81c995;
-            --success-bg: rgba(129, 201, 149, 0.15);
-            --warning: #fdd663;
-            --warning-bg: rgba(253, 214, 99, 0.15);
+            --bg: #131314; --card-bg: #1e1f20; --text-main: #e3e3e3; --text-sub: #b3b3b3;
+            --accent: #8ab4f8; --accent-bg: rgba(138, 180, 248, 0.1); --border: #3c4043; 
+            --input-bg: #202124; --btn-hover: #28292c;
+            --danger: #f28b82; --danger-bg: rgba(242, 139, 130, 0.1);
+            --success: #81c995; --success-bg: rgba(129, 201, 149, 0.1);
+            --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.1); --tag-bg: #2a2b2c;
         }
 
         [data-theme="light"] {
-            --bg: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #202124;
-            --text-sub: #5f6368;
-            --accent: #1a73e8;
-            --accent-bg: rgba(26, 115, 232, 0.1);
-            --border: #dadce0;
-            --input-bg: #f8f9fa;
-            --btn-hover: #e8eaed;
-            --danger: #d93025;
-            --danger-bg: rgba(217, 48, 37, 0.1);
-            --success: #137333;
-            --success-bg: rgba(19, 115, 51, 0.1);
-            --warning: #e37400;
-            --warning-bg: rgba(227, 116, 0, 0.1);
+            --bg: #f8f9fa; --card-bg: #ffffff; --text-main: #202124; --text-sub: #5f6368;
+            --accent: #1a73e8; --accent-bg: rgba(26, 115, 232, 0.1); --border: #dadce0; 
+            --input-bg: #f1f3f4; --btn-hover: #e8eaed;
+            --danger: #d93025; --danger-bg: rgba(217, 48, 37, 0.1);
+            --success: #137333; --success-bg: rgba(19, 115, 51, 0.1);
+            --warning: #b06000; --warning-bg: rgba(251, 188, 4, 0.2); --tag-bg: #f1f3f4;
         }
 
-        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; transition: 0.3s; line-height: 1.25; }
-        .container { width: 100%; max-width: 900px; }
-
-        .header { display: flex; justify-content: center; align-items: center; margin-bottom: 25px; position: relative; }
-        h1 { font-size: 24px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; display: flex; min-height: 100vh; transition: 0.3s; }
         
-        .btn-theme { position: absolute; right: 0; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; font-size: 13px; font-family: inherit; font-weight: 500; }
-        .btn-theme:hover { background: var(--input-bg); }
+        /* Sidebar (Menu Lateral) */
+        .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--card-bg); border-right: 1px solid var(--border); transition: 0.3s; z-index: 1000; padding: 20px 0; }
+        .sidebar.open { left: 0; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        .overlay.active { display: block; }
+        
+        .menu-item { padding: 15px 25px; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 15px; font-weight: 500; transition: 0.2s; font-size: 15px; }
+        .menu-item:hover { background: var(--input-bg); color: var(--accent); }
+        .menu-item.active { border-left: 4px solid var(--accent); color: var(--accent); background: var(--accent-bg); }
+        .menu-title { padding: 0 25px; margin-bottom: 20px; font-size: 18px; font-weight: 700; color: var(--accent); }
 
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; transition: 0.3s; }
+        /* Topbar */
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .btn-menu { background: transparent; border: none; color: var(--text-main); cursor: pointer; padding: 5px; }
+        h1 { font-size: 20px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn-theme { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-family: inherit;}
 
-        .drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 20px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; }
-        .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; }
+        .module { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .module.active { display: block; }
 
-        .grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .field { display: flex; flex-direction: column; gap: 8px; }
-        label { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+        
+        /* Drop Zone Minimalista */
+        .drop-zone { border: 1px dashed var(--border); border-radius: 10px; padding: 15px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; }
+        .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+        .drop-zone-text h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--text-main); }
+        .drop-zone-text p { margin: 2px 0 0 0; font-size: 12px; opacity: 0.8; }
 
-        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; transition: 0.2s; font-family: inherit; }
+        /* Tables & Lists */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
+        th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
+        td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        
+        /* Inputs & Buttons */
+        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
         input[type="text"]:focus { border-color: var(--accent); }
+        .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-main:hover { opacity: 0.9; }
+        .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-secondary:hover { background: var(--input-bg); }
+        
+        .icon-print-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 50%; padding: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .icon-print-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-aliq { flex: 1; padding: 12px; background: transparent; border: 1px solid var(--border); border-radius: 50px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-aliq { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500;}
         .btn-aliq.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
-        .action-group { display: flex; gap: 10px; }
-        .btn-main { flex: 2; padding: 14px; background: var(--accent); color: var(--bg); border: none; border-radius: 50px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.2s; font-family: inherit; }
-        .btn-main:hover { opacity: 0.9; }
-        .btn-clear { flex: 1; padding: 14px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 50px; font-size: 15px; cursor: pointer; transition: 0.2s; font-family: inherit; }
-        .btn-clear:hover { background: var(--input-bg); border-color: var(--danger); color: var(--danger); }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: var(--text-sub); font-size: 11px; padding: 10px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; }
-        td { padding: 12px 10px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
-
-        .st-badge { background: var(--success-bg); color: var(--success); padding: 6px 10px; border-radius: 6px; font-weight: 500; }
+        .st-badge { background: var(--success-bg); color: var(--success); padding: 4px 8px; border-radius: 6px; font-weight: 600; }
         .val-container { display: flex; align-items: center; gap: 8px; }
-
         .icon-btn { background: transparent; border: none; color: var(--text-sub); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .icon-btn:hover { background: var(--border); color: var(--text-main); }
         .icon-btn.delete:hover { background: var(--danger-bg); color: var(--danger); }
+        svg { fill: currentColor; width: 18px; height: 18px; }
 
-        .total-wrapper { background: var(--accent-bg); border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid var(--border); }
-        .total-linha { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .total-linha:last-child { margin-bottom: 0; }
+        /* NCM Banco Design */
+        .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-top: 15px; position: relative; }
+        .ncm-header-pro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .ncm-header-pro h2 { font-size: 24px; margin: 0; font-weight: 500; color: var(--text-main); }
+        .uf-badge { border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-sub); }
+        .ncm-cest-pro { color: var(--text-sub); margin-bottom: 20px; font-size: 14px; }
         
-        .auditoria-badge { padding: 8px 14px; border-radius: 6px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
-        .auditoria-badge.credito { background: var(--warning-bg); color: var(--warning); border-color: rgba(253, 214, 99, 0.2); }
-        .auditoria-badge.recolher { background: var(--danger-bg); color: var(--danger); border-color: rgba(242, 139, 130, 0.2); }
+        .ncm-tags { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .tag-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-main); }
+        .st-tag-bg { background: var(--warning-bg); color: var(--warning); padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        
+        .mva-section-title { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; text-transform: uppercase; }
+        .mva-grid-pro { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .mva-box-pro { background: var(--tag-bg); border-radius: 8px; padding: 12px; text-align: center; }
+        .mva-box-label { font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 5px; }
+        .mva-box-val { font-size: 16px; font-weight: 700; color: var(--text-main); }
 
-        .total-box { font-size: 24px; color: var(--accent); font-weight: 500; text-align: right; }
+        .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
+
+        .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
+        .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
-        svg { fill: currentColor; width: 16px; height: 16px; }
+        /* Badges de Auditoria ST */
+        .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
+        .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(242, 139, 130, 0.3);}
+        
+        .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .isento-txt { color: var(--text-sub); font-style: italic; }
-
-        /* NOVO DESIGN DO BUSCADOR NCM TIPO GEMINI - ULTRA MINIMALISTA */
-        .ncm-search-box { display: flex; gap: 8px; margin-bottom: 12px; }
-        .ncm-search-box input { flex: 1; }
-        .ncm-mini-result { font-size: 12px; border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: none; }
-        .ncm-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .ncm-title-row h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--accent); }
-        .ncm-desc { color: var(--text-sub); margin-bottom: 10px; font-size: 12px; }
-        .ncm-mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .ncm-mini-box { background: var(--input-bg); border: 1px solid var(--border); padding: 6px; border-radius: 6px; text-align: center; }
-        .ncm-mini-label { font-size: 9px; color: var(--text-sub); display: block; margin-bottom: 2px; text-transform: uppercase; font-weight: 500; }
-        .ncm-mini-val { font-size: 13px; font-weight: 700; color: var(--text-main); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>Calculadora de ICMS-ST Smart</h1>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<nav class="sidebar" id="sidebar">
+    <div class="menu-title">Smart Tools</div>
+    <div class="menu-item active" onclick="switchModule('xml')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        Importar XML
+    </div>
+    <div class="menu-item" onclick="switchModule('manual')">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H7v-2h4v2zm0-4H7v-2h4v2zm0-4H7V7h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z"/></svg>
+        Cálculo Manual
+    </div>
+    <div class="menu-item" onclick="switchModule('ncm')">
+        <svg viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zm-9-2h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg>
+        Banco de NCM
+    </div>
+</nav>
+
+<div class="main-content">
+    <div class="topbar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="btn-menu" onclick="toggleMenu()">
+                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
+            <h1>Calculadora ST Pro</h1>
+        </div>
         <button class="btn-theme" onclick="toggleTema()" id="btnTema">Claro</button>
     </div>
 
-    <div class="card" style="padding: 14px;">
-        <label style="display:block; margin-bottom: 6px;">Consultar Base de NCM (MT)</label>
-        <div class="ncm-search-box">
-            <input type="text" id="busca-ncm-input" placeholder="Digite o NCM para checar MVAs e Segmento..." onkeyup="if(event.key === 'Enter') consultarNcmRapido()">
-            <button class="btn-main" style="flex:none; padding: 0 16px; border-radius: 8px;" onclick="consultarNcmRapido()">Buscar</button>
+    <main class="module active" id="module-xml">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div id="drop-zone" class="drop-zone" style="flex: 1; min-width: 300px;">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste XMLs da NF-e aqui</h3>
+                    <p>Ou clique para selecionar (até 20 arquivos)</p>
+                </div>
+                <input type="file" id="xml-input" accept=".xml" multiple style="display: none;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-secondary" onclick="limparNotas()" style="color: var(--danger); border-color: var(--danger);">Limpar Tudo</button>
+            </div>
         </div>
-        <div id="busca-ncm-resultado" class="ncm-mini-result"></div>
-    </div>
-    
-    <div class="card">
-        <div id="drop-zone" class="drop-zone">
-            <svg style="width: 28px; height: 28px; margin-bottom: 6px; color: var(--text-sub);" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-            <p style="margin: 0; font-weight: 500; font-size: 14px;">Arraste o arquivo XML da NF-e aqui</p>
-            <p style="margin: 2px 0 0 0; font-size: 11px; opacity: 0.8;">Ou clique para buscar no computador</p>
-            <input type="file" id="xml-input" accept=".xml" style="display: none;">
-        </div>
+        <div id="notas-container"></div>
+    </main>
 
-        <div style="text-align: center; color: var(--text-sub); font-size: 11px; margin-bottom: 15px; letter-spacing: 0.5px;">— OU PREENCHA MANUALMENTE —</div>
+    <main class="module" id="module-manual">
+        <div class="card">
+            <div class="grid-manual">
+                <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Clique para auto-colar"></div>
+                <div class="field"><label>Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
+                <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+            </div>
 
-        <div class="grid">
-            <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Clique para colar"></div>
-            <div class="field"><label>Valor Produtos</label><input type="text" id="vlr" placeholder="Clique para colar"></div>
-            <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="Clique para colar"></div>
-        </div>
+            <div class="field" style="margin-bottom: 15px;">
+                <label>Alíquota Interestadual</label>
+                <div class="btn-group" style="margin-top: 5px;">
+                    <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
+                    <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+                </div>
+            </div>
 
-        <div class="field" style="margin-bottom: 20px;">
-            <label>Alíquota Interestadual (Lançamento Manual)</label>
-            <div class="btn-group" style="margin-bottom: 0; margin-top: 8px;">
-                <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
-                <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-main" style="flex: 2;" onclick="processarManual()">Calcular Manual</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="limparManual()">Limpar Tabela</button>
             </div>
         </div>
 
-        <div class="action-group">
-            <button class="btn-main" onclick="processarManual()">Calcular Manual</button>
-            <button class="btn-clear" onclick="limparTudo()">Limpar Tudo</button>
+        <div id="resManualCard" class="card" style="display:none;">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>NCM</th><th>MVA</th><th>PRODUTOS</th><th>BASE ST</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
+                    </thead>
+                    <tbody id="corpoTabelaManual"></tbody>
+                </table>
+            </div>
+            <div class="total-box" id="totalStManual">Total ST: R$ 0,00</div>
         </div>
-    </div>
+    </main>
 
-    <div id="resCard" class="card" style="display:none;">
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>NCM</th>
-                        <th>MVA</th>
-                        <th>PRODUTOS</th>
-                        <th>BASE ST</th>
-                        <th>ICMS ST</th>
-                        <th style="text-align:center;">AÇÃO</th>
-                    </tr>
-                </thead>
-                <tbody id="corpoTabela"></tbody>
-            </table>
+    <main class="module" id="module-ncm">
+        <div class="card">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <input type="text" id="search-ncm" placeholder="Pesquisar NCM..." style="flex: 1;">
+                <button class="btn-main" onclick="buscarNCM()">Buscar</button>
+                <button class="btn-secondary" onclick="abrirModalNCM(null, false)">+ Adicionar</button>
+            </div>
+            <div id="ncm-result">
+                <p style="color: var(--text-sub); text-align: center; margin-top: 40px;">Consulte um NCM para visualizar as regras tributárias de MT.</p>
+            </div>
         </div>
+    </main>
+</div>
+
+<div class="overlay" id="modal-overlay"></div>
+<div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
+    <h3 style="margin-top: 0; margin-bottom: 15px; font-weight: 500;" id="modal-title">Adicionar/Editar NCM</h3>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div><label style="font-size: 12px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm" placeholder="Ex: 85444200"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest" placeholder="Ex: 12.009.00"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat" placeholder="Ex: Materiais elétricos"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">Fundamento Legal</label><input type="text" id="form-fund" placeholder="Ex: Art. 53, Anexo V, RCIMS MT"></div>
         
-        <div class="total-wrapper">
-            <div class="total-linha">
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-weight: 500; color: var(--text-main);">ST Destacado na Nota Fiscal (R$):</label>
-                    <input type="text" id="vlrStNota" placeholder="0,00" onkeyup="verificarAuditoriaST()" style="width: 160px; padding: 8px; font-size: 14px;">
-                </div>
-                
-                <div style="text-align: right;">
-                    <div style="font-size: 13px; color: var(--text-sub); margin-bottom: 3px;">Total Calculado:</div>
-                    <div class="total-box" id="totalSt">R$ 0,00</div>
-                </div>
-            </div>
-            
-            <div class="total-linha" id="boxCredito" style="display: none; justify-content: flex-end; margin-top: 10px;">
-                <div class="auditoria-badge" id="txtCredito"></div>
-            </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Ex: 41.17"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva" placeholder="Ex: 63.28"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata" placeholder="0"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out" placeholder="0"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="btn-main" style="flex: 1;" onclick="salvarNCM()">Salvar</button>
+            <button class="btn-secondary" style="flex: 1;" onclick="fecharModal()">Cancelar</button>
         </div>
     </div>
 </div>
 
 <script>
-    let dbNcm = {};
-    let aliqAtiva = 0.04;
-    let historico = [];
-    let totalCalculadoGlobal = 0;
-
+    // --- ICONES ---
     const svgCopy = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
     const svgDel = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
     const svgCheck = `<svg viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+    const svgScale = `<svg viewBox="0 0 24 24"><path d="M12 2L1 7h22L12 2zm0 3.82L18.44 8H5.56L12 5.82zM4 10h2v7H4v-7zm6 0h2v7h-2v-7zm6 0h2v7h-2v-7zM2 19h20v2H2v-2z"/></svg>`;
+    const svgTag = `<svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.41zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>`;
+    const svgPerc = `<svg viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zM10.16 16c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm5.68 3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm-4.32-2.1l4.08-4.08 1.28 1.28-4.08 4.08-1.28-1.28z"/></svg>`;
+    const svgPrint = `<svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>`;
 
-    function parseFatorPercentual(str) {
-        if(!str) return 0;
-        let limpo = str.replace(/"/g, '').replace('%', '').trim();
-        if(limpo === '-' || limpo === 'D/C' || limpo === 'NT' || limpo.includes('#REF')) return 0;
-        let v = parseFloat(limpo.replace(',', '.'));
-        if(isNaN(v)) return 0;
-        if(v > 1) return v / 100; // Converte "63.28" ou "41.17" em fator decimal
-        return v;
-    }
+    // --- ESTADO GLOBAL ---
+    let dbNcm = {};
+    let notasFiscais = [];
+    let historicoManual = [];
+    let aliqAtivaManual = 0.04;
 
-    window.onload = function() {
-        // Leitura otimizada do CSV separado por ponto e vírgula corporativo
-        fetch('BASE NCM.csv').then(r => r.text()).then(txt => {
-            txt.split(/\r?\n/).forEach((linha, i) => {
-                if(i === 0 || !linha.trim()) return;
-                const col = linha.split(';');
-                if(col.length < 9) return;
-                
-                const ncmChave = col[0].replace(/"/g, '').trim();
-                dbNcm[ncmChave] = {
-                    cest: col[1]?.replace(/"/g, '').trim() || '---',
-                    red: parseFatorPercentual(col[3]),
-                    leg: col[4]?.replace(/"/g, '').trim() || '---',
-                    classificacao: col[5]?.replace(/"/g, '').trim() || 'Não informada',
-                    mvaOutorgado: col[6]?.replace(/"/g, '').trim() || '-',
-                    mvaAtacadista: col[7]?.replace(/"/g, '').trim() || '-',
-                    mvaDemais: col[8]?.replace(/"/g, '').trim() || '-',
-                    mvaCalculo: parseFatorPercentual(col[8]) // Coluna I para a conta
-                };
-            });
-        }).catch(e => console.log("Aguardando arquivo CSV..."));
+    window.onload = async function() {
+        try {
+            const r = await fetch('BASE NCM.csv');
+            if (r.ok) {
+                const txt = await r.text();
+                txt.split(/\r?\n/).forEach((linha, i) => {
+                    if(i === 0 || !linha.trim()) return;
+                    const col = linha.split(';');
+                    // Mapeamento dinâmico das colunas CSV (ajustado para incluir Atacadista e Outorgado se houver)
+                    dbNcm[col[0].trim()] = {
+                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
+                        mvaAta: parseFloat(col[2]?.replace('%','').replace(',','.')) / 100 || 0,
+                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0,
+                        mvaOut: parseFloat(col[4]?.replace('%','').replace(',','.')) / 100 || 0,
+                        categoria: col[5]?.trim() || 'Não informada',
+                        fundamento: 'Conforme Legislação',
+                        cest: '---'
+                    };
+                });
+            }
+        } catch (e) { console.log("Aviso: CSV não encontrado."); }
 
+        const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
+        dbNcm = { ...dbNcm, ...customDb };
+
+        // AUTO-PASTE MANUAL
         ['ncm', 'vlr', 'ipi'].forEach(id => {
             const el = document.getElementById(id);
             el.onclick = async function() {
@@ -250,33 +290,6 @@
         });
     };
 
-    function consultarNcmRapido() {
-        const query = document.getElementById('busca-ncm-input').value.trim();
-        const box = document.getElementById('busca-ncm-resultado');
-        if(!query) { box.style.display = 'none'; return; }
-
-        const info = dbNcm[query];
-        if(info) {
-            box.innerHTML = `
-                <div class="ncm-title-row">
-                    <h3>NCM ${query} <span class="ncm-cest-mini">CEST ${info.cest}</span></h3>
-                    <span class="uf-badge">MT</span>
-                </div>
-                <div class="ncm-desc"><strong>Segmento:</strong> ${info.classificacao} | <strong>Legislação:</strong> ${info.leg}</div>
-                <div class="ncm-mini-grid">
-                    <div class="ncm-mini-box"><span class="ncm-mini-label">Redução BC</span><span class="ncm-mini-val">${(info.red*100).toFixed(2)}%</span></div>
-                    <div class="ncm-mini-box"><span class="ncm-mini-label">Créd. Outorgado</span><span class="ncm-mini-val">${info.mvaOutorgado}%</span></div>
-                    <div class="ncm-mini-box"><span class="ncm-mini-label">Atacadista</span><span class="ncm-mini-val">${info.mvaAtacadista}%</span></div>
-                    <div class="ncm-mini-box" style="border-color:var(--accent); background:var(--accent-bg);"><span class="ncm-mini-label" style="color:var(--accent);">Demais (Cálculo)</span><span class="ncm-mini-val" style="color:var(--accent);">${info.mvaDemais}%</span></div>
-                </div>
-            `;
-            box.style.display = 'block';
-        } else {
-            box.innerHTML = `<span style="color:var(--danger)">NCM não cadastrado na base de dados local.</span>`;
-            box.style.display = 'block';
-        }
-    }
-
     function distribuirValores(text) {
         if (!text) return;
         const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
@@ -289,137 +302,29 @@
         }
     }
 
-    const dropZone = document.getElementById('drop-zone');
-    const xmlInput = document.getElementById('xml-input');
+    // --- UI GERAL ---
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('active');
+    }
 
-    dropZone.onclick = () => xmlInput.click();
-    xmlInput.onchange = (e) => processarArquivoXML(e.target.files[0]);
-
-    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
-    dropZone.ondragleave = () => { dropZone.classList.remove('dragover'); };
-    dropZone.ondrop = (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); processarArquivoXML(e.dataTransfer.files[0]); };
-
-    function processarArquivoXML(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
-            
-            const icmsTotNode = xmlDoc.getElementsByTagName("ICMSTot")[0];
-            if (icmsTotNode) {
-                const vSTNota = parseFloat(icmsTotNode.getElementsByTagName("vST")[0]?.textContent || 0);
-                if(vSTNota > 0) {
-                    document.getElementById('vlrStNota').value = vSTNota.toLocaleString('pt-BR', {minimumFractionDigits:2});
-                }
-            }
-
-            const itens = xmlDoc.getElementsByTagName("det");
-            let importados = 0;
-            for (let i = 0; i < itens.length; i++) {
-                const item = itens[i];
-                const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "";
-                const vProd = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent || 0);
-                const vIpi = parseFloat(item.getElementsByTagName("vIPI")[0]?.textContent || 0);
-                
-                const pIcmsNodes = item.getElementsByTagName("pICMS");
-                let aliqItem = aliqAtiva; 
-                if (pIcmsNodes.length > 0) {
-                    const pIcmsVal = parseFloat(pIcmsNodes[0].textContent);
-                    if (pIcmsVal === 12) aliqItem = 0.07;
-                    else if (pIcmsVal > 0) aliqItem = pIcmsVal / 100;
-                }
-                
-                if (ncm && vProd > 0) {
-                    executarCalculoInterno(ncm, vProd, isNaN(vIpi) ? 0 : vIpi, aliqItem, 'xml');
-                    importados++;
-                }
-            }
-            xmlInput.value = '';
-        };
-        reader.readAsText(file);
+    function switchModule(mod) {
+        document.querySelectorAll('.module').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`module-${mod}`).classList.add('active');
+        event.currentTarget.classList.add('active');
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
     }
 
     function toggleTema() {
         const doc = document.documentElement;
-        const btn = document.getElementById('btnTema');
         if (doc.getAttribute('data-theme') === 'light') {
             doc.removeAttribute('data-theme');
-            btn.innerText = "Claro";
+            document.getElementById('btnTema').innerText = 'Claro';
         } else {
             doc.setAttribute('data-theme', 'light');
-            btn.innerText = "Escuro";
-        }
-    }
-
-    function setAliq(v) {
-        aliqAtiva = v;
-        document.getElementById('a4').classList.toggle('active', v === 0.04);
-        document.getElementById('a7').classList.toggle('active', v === 0.07);
-        
-        if (historico.length > 0) {
-            historico = historico.map(item => {
-                if (item.origem === 'manual') {
-                    item.aliq = aliqAtiva;
-                    if (item.mva > 0) {
-                        item.stFinal = Number(((item.baseST * 0.17) - ((item.vProd * item.aliq) * item.fator)).toFixed(2));
-                    }
-                }
-                return item;
-            });
-            atualizarTabela();
-        }
-    }
-
-    function processarManual() {
-        const ncm = document.getElementById('ncm').value.trim();
-        const vProd = limparNum(document.getElementById('vlr').value);
-        const vIpi = limparNum(document.getElementById('ipi').value);
-        if (!ncm) return;
-        executarCalculoInterno(ncm, vProd, vIpi, aliqAtiva, 'manual');
-        document.getElementById('ncm').value = '';
-        document.getElementById('vlr').value = '';
-        document.getElementById('ipi').value = '';
-    }
-
-    function executarCalculoInterno(ncm, vProd, vIpi, aliq, origem) {
-        const info = dbNcm[ncm] || { mvaCalculo: 0, red: 0 };
-        let baseST = 0;
-        let stFinal = 0;
-        let mvaParaCalculo = info.mvaCalculo || 0;
-        let fator = info.red === 0 ? 1 : info.red;
-
-        if (mvaParaCalculo > 0) {
-            baseST = Number(((vProd + vIpi) * (1 + mvaParaCalculo) * fator).toFixed(2));
-            stFinal = Number(((baseST * 0.17) - ((vProd * aliq) * fator)).toFixed(2));
-        }
-
-        historico.push({ ncm, mva: mvaParaCalculo, vProd, baseST, stFinal, aliq, origem, fator });
-        atualizarTabela();
-    }
-
-    function limparNum(t) {
-        if(!t) return 0;
-        return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
-    }
-
-    function limparTudo() {
-        historico = [];
-        document.getElementById('ncm').value = '';
-        document.getElementById('vlr').value = '';
-        document.getElementById('ipi').value = '';
-        document.getElementById('vlrStNota').value = '';
-        document.getElementById('busca-ncm-input').value = '';
-        document.getElementById('busca-ncm-resultado').style.display = 'none';
-        document.getElementById('resCard').style.display = 'none';
-    }
-
-    function removerLinha(index) {
-        historico.splice(index, 1);
-        if (historico.length === 0) {
-            document.getElementById('resCard').style.display = 'none';
-        } else {
-            atualizarTabela();
+            document.getElementById('btnTema').innerText = 'Escuro';
         }
     }
 
@@ -432,70 +337,445 @@
         });
     }
 
-    function atualizarTabela() {
-        let total = 0;
-        let html = '';
-        historico.forEach((item, index) => {
-            total += item.stFinal;
-            const isZero = item.mva === 0;
-            
-            html += `<tr>
-                <td>${item.ncm}</td>
-                <td class="${isZero ? 'isento-txt' : ''}">${(item.mva*100).toFixed(2)}%</td>
-                <td>R$ ${item.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td>
-                    <div class="val-container">
-                        <span class="${isZero ? 'isento-txt' : ''}">R$ ${item.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
-                        ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${item.baseST}, this)">${svgCopy}</button>` : ''}
-                    </div>
-                </td>
-                <td>
-                    <div class="val-container">
-                        <span class="st-badge" style="${isZero ? 'background: transparent; color: var(--text-sub); border: 1px solid var(--border);' : ''}">
-                            R$ ${item.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                        </span>
-                        ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${item.stFinal}, this)">${svgCopy}</button>` : ''}
-                    </div>
-                </td>
-                <td style="text-align:center;">
-                    <button class="icon-btn delete" onclick="removerLinha(${index})">${svgDel}</button>
-                </td>
-            </tr>`;
-        });
-        
-        totalCalculadoGlobal = total;
-        document.getElementById('corpoTabela').innerHTML = html;
-        document.getElementById('totalSt').innerText = `R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-        document.getElementById('resCard').style.display = 'block';
+    // --- MÓDULO 1: IMPORTAR XML ---
+    const dropZone = document.getElementById('drop-zone');
+    const xmlInput = document.getElementById('xml-input');
 
-        verificarAuditoriaST();
+    dropZone.onclick = () => xmlInput.click();
+    xmlInput.onchange = (e) => processarArquivosXML(e.target.files);
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
+    dropZone.ondragleave = () => { dropZone.classList.remove('dragover'); };
+    dropZone.ondrop = (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); processarArquivosXML(e.dataTransfer.files); };
+
+    function processarArquivosXML(files) {
+        if (!files || files.length === 0) return;
+        Array.from(files).forEach(file => {
+            if (file.type === "text/xml" || file.name.toLowerCase().endsWith('.xml')) {
+                const reader = new FileReader();
+                reader.onload = function(e) { analisarXML(e.target.result, file.name); };
+                reader.readAsText(file);
+            }
+        });
+        xmlInput.value = '';
     }
 
-    function verificarAuditoriaST() {
-        let stNota = limparNum(document.getElementById('vlrStNota').value);
-        let boxCredito = document.getElementById('boxCredito');
-        let txtCredito = document.getElementById('txtCredito');
+    function analisarXML(xmlStr, fileName) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlStr, "text/xml");
+        
+        const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "S/N";
+        const xNome = xmlDoc.getElementsByTagName("xNome")[0]?.textContent || "Desconhecido";
+        const cnpj = xmlDoc.getElementsByTagName("CNPJ")[0]?.textContent || "00.000.000/0000-00";
+        const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
+        
+        const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
+        const vBC_tot = parseFloat(totais?.getElementsByTagName("vBC")[0]?.textContent || 0);
+        const vICMS_tot = parseFloat(totais?.getElementsByTagName("vICMS")[0]?.textContent || 0);
+        const vIPI_tot = parseFloat(totais?.getElementsByTagName("vIPI")[0]?.textContent || 0);
+        const vSTNota = parseFloat(totais?.getElementsByTagName("vST")[0]?.textContent || 0);
+        
+        const itensXML = xmlDoc.getElementsByTagName("det");
+        const itensCalc = [];
+        let bcStTotalCalculado = 0;
+        let vStTotalCalculado = 0;
 
-        if (stNota === 0 || historico.length === 0) {
-            boxCredito.style.display = 'none';
-            return;
+        for (let i = 0; i < itensXML.length; i++) {
+            const item = itensXML[i];
+            const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "";
+            const cest = item.getElementsByTagName("CEST")[0]?.textContent || "-";
+            const qCom = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent || 0);
+            const vUnCom = parseFloat(item.getElementsByTagName("vUnCom")[0]?.textContent || 0);
+            const vProd = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent || 0);
+            const vBC_icms = parseFloat(item.getElementsByTagName("vBC")[0]?.textContent || 0);
+            const vICMS = parseFloat(item.getElementsByTagName("vICMS")[0]?.textContent || 0);
+            
+            const pIcmsNodes = item.getElementsByTagName("pICMS");
+            let aliqIcms = 0.04; 
+            if (pIcmsNodes.length > 0) {
+                const pIcmsVal = parseFloat(pIcmsNodes[0].textContent);
+                if (pIcmsVal === 12) aliqIcms = 0.07; 
+                else if (pIcmsVal > 0) aliqIcms = pIcmsVal / 100;
+            }
+            
+            const vIpiNodes = item.getElementsByTagName("vIPI");
+            const vIpi = vIpiNodes.length > 0 ? parseFloat(vIpiNodes[0].textContent) : 0;
+            const pIPI = item.getElementsByTagName("pIPI")[0]?.textContent || "0";
+
+            const info = dbNcm[ncm] || { mva: 0, red: 0 };
+            let baseST = 0, stFinal = 0;
+            let fator = info.red === 0 ? 1 : info.red;
+
+            if (info.mva > 0) {
+                baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
+                stFinal = Number(((baseST * 0.17) - ((vProd * aliqIcms) * fator)).toFixed(2));
+                bcStTotalCalculado += baseST;
+                vStTotalCalculado += stFinal;
+            }
+
+            itensCalc.push({
+                item: i+1, ncm, cest, qCom, vUnCom, vProd, vBC_icms, vICMS, vIpi, pIPI,
+                aliqIcms: aliqIcms * 100, mva: info.mva * 100, baseST, stFinal
+            });
         }
 
-        let diferenca = stNota - totalCalculadoGlobal;
+        notasFiscais.push({
+            id: Date.now() + Math.floor(Math.random()*1000),
+            nNF, xNome, cnpj, chNFe, vBC_tot, vICMS_tot, vIPI_tot, vSTNota,
+            bcStTotalCalculado, vStTotalCalculado, itens: itensCalc
+        });
+        renderizarNotas();
+    }
 
-        if (diferenca > 0.01) {
-            // Nota cobrou a mais do que o cálculo da ferramenta -> Gera Crédito
-            boxCredito.style.display = 'flex';
-            txtCredito.className = "auditoria-badge credito";
-            txtCredito.innerHTML = `IMPOSTO RECOLHIDO A MAIS (R$ ${diferenca.toLocaleString('pt-BR', {minimumFractionDigits:2})})`;
-        } else if (diferenca < -0.01) {
-            // Nota cobrou a menos do que o cálculo real -> Falta pagar complemento
-            boxCredito.style.display = 'flex';
-            txtCredito.className = "auditoria-badge recolher";
-            txtCredito.innerHTML = `IMPOSTO A RECOLHER (R$ ${Math.abs(diferenca).toLocaleString('pt-BR', {minimumFractionDigits:2})})`;
+    function renderizarNotas() {
+        const container = document.getElementById('notas-container');
+        container.innerHTML = '';
+        
+        notasFiscais.forEach(nota => {
+            const htmlItens = nota.itens.map(it => `
+                <tr>
+                    <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
+                    <td>R$ ${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td>R$ ${it.vICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td>
+                        <div class="val-container">
+                            R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}
+                            ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)" title="Copiar">${svgCopy}</button>` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="val-container">
+                            <span class="${it.stFinal > 0 ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+                            ${it.stFinal > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)" title="Copiar">${svgCopy}</button>` : ''}
+                        </div>
+                    </td>
+                    <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
+                    <td>${Number(it.pIPI).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
+                    <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td>${it.mva.toFixed(2)}%</td>
+                </tr>
+            `).join('');
+
+            // Auditoria de Diferença
+            let diff = nota.vStTotalCalculado - nota.vSTNota;
+            let auditoriaHtml = '';
+            if (nota.vSTNota > 0) {
+                if (diff > 0.01) {
+                    auditoriaHtml = `<div class="badge-recolher" style="margin-top: 15px;">
+                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        IMPOSTO A RECOLHER (R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})})
+                    </div>`;
+                } else if (diff < -0.01) {
+                    auditoriaHtml = `<div class="badge-credito" style="margin-top: 15px;">
+                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})})
+                    </div>`;
+                }
+            }
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="header-nota">
+                    <div>
+                        <h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3>
+                        <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">
+                            ${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}
+                        </p>
+                    </div>
+                    <button class="icon-print-btn" onclick="imprimirNota(${nota.id})" title="Imprimir Relatório">${svgPrint}</button>
+                </div>
+                <div class="table-responsive">
+                    <table style="margin-bottom: 5px; border-bottom: 2px solid var(--border);">
+                        <thead>
+                            <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado NFe</th><th>BC ST Calc.</th><th>Valor ST Calc.</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>R$ ${nota.vBC_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${nota.vICMS_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${nota.vIPI_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ ${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                                <td>R$ ${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong style="color:var(--success);">R$ ${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="text-align: right;">${auditoriaHtml}</div>
+                    
+                    <h4 style="font-size: 13px; color: var(--text-sub); margin: 20px 0 10px 0; font-weight: 500;">Itens da Nota</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Unit</th><th>V.Total</th>
+                                <th>BC ICMS</th><th>V.ICMS</th><th>BC ICMS-ST</th><th>V.ICMS-ST</th>
+                                <th>% ICMS</th><th>% IPI</th><th>V.IPI</th><th>% MVA</th>
+                            </tr>
+                        </thead>
+                        <tbody>${htmlItens}</tbody>
+                    </table>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function limparNotas() { notasFiscais = []; renderizarNotas(); }
+
+    function imprimirNota(id) {
+        const nota = notasFiscais.find(n => n.id === id);
+        if(!nota) return;
+        const htmlStr = `
+            <html><head><title>Memória de Cálculo - NF ${nota.nNF}</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px;}
+                th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+                th { background: #f0f0f0; } .header-box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+            </style>
+            </head><body>
+                <h2 style="text-align: center;">Cálculo de ST de Nota Fiscal - Emitido em: ${new Date().toLocaleString()}</h2>
+                <div class="header-box">
+                    <strong>Nota:</strong> ${nota.nNF} | <strong>Chave de Acesso:</strong> ${nota.chNFe}<br>
+                    <strong>Razão Social:</strong> ${nota.xNome} | <strong>CNPJ:</strong> ${nota.cnpj}
+                </div>
+                <h3>Produtos</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th><th>Qtd.</th><th>NCM</th><th>CEST</th><th>V.Unit</th><th>V.Total</th>
+                            <th>BC ICMS</th><th>V.ICMS</th><th>BC ICMS-ST</th><th>V.ICMS-ST</th>
+                            <th>% ICMS</th><th>% IPI</th><th>V.IPI</th><th>% MVA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${nota.itens.map(it => `
+                            <tr>
+                                <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
+                                <td>R$ ${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${it.vICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                                <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
+                                <td>${Number(it.pIPI).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
+                                <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>${it.mva.toFixed(2)}%</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <h3>Totais da Nota</h3>
+                <table>
+                    <thead>
+                        <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado na NF</th><th>BC ST Calc.</th><th>ST Calculado Final</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>R$ ${nota.vBC_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                            <td>R$ ${nota.vICMS_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                            <td>R$ ${nota.vIPI_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                            <td><strong>R$ ${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                            <td>R$ ${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                            <td><strong>R$ ${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <script>window.print();<\/script>
+            </body></html>
+        `;
+        const janela = window.open('', '_blank');
+        janela.document.write(htmlStr);
+        janela.document.close();
+    }
+
+    // --- MÓDULO 2: CÁLCULO MANUAL ---
+    function limparNum(t) {
+        if(!t) return 0;
+        return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
+    function setAliq(v) {
+        aliqAtivaManual = v;
+        document.getElementById('a4').classList.toggle('active', v === 0.04);
+        document.getElementById('a7').classList.toggle('active', v === 0.07);
+        if (historicoManual.length > 0) {
+            historicoManual = historicoManual.map(it => {
+                if (it.mva > 0) {
+                    let fator = it.fator;
+                    it.stFinal = Number(((it.baseST * 0.17) - ((it.vProd * aliqAtivaManual) * fator)).toFixed(2));
+                }
+                return it;
+            });
+            atualizarTabelaManual();
+        }
+    }
+
+    function processarManual() {
+        const ncm = document.getElementById('ncm').value.trim();
+        const vProd = limparNum(document.getElementById('vlr').value);
+        const vIpi = limparNum(document.getElementById('ipi').value);
+        if (!ncm) return;
+
+        const info = dbNcm[ncm] || { mva: 0, red: 0 };
+        let baseST = 0, stFinal = 0;
+        let fator = info.red === 0 ? 1 : info.red;
+
+        if (info.mva > 0) {
+            baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
+            stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtivaManual) * fator)).toFixed(2));
+        }
+
+        historicoManual.push({ ncm, mva: info.mva, vProd, baseST, stFinal, fator });
+        atualizarTabelaManual();
+        
+        document.getElementById('ncm').value = '';
+        document.getElementById('vlr').value = '';
+        document.getElementById('ipi').value = '';
+    }
+
+    function atualizarTabelaManual() {
+        let total = 0;
+        let html = '';
+        historicoManual.forEach((it, idx) => {
+            total += it.stFinal;
+            const isZero = it.mva === 0;
+            html += `<tr>
+                <td>${it.ncm}</td>
+                <td class="${isZero ? 'isento-txt' : ''}">${(it.mva*100).toFixed(2)}%</td>
+                <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><div class="val-container"><span class="${isZero ? 'isento-txt' : ''}">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+                    ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}</div></td>
+                <td><div class="val-container"><span class="${!isZero ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+                    ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}</div></td>
+                <td style="text-align:center;"><button class="icon-btn delete" onclick="removerLinhaManual(${idx})">${svgDel}</button></td>
+            </tr>`;
+        });
+        document.getElementById('corpoTabelaManual').innerHTML = html;
+        document.getElementById('totalStManual').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('resManualCard').style.display = 'block';
+    }
+
+    function removerLinhaManual(idx) {
+        historicoManual.splice(idx, 1);
+        if (historicoManual.length === 0) document.getElementById('resManualCard').style.display = 'none';
+        else atualizarTabelaManual();
+    }
+
+    function limparManual() {
+        historicoManual = [];
+        document.getElementById('resManualCard').style.display = 'none';
+        document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
+    }
+
+    // --- MÓDULO 3: BANCO NCM ---
+    function buscarNCM() {
+        const query = document.getElementById('search-ncm').value.trim();
+        const resDiv = document.getElementById('ncm-result');
+        if (!query) { resDiv.innerHTML = '<p>Digite um NCM.</p>'; return; }
+
+        const info = dbNcm[query];
+        if (info) {
+            const mvaDemais = (info.mva * 100).toFixed(2);
+            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : (info.mvaOutorgado ? Number(info.mvaOutorgado).toFixed(2) : '-');
+            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : (info.mvaAtacadista ? Number(info.mvaAtacadista).toFixed(2) : '-');
+            const redBc = (info.red * 100).toFixed(2);
+            const categoria = info.categoria || 'Não informada';
+            const fundamento = info.fundamento || 'Não informado';
+
+            resDiv.innerHTML = `
+                <div class="ncm-card-pro">
+                    <div class="ncm-header-pro">
+                        <h2>${query}</h2>
+                        <span class="uf-badge">MT</span>
+                    </div>
+                    <div class="ncm-cest-pro">CEST: ${info.cest || 'Não inf.'}</div>
+                    
+                    <div class="ncm-tags">
+                        <div class="tag-row">
+                            <div class="st-tag-bg">${svgScale} Substituição Tributária</div>
+                        </div>
+                        <div class="tag-row">${svgTag} ${categoria}</div>
+                        <div class="tag-row">${svgPerc} % Redução BC: ${redBc}%</div>
+                    </div>
+
+                    <div>
+                        <div class="mva-section-title">MVA / CRÉDITO</div>
+                        <div class="mva-grid-pro">
+                            <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOut !== '-' ? mvaOut + '%' : '-'}</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAta !== '-' ? mvaAta + '%' : '-'}</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Demais</span><span class="mva-box-val">${mvaDemais}%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="ncm-actions-pro">
+                        <button class="btn-secondary" onclick="abrirModalNCM('${query}', true)">Clonar</button>
+                        <button class="btn-main" onclick="abrirModalNCM('${query}', false)">Editar</button>
+                    </div>
+                </div>
+            `;
         } else {
-            boxCredito.style.display = 'none';
+            resDiv.innerHTML = `<p style="color: var(--danger); text-align:center;">NCM não encontrado. <br><br> <button class="btn-secondary" onclick="abrirModalNCM('${query}', false)">Adicionar Novo</button></p>`;
         }
+    }
+
+    function abrirModalNCM(ncmBase, isClone) {
+        document.getElementById('modal-overlay').classList.add('active');
+        document.getElementById('modal-ncm').style.display = 'block';
+        
+        if (ncmBase && dbNcm[ncmBase]) {
+            const inf = dbNcm[ncmBase];
+            document.getElementById('form-ncm').value = isClone ? '' : ncmBase;
+            document.getElementById('form-cest').value = inf.cest || '';
+            document.getElementById('form-cat').value = inf.categoria || '';
+            document.getElementById('form-fund').value = inf.fundamento || '';
+            document.getElementById('form-mva').value = (inf.mva * 100).toFixed(2);
+            document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
+            document.getElementById('form-mva-ata').value = inf.mvaAta > 0 ? (inf.mvaAta * 100).toFixed(2) : (inf.mvaAtacadista || '');
+            document.getElementById('form-mva-out').value = inf.mvaOut > 0 ? (inf.mvaOut * 100).toFixed(2) : (inf.mvaOutorgado || '');
+            document.getElementById('modal-title').innerText = isClone ? `Clonando de ${ncmBase}` : `Editando ${ncmBase}`;
+        } else {
+            document.getElementById('form-ncm').value = ncmBase || '';
+            document.getElementById('form-cest').value = '';
+            document.getElementById('form-cat').value = '';
+            document.getElementById('form-fund').value = '';
+            document.getElementById('form-mva').value = '';
+            document.getElementById('form-red').value = '';
+            document.getElementById('form-mva-ata').value = '';
+            document.getElementById('form-mva-out').value = '';
+            document.getElementById('modal-title').innerText = 'Adicionar Novo NCM';
+        }
+    }
+
+    function fecharModal() {
+        document.getElementById('modal-overlay').classList.remove('active');
+        document.getElementById('modal-ncm').style.display = 'none';
+    }
+
+    function salvarNCM() {
+        const ncm = document.getElementById('form-ncm').value.trim();
+        const mva = parseFloat(document.getElementById('form-mva').value.replace(',','.')) / 100 || 0;
+        const red = parseFloat(document.getElementById('form-red').value.replace(',','.')) / 100 || 0;
+        const cest = document.getElementById('form-cest').value.trim();
+        const categoria = document.getElementById('form-cat').value.trim();
+        const fundamento = document.getElementById('form-fund').value.trim();
+        const mvaAtacadista = document.getElementById('form-mva-ata').value.trim().replace(',','.');
+        const mvaOutorgado = document.getElementById('form-mva-out').value.trim().replace(',','.');
+
+        if (!ncm) { alert("Preencha o NCM!"); return; }
+
+        const payload = { mva, red, cest, categoria, fundamento, mvaAtacadista, mvaOutorgado };
+        dbNcm[ncm] = payload;
+
+        const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
+        customDb[ncm] = payload;
+        localStorage.setItem('customDbNcm', JSON.stringify(customDb));
+
+        fecharModal();
+        document.getElementById('search-ncm').value = ncm;
+        buscarNCM();
     }
 </script>
 </body>
