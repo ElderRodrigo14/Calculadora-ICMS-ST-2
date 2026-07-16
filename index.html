@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora ICMS-ST Smart Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Bibliotecas do Extrator de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
     <style>
         :root {
             --bg: #131314; --card-bg: #1e1f20; --text-main: #e3e3e3; --text-sub: #b3b3b3;
@@ -68,6 +73,7 @@
         input[type="text"]:focus { border-color: var(--accent); }
         .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-main:hover { opacity: 0.9; }
+        .btn-main:disabled { background-color: var(--border); color: var(--text-sub); cursor: not-allowed; opacity: 0.7; }
         .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-secondary:hover { background: var(--input-bg); }
         
@@ -132,6 +138,11 @@
         <svg viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zm-9-2h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg>
         Banco de NCM
     </div>
+    <!-- NOVO ITEM: EXTRATOR DIFAL -->
+    <div class="menu-item" onclick="switchModule('difal')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+        Extrator DIFAL
+    </div>
 </nav>
 
 <div class="main-content">
@@ -145,6 +156,7 @@
         <button class="btn-theme" onclick="toggleTema()" id="btnTema">Claro</button>
     </div>
 
+    <!-- MÓDULO 1: IMPORTAR XML -->
     <main class="module active" id="module-xml">
         <div class="card" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
             <div id="drop-zone" class="drop-zone" style="flex: 1; min-width: 300px;">
@@ -162,6 +174,7 @@
         <div id="notas-container"></div>
     </main>
 
+    <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
             <div class="grid-manual">
@@ -197,6 +210,7 @@
         </div>
     </main>
 
+    <!-- MÓDULO 3: BANCO DE NCM -->
     <main class="module" id="module-ncm">
         <div class="card">
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -209,8 +223,53 @@
             </div>
         </div>
     </main>
+
+    <!-- NOVO MÓDULO 4: EXTRATOR DE DIFAL -->
+    <main class="module" id="module-difal">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faça o upload dos PDFs das notas, revise os valores e gere o protocolo formatado.</p>
+            
+            <div id="drop-zone-difal" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste PDFs da Nota aqui</h3>
+                    <p>Ou clique para selecionar</p>
+                </div>
+                <input type="file" id="pdf-input-difal" accept=".pdf" multiple style="display: none;">
+            </div>
+
+            <div id="status-difal" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
+            <div id="log-difal" style="margin-top: 12px; font-size: 13px; color: var(--text-sub); white-space: pre-wrap; max-height: 120px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
+        </div>
+
+        <div id="previewSectionDifal" class="card" style="display: none;">
+            <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados</h3>
+            <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Altere os valores se necessário. Somente o que está aqui será impresso.</p>
+            
+            <div class="table-responsive">
+                <table id="tabelaPreviewDifal">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">Descrição</th>
+                            <th style="width: 40%;">Valor (R$)</th>
+                            <th style="width: 10%; text-align: center;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas geradas pelo JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn-main" id="btnGerarPDFDifal" onclick="gerarPDFFinal()">📥 Baixar PDF Finalizado</button>
+            </div>
+        </div>
+    </main>
 </div>
 
+<!-- Modal NCM -->
 <div class="overlay" id="modal-overlay"></div>
 <div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
     <h3 style="margin-top: 0; margin-bottom: 15px; font-weight: 500;" id="modal-title">Adicionar/Editar NCM</h3>
@@ -258,7 +317,6 @@
                 txt.split(/\r?\n/).forEach((linha, i) => {
                     if(i === 0 || !linha.trim()) return;
                     const col = linha.split(';');
-                    // Mapeamento dinâmico das colunas CSV (ajustado para incluir Atacadista e Outorgado se houver)
                     dbNcm[col[0].trim()] = {
                         mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
                         mvaAta: parseFloat(col[2]?.replace('%','').replace(',','.')) / 100 || 0,
@@ -776,6 +834,189 @@
         fecharModal();
         document.getElementById('search-ncm').value = ncm;
         buscarNCM();
+    }
+
+    // --- MÓDULO 4: EXTRATOR DE DIFAL ---
+    
+    // Inicia o leitor de PDF
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Valores gravados de calibração
+    const POS = { dataX: 140, dataY: 617, colDescX: 175, colValorX: 405, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
+
+    // Configuração do Drop-Zone do DIFAL
+    const dropZoneDifal = document.getElementById('drop-zone-difal');
+    const pdfInputDifal = document.getElementById('pdf-input-difal');
+
+    dropZoneDifal.onclick = () => pdfInputDifal.click();
+    pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
+    dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); };
+    dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
+    dropZoneDifal.ondrop = (e) => { e.preventDefault(); dropZoneDifal.classList.remove('dragover'); processarArquivosDIFAL(e.dataTransfer.files); };
+
+    function mostrarLogDifal(mensagem) {
+        const logEl = document.getElementById('log-difal');
+        logEl.style.display = 'block';
+        logEl.innerText += mensagem + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function extractTextFromPDF(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(" ");
+            fullText += pageText + " ";
+        }
+        return fullText;
+    }
+
+    async function processarArquivosDIFAL(files) {
+        if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files;
+        if (!files || files.length === 0) {
+            alert("Selecione os arquivos PDF das Notas Fiscais.");
+            return;
+        }
+
+        const status = document.getElementById('status-difal');
+        const log = document.getElementById('log-difal');
+
+        status.innerText = "⏳ Lendo arquivos...";
+        log.innerText = "";
+        log.style.display = 'none';
+        document.getElementById('previewSectionDifal').style.display = 'none';
+        
+        let dadosExtraidos = [];
+
+        for (const file of files) {
+            try {
+                const text = await extractTextFromPDF(file);
+                const matchNf = text.match(/N\.\s*([\d\.]+)/);
+                const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/);
+                const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
+
+                let numeroNf = matchNf ? matchNf[1] : "N/A";
+                let valorDifal = matchDifal ? parseFloat(matchDifal[1].replace('.', '').replace(',', '.')) : 0;
+                let valorFcp = matchFcp ? parseFloat(matchFcp[1].replace('.', '').replace(',', '.')) : 0;
+
+                if (numeroNf !== "N/A") {
+                    dadosExtraidos.push({ nf: numeroNf, valor: (valorDifal + valorFcp) });
+                    mostrarLogDifal(`✅ NF ${numeroNf} lida com sucesso.`);
+                } else {
+                    mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`);
+                }
+            } catch (error) {
+                mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`);
+            }
+        }
+
+        document.getElementById('pdf-input-difal').value = '';
+
+        if (dadosExtraidos.length === 0) {
+            status.innerText = "Nenhum dado encontrado nas notas selecionadas.";
+            return;
+        }
+
+        status.innerText = "Verifique a prévia abaixo e edite se necessário.";
+        renderizarTabelaDifal(dadosExtraidos);
+    }
+
+    function renderizarTabelaDifal(dados) {
+        const tbody = document.querySelector('#tabelaPreviewDifal tbody');
+        tbody.innerHTML = '';
+        
+        const limitados = dados.slice(0, 18);
+        if(dados.length > 18) {
+            mostrarLogDifal(`\n⚠️ Atenção: ${dados.length} notas carregadas, mas o protocolo PDF suporta apenas 18. Exibindo as primeiras 18.`);
+        }
+
+        limitados.forEach((dado, index) => {
+            const tr = document.createElement('tr');
+            
+            const tdDesc = document.createElement('td');
+            const inputDesc = document.createElement('input');
+            inputDesc.type = "text";
+            inputDesc.value = `NF ${dado.nf}`;
+            tdDesc.appendChild(inputDesc);
+
+            const tdVal = document.createElement('td');
+            const inputVal = document.createElement('input');
+            inputVal.type = "text";
+            inputVal.value = dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            tdVal.appendChild(inputVal);
+
+            const tdAcao = document.createElement('td');
+            tdAcao.style.textAlign = "center";
+            const btnDel = document.createElement('button');
+            btnDel.className = "icon-btn delete";
+            btnDel.innerHTML = svgDel;
+            btnDel.onclick = function() { tr.remove(); };
+            tdAcao.appendChild(btnDel);
+
+            tr.appendChild(tdDesc);
+            tr.appendChild(tdVal);
+            tr.appendChild(tdAcao);
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('previewSectionDifal').style.display = 'block';
+    }
+
+    async function gerarPDFFinal() {
+        const btnGerar = document.getElementById('btnGerarPDFDifal');
+        const status = document.getElementById('status-difal');
+        
+        const originalText = btnGerar.innerText;
+        btnGerar.disabled = true;
+        btnGerar.innerText = "⏳ Gerando PDF...";
+        
+        try {
+            const response = await fetch('./modelo.pdf'); 
+            if (!response.ok) throw new Error("O arquivo 'modelo.pdf' não foi encontrado.");
+            
+            const existingPdfBytes = await response.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+            const firstPage = pdfDoc.getPages()[0];
+
+            const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+            const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+            firstPage.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
+
+            const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
+            
+            linhas.forEach((tr, index) => {
+                const descTexto = tr.querySelector('td:nth-child(1) input').value;
+                const valTexto = tr.querySelector('td:nth-child(2) input').value;
+                
+                const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
+
+                firstPage.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold });
+                firstPage.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Protocolo_DIFAL_${dataHoje.replace(/\//g, '-')}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            status.innerText = "✅ Protocolo gerado e baixado com sucesso!";
+            status.style.color = "var(--success)";
+        } catch (error) {
+            status.innerText = `Erro ao gerar PDF: ${error.message}`;
+            status.style.color = "var(--danger)";
+        }
+        
+        btnGerar.disabled = false;
+        btnGerar.innerText = originalText;
     }
 </script>
 </body>
