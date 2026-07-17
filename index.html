@@ -360,27 +360,71 @@
     let historicoManual = [];
     let aliqAtivaManual = 0.04;
 
+    // Função auxiliar para extrair apenas os números limpando textos como "NT", "D/C", etc.
+    const parseNumStr = (val) => {
+        if(!val) return 0;
+        const cleaned = val.toString().replace(/NT|D\/C|-/g, '').trim();
+        return parseFloat(cleaned.replace('%', '').replace(',', '.')) || 0;
+    };
+
     window.onload = async function() {
+        let carregouNovo = false;
+
+        // 1. TENTA CARREGAR O NOVO ARQUIVO PRIMEIRO
         try {
-            const r = await fetch('BASE NCM.csv');
+            const r = await fetch('BASE NCM nova.csv');
             if (r.ok) {
                 const txt = await r.text();
                 txt.split(/\r?\n/).forEach((linha, i) => {
                     if(i === 0 || !linha.trim()) return;
                     const col = linha.split(';');
+                    
+                    // Mapeamento baseado no Print 2 do Excel (Colunas A até I)
+                    // 0:NCM | 1:CEST | 2:TIPO(ST ou D/C) | 3:RED BC | 4:LEGISLAÇÃO | 5:CLASSE TRIB | 6:MVA OUT | 7:MVA ATA | 8:MVA DEMAIS
                     dbNcm[col[0].trim()] = {
-                        mva: parseFloat(col[1]?.replace('%','').replace(',','.')) / 100 || 0,
-                        mvaAta: parseFloat(col[2]?.replace('%','').replace(',','.')) / 100 || 0,
-                        red: parseFloat(col[3]?.replace('%','').replace(',','.')) / 100 || 0,
-                        mvaOut: parseFloat(col[4]?.replace('%','').replace(',','.')) / 100 || 0,
+                        cest: col[1]?.trim() || '---',
+                        tipo: col[2]?.trim() || 'Não informada',
+                        red: parseNumStr(col[3]) / 100,
+                        fundamento: col[4]?.trim() || 'Não informada',
                         categoria: col[5]?.trim() || 'Não informada',
-                        fundamento: 'Conforme Legislação',
-                        cest: '---'
+                        mvaOut: parseNumStr(col[6]) / 100,
+                        mvaAta: parseNumStr(col[7]) / 100,
+                        mva: parseNumStr(col[8]) / 100
                     };
                 });
+                carregouNovo = true;
+                console.log("Arquivo 'BASE NCM nova.csv' carregado com sucesso!");
             }
-        } catch (e) { console.log("Aviso: CSV não encontrado."); }
+        } catch (e) {
+            console.log("Arquivo novo não encontrado, tentando plano B...");
+        }
 
+        // 2. PLANO B (FALLBACK): SE O NOVO FALHAR, CARREGA O ANTIGO
+        if (!carregouNovo) {
+            try {
+                const r = await fetch('BASE NCM.csv');
+                if (r.ok) {
+                    const txt = await r.text();
+                    txt.split(/\r?\n/).forEach((linha, i) => {
+                        if(i === 0 || !linha.trim()) return;
+                        const col = linha.split(';');
+                        dbNcm[col[0].trim()] = {
+                            mva: parseNumStr(col[1]) / 100,
+                            mvaAta: parseNumStr(col[2]) / 100,
+                            red: parseNumStr(col[3]) / 100,
+                            mvaOut: parseNumStr(col[4]) / 100,
+                            categoria: col[5]?.trim() || 'Não informada',
+                            fundamento: 'Conforme Legislação',
+                            cest: '---',
+                            tipo: 'Substituição Tributária'
+                        };
+                    });
+                    console.log("Arquivo antigo 'BASE NCM.csv' carregado como backup.");
+                }
+            } catch (e) { console.log("Aviso: Nenhum CSV de NCM encontrado."); }
+        }
+
+        // Mescla edições personalizadas do LocalStorage
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
         dbNcm = { ...dbNcm, ...customDb };
 
@@ -780,11 +824,16 @@
         const info = dbNcm[query];
         if (info) {
             const mvaDemais = (info.mva * 100).toFixed(2);
-            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : (info.mvaOutorgado ? Number(info.mvaOutorgado).toFixed(2) : '-');
-            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : (info.mvaAtacadista ? Number(info.mvaAtacadista).toFixed(2) : '-');
+            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : '-';
+            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : '-';
             const redBc = (info.red * 100).toFixed(2);
             const categoria = info.categoria || 'Não informada';
-            const fundamento = info.fundamento || 'Não informado';
+            const fundamento = info.fundamento || 'Não informada';
+            const cest = info.cest || '---';
+            const tipo = info.tipo || 'Substituição Tributária';
+
+            // Muda a cor da badge de ST se for D/C (Débito e Crédito)
+            let stBadgeStyle = tipo.includes('D/C') ? 'background: var(--accent-bg); color: var(--accent);' : '';
 
             resDiv.innerHTML = `
                 <div class="ncm-card-pro">
@@ -792,14 +841,15 @@
                         <h2>${query}</h2>
                         <span class="uf-badge">MT</span>
                     </div>
-                    <div class="ncm-cest-pro">CEST: ${info.cest || 'Não inf.'}</div>
+                    <div class="ncm-cest-pro">CEST: ${cest}</div>
                     
                     <div class="ncm-tags">
                         <div class="tag-row">
-                            <div class="st-tag-bg">${svgScale} Substituição Tributária</div>
+                            <div class="st-tag-bg" style="${stBadgeStyle}">${svgScale} ${tipo}</div>
                         </div>
-                        <div class="tag-row">${svgTag} ${categoria}</div>
-                        <div class="tag-row">${svgPerc} % Redução BC: ${redBc}%</div>
+                        <div class="tag-row">${svgTag} <strong>Classificação:</strong> ${categoria}</div>
+                        <div class="tag-row">${svgTag} <strong>Legislação:</strong> ${fundamento}</div>
+                        <div class="tag-row">${svgPerc} <strong>% Redução BC:</strong> ${redBc}%</div>
                     </div>
 
                     <div>
@@ -807,7 +857,7 @@
                         <div class="mva-grid-pro">
                             <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOut !== '-' ? mvaOut + '%' : '-'}</span></div>
                             <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAta !== '-' ? mvaAta + '%' : '-'}</span></div>
-                            <div class="mva-box-pro"><span class="mva-box-label">Demais</span><span class="mva-box-val">${mvaDemais}%</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Demais (Op. Inter)</span><span class="mva-box-val">${mvaDemais}%</span></div>
                         </div>
                     </div>
 
@@ -834,8 +884,8 @@
             document.getElementById('form-fund').value = inf.fundamento || '';
             document.getElementById('form-mva').value = (inf.mva * 100).toFixed(2);
             document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
-            document.getElementById('form-mva-ata').value = inf.mvaAta > 0 ? (inf.mvaAta * 100).toFixed(2) : (inf.mvaAtacadista || '');
-            document.getElementById('form-mva-out').value = inf.mvaOut > 0 ? (inf.mvaOut * 100).toFixed(2) : (inf.mvaOutorgado || '');
+            document.getElementById('form-mva-ata').value = (inf.mvaAta * 100).toFixed(2);
+            document.getElementById('form-mva-out').value = (inf.mvaOut * 100).toFixed(2);
             document.getElementById('modal-title').innerText = isClone ? `Clonando de ${ncmBase}` : `Editando ${ncmBase}`;
         } else {
             document.getElementById('form-ncm').value = ncmBase || '';
@@ -862,12 +912,15 @@
         const cest = document.getElementById('form-cest').value.trim();
         const categoria = document.getElementById('form-cat').value.trim();
         const fundamento = document.getElementById('form-fund').value.trim();
-        const mvaAtacadista = document.getElementById('form-mva-ata').value.trim().replace(',','.');
-        const mvaOutorgado = document.getElementById('form-mva-out').value.trim().replace(',','.');
+        const mvaAta = parseFloat(document.getElementById('form-mva-ata').value.replace(',','.')) / 100 || 0;
+        const mvaOut = parseFloat(document.getElementById('form-mva-out').value.replace(',','.')) / 100 || 0;
 
         if (!ncm) { alert("Preencha o NCM!"); return; }
 
-        const payload = { mva, red, cest, categoria, fundamento, mvaAtacadista, mvaOutorgado };
+        // Mantém o 'tipo' original caso esteja apenas editando, senão assume ST
+        const tipoOriginal = dbNcm[ncm] ? dbNcm[ncm].tipo : 'Substituição Tributária';
+
+        const payload = { mva, red, cest, categoria, fundamento, mvaAta, mvaOut, tipo: tipoOriginal };
         dbNcm[ncm] = payload;
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
@@ -1102,7 +1155,6 @@
                 return numA - numB; 
             }
             
-            // Se os números são iguais, a Guia (não tem "nf") vem primeiro que a Nota (tem "nf")
             const isNfA = a.name.toLowerCase().includes('nf');
             const isNfB = b.name.toLowerCase().includes('nf');
             
