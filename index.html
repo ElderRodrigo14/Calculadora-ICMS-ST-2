@@ -6,7 +6,7 @@
     <title>Calculadora ICMS-ST Smart Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas do Extrator de PDF -->
+    <!-- Bibliotecas de PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
@@ -56,7 +56,7 @@
 
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         
-        /* Drop Zone Minimalista */
+        /* Drop Zone */
         .drop-zone { border: 1px dashed var(--border); border-radius: 10px; padding: 15px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; }
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
         .drop-zone-text h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--text-main); }
@@ -109,11 +109,9 @@
         .mva-box-val { font-size: 16px; font-weight: 700; color: var(--text-main); }
 
         .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
-
         .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
         .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
-        /* Badges de Auditoria ST */
         .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
         .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(242, 139, 130, 0.3);}
         
@@ -138,10 +136,14 @@
         <svg viewBox="0 0 24 24"><path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H4V5h16v14zm-9-2h2v-2h-2v2zm0-4h2V7h-2v6z"/></svg>
         Banco de NCM
     </div>
-    <!-- NOVO ITEM: EXTRATOR DIFAL -->
     <div class="menu-item" onclick="switchModule('difal')">
         <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
         Extrator DIFAL
+    </div>
+    <!-- NOVO ITEM: AGRUPADOR DE PDFS -->
+    <div class="menu-item" onclick="switchModule('agrupador')">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        Agrupador de PDFs
     </div>
 </nav>
 
@@ -224,7 +226,7 @@
         </div>
     </main>
 
-    <!-- NOVO MÓDULO 4: EXTRATOR DE DIFAL -->
+    <!-- MÓDULO 4: EXTRATOR DE DIFAL -->
     <main class="module" id="module-difal">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
@@ -250,23 +252,41 @@
             <div class="table-responsive">
                 <table id="tabelaPreviewDifal">
                     <thead>
-                        <tr>
-                            <th style="width: 50%;">Descrição</th>
-                            <th style="width: 40%;">Valor (R$)</th>
-                            <th style="width: 10%; text-align: center;">Ação</th>
-                        </tr>
+                        <tr><th style="width: 50%;">Descrição</th><th style="width: 40%;">Valor (R$)</th><th style="width: 10%; text-align: center;">Ação</th></tr>
                     </thead>
-                    <tbody>
-                        <!-- Linhas geradas pelo JS -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
-
             <div style="margin-top: 20px; display: flex; gap: 10px;">
                 <button class="btn-main" id="btnGerarPDFDifal" onclick="gerarPDFFinal()">📥 Baixar PDF Finalizado</button>
             </div>
         </div>
     </main>
+
+    <!-- NOVO MÓDULO 5: AGRUPADOR DE PDFS -->
+    <main class="module" id="module-agrupador">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador de Guias e Notas</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Envie os PDFs das Guias (ex: 2517) e Notas Fiscais (ex: nf 2517). Eles serão organizados numericamente e mesclados em um único arquivo (Guia seguida de Nota).</p>
+            
+            <div id="drop-zone-agrupador" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste todos os PDFs aqui</h3>
+                    <p>Você pode selecionar dezenas de arquivos de uma vez</p>
+                </div>
+                <input type="file" id="pdf-input-agrupador" accept=".pdf" multiple style="display: none;">
+            </div>
+
+            <div id="status-agrupador" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
+            <div id="log-agrupador" style="margin-top: 12px; font-size: 13px; color: var(--text-main); white-space: pre-wrap; max-height: 250px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
+            
+            <button class="btn-main" id="btnMesclarPDF" onclick="mesclarArquivos()" style="margin-top: 20px; display: none; width: 100%; justify-content: center;">
+                📥 Unir e Baixar Lote
+            </button>
+        </div>
+    </main>
+
 </div>
 
 <!-- Modal NCM -->
@@ -515,7 +535,6 @@
                 </tr>
             `).join('');
 
-            // Auditoria de Diferença
             let diff = nota.vStTotalCalculado - nota.vSTNota;
             let auditoriaHtml = '';
             if (nota.vSTNota > 0) {
@@ -837,14 +856,10 @@
     }
 
     // --- MÓDULO 4: EXTRATOR DE DIFAL ---
-    
-    // Inicia o leitor de PDF
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-    // Valores gravados de calibração
     const POS = { dataX: 140, dataY: 617, colDescX: 175, colValorX: 405, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
 
-    // Configuração do Drop-Zone do DIFAL
     const dropZoneDifal = document.getElementById('drop-zone-difal');
     const pdfInputDifal = document.getElementById('pdf-input-difal');
 
@@ -876,10 +891,7 @@
 
     async function processarArquivosDIFAL(files) {
         if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files;
-        if (!files || files.length === 0) {
-            alert("Selecione os arquivos PDF das Notas Fiscais.");
-            return;
-        }
+        if (!files || files.length === 0) return;
 
         const status = document.getElementById('status-difal');
         const log = document.getElementById('log-difal');
@@ -1017,6 +1029,104 @@
         
         btnGerar.disabled = false;
         btnGerar.innerText = originalText;
+    }
+
+    // --- MÓDULO 5: AGRUPADOR DE PDFS ---
+    const dropZoneAgrupador = document.getElementById('drop-zone-agrupador');
+    const pdfInputAgrupador = document.getElementById('pdf-input-agrupador');
+
+    dropZoneAgrupador.onclick = () => pdfInputAgrupador.click();
+    pdfInputAgrupador.onchange = (e) => lidarArquivosMescla(e.target.files);
+    dropZoneAgrupador.ondragover = (e) => { e.preventDefault(); dropZoneAgrupador.classList.add('dragover'); };
+    dropZoneAgrupador.ondragleave = () => { dropZoneAgrupador.classList.remove('dragover'); };
+    dropZoneAgrupador.ondrop = (e) => { e.preventDefault(); dropZoneAgrupador.classList.remove('dragover'); lidarArquivosMescla(e.dataTransfer.files); };
+
+    let arquivosParaMesclar = [];
+
+    function mostrarLogMesclar(mensagem) {
+        const logEl = document.getElementById('log-agrupador');
+        logEl.style.display = 'block';
+        logEl.innerText += mensagem + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function lidarArquivosMescla(files) {
+        if (!files || files.length === 0) return;
+        
+        arquivosParaMesclar = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+        
+        const status = document.getElementById('status-agrupador');
+        status.innerText = `${arquivosParaMesclar.length} arquivos selecionados. Clique no botão abaixo para unir.`;
+        document.getElementById('log-agrupador').innerHTML = '';
+        document.getElementById('btnMesclarPDF').style.display = 'inline-flex';
+    }
+
+    async function mesclarArquivos() {
+        const btn = document.getElementById('btnMesclarPDF');
+        const status = document.getElementById('status-agrupador');
+        btn.disabled = true;
+        btn.innerText = "⏳ Processando...";
+        
+        mostrarLogMesclar("Analisando e ordenando arquivos...");
+
+        // Lógica de Ordenação: Numérico Crescente -> Guia -> Nota (NF)
+        arquivosParaMesclar.sort((a, b) => {
+            const numA = parseInt(a.name.match(/\d+/)?.[0] || 0);
+            const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
+            
+            if (numA !== numB) {
+                return numA - numB; 
+            }
+            
+            // Se os números são iguais, a Guia (não tem "nf") vem primeiro que a Nota (tem "nf")
+            const isNfA = a.name.toLowerCase().includes('nf');
+            const isNfB = b.name.toLowerCase().includes('nf');
+            
+            if (isNfA && !isNfB) return 1; 
+            if (!isNfA && isNfB) return -1;
+            return 0;
+        });
+
+        mostrarLogMesclar("Ordem estabelecida:");
+        arquivosParaMesclar.forEach(f => mostrarLogMesclar(`- ${f.name}`));
+
+        try {
+            const pdfFinal = await PDFLib.PDFDocument.create();
+            
+            for (let i = 0; i < arquivosParaMesclar.length; i++) {
+                const file = arquivosParaMesclar[i];
+                mostrarLogMesclar(`Mesclando: ${file.name}...`);
+                
+                const arrayBuffer = await file.arrayBuffer();
+                const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
+                const paginasCopiadas = await pdfFinal.copyPages(pdfAtual, pdfAtual.getPageIndices());
+                
+                paginasCopiadas.forEach((page) => {
+                    pdfFinal.addPage(page);
+                });
+            }
+
+            mostrarLogMesclar("✅ Todos os PDFs foram unidos! Gerando arquivo final...");
+            
+            const pdfBytes = await pdfFinal.save();
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Documentos_Agrupados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            status.innerText = "✅ PDF Único gerado com sucesso!";
+            status.style.color = "var(--success)";
+        } catch (error) {
+            mostrarLogMesclar(`❌ Erro ao mesclar: ${error.message}`);
+            status.innerText = "Erro ao gerar PDF.";
+            status.style.color = "var(--danger)";
+        }
+
+        btn.disabled = false;
+        btn.innerText = "📥 Gerar e Baixar PDF Único";
     }
 </script>
 </body>
