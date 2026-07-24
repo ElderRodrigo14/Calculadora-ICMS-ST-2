@@ -15,9 +15,9 @@
             --bg: #131314; --card-bg: #1e1f20; --text-main: #e3e3e3; --text-sub: #b3b3b3;
             --accent: #8ab4f8; --accent-bg: rgba(138, 180, 248, 0.1); --border: #3c4043; 
             --input-bg: #202124; --btn-hover: #28292c;
-            --danger: #f28b82; --danger-bg: rgba(242, 139, 130, 0.1);
-            --success: #81c995; --success-bg: rgba(129, 201, 149, 0.1);
-            --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.1); --tag-bg: #2a2b2c;
+            --danger: #f28b82; --danger-bg: rgba(242, 139, 130, 0.15);
+            --success: #81c995; --success-bg: rgba(129, 201, 149, 0.15);
+            --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.15); --tag-bg: #2a2b2c;
             --sankhya-green: #34a853;
         }
 
@@ -65,7 +65,7 @@
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
         th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
-        td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; transition: background-color 0.4s ease; }
         
         input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
         input[type="text"]:focus { border-color: var(--accent); }
@@ -108,7 +108,6 @@
         .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
         .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
         
-        /* Grid para o cálculo manual agora comporta mais campos */
         .grid-manual { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
         .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
@@ -116,6 +115,40 @@
         
         .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .isento-txt { color: var(--text-sub); font-style: italic; }
+
+        /* NOVA ANIMAÇÃO DE FLASH AO COPIAR */
+        @keyframes flashRow {
+            0% { background-color: var(--success-bg); }
+            100% { background-color: transparent; }
+        }
+        .flash-row td {
+            animation: flashRow 1.5s ease-out;
+        }
+
+        /* ESTILO DO ACCORDION DO XML */
+        .accordion-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .accordion-btn.open {
+            transform: rotate(180deg);
+        }
+        .itens-nota-container {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+        }
+        .itens-nota-container.open {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -176,7 +209,6 @@
     <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
-            <!-- Grid atualizado para suportar a matemática completa -->
             <div class="grid-manual">
                 <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85171300"></div>
                 <div class="field"><label>Valor Produtos (R$)</label><input type="text" id="vlr" placeholder="0,00"></div>
@@ -206,7 +238,7 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr><th>NCM</th><th>MVA</th><th>V. OPERAÇÃO</th><th>BASE ST</th><th>CRÉDITO</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
+                        <tr><th>NCM</th><th>MVA Aplicado</th><th>V. OPERAÇÃO</th><th>BASE ST</th><th>CRÉDITO</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
                     </thead>
                     <tbody id="corpoTabelaManual"></tbody>
                 </table>
@@ -302,7 +334,7 @@
         <div><label style="font-size: 12px; color: var(--text-sub);">Fundamento Legal</label><input type="text" id="form-fund"></div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Deixe 0 para NT"></div>
             <div><label style="font-size: 12px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva"></div>
             <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata"></div>
             <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out"></div>
@@ -323,6 +355,7 @@
     const svgTag = `<svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.41zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>`;
     const svgPerc = `<svg viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zM10.16 16c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm5.68 3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm-4.32-2.1l4.08-4.08 1.28 1.28-4.08 4.08-1.28-1.28z"/></svg>`;
     const svgPrint = `<svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>`;
+    const svgChevron = `<svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>`;
 
     let dbNcm = {};
     let notasFiscais = [];
@@ -346,15 +379,26 @@
                     if(i === 0 || !linha.trim()) return;
                     const col = linha.split(';');
                     
+                    let redStr = col[3] ? col[3].trim().toUpperCase() : 'NT';
+                    let isNT = redStr === 'NT' || redStr === '-' || redStr === '' || parseNumStr(redStr) === 0;
+                    let red = isNT ? 0 : parseNumStr(redStr) / 100;
+                    
+                    let mvaOut = parseNumStr(col[6]) / 100;
+                    let mvaAta = parseNumStr(col[7]) / 100;
+                    let mvaDemais = parseNumStr(col[8]) / 100;
+
+                    let mvaCalculo = isNT ? mvaOut : mvaDemais;
+                    
                     dbNcm[col[0].trim()] = {
                         cest: col[1]?.trim() || '---',
                         tipo: col[2]?.trim() || 'Não informada',
-                        red: parseNumStr(col[3]) / 100,
+                        red: red,
                         fundamento: col[4]?.trim() || 'Não informada',
                         categoria: col[5]?.trim() || 'Não informada',
-                        mvaOut: parseNumStr(col[6]) / 100,
-                        mvaAta: parseNumStr(col[7]) / 100,
-                        mva: parseNumStr(col[8]) / 100 // Mantido o padrão original da base "Demais"
+                        mvaOut: mvaOut,
+                        mvaAta: mvaAta,
+                        mvaDemais: mvaDemais, 
+                        mva: mvaCalculo
                     };
                 });
                 carregouNovo = true;
@@ -369,11 +413,23 @@
                     txt.split(/\r?\n/).forEach((linha, i) => {
                         if(i === 0 || !linha.trim()) return;
                         const col = linha.split(';');
+                        
+                        let redStr = col[3] ? col[3].trim().toUpperCase() : 'NT';
+                        let isNT = redStr === 'NT' || redStr === '-' || redStr === '' || parseNumStr(redStr) === 0;
+                        let red = isNT ? 0 : parseNumStr(redStr) / 100;
+
+                        let mvaDemais = parseNumStr(col[1]) / 100;
+                        let mvaAta = parseNumStr(col[2]) / 100;
+                        let mvaOut = parseNumStr(col[4]) / 100;
+
+                        let mvaCalculo = isNT ? mvaOut : mvaDemais;
+
                         dbNcm[col[0].trim()] = {
-                            mva: parseNumStr(col[1]) / 100,
-                            mvaAta: parseNumStr(col[2]) / 100,
-                            red: parseNumStr(col[3]) / 100,
-                            mvaOut: parseNumStr(col[4]) / 100,
+                            mva: mvaCalculo,
+                            mvaDemais: mvaDemais,
+                            mvaAta: mvaAta,
+                            red: red,
+                            mvaOut: mvaOut,
                             categoria: col[5]?.trim() || 'Não informada',
                             fundamento: 'Conforme Legislação',
                             cest: '---',
@@ -385,9 +441,12 @@
         }
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
+        for(let key in customDb) {
+            if(customDb[key].mvaDemais === undefined) customDb[key].mvaDemais = customDb[key].mva;
+        }
         dbNcm = { ...dbNcm, ...customDb };
 
-        // AUTO-PASTE MANUAL para as 6 colunas (suporta copiar do Excel direto)
+        // AUTO-PASTE MANUAL
         ['ncm', 'vlr', 'ipi', 'frete_manual', 'desc_manual', 'bc_icms_manual'].forEach(id => {
             const el = document.getElementById(id);
             el.onclick = async function() {
@@ -433,13 +492,39 @@
         }
     }
 
+    // Função de cópia com animação
     function copiarParaArea(valor, btnElem) {
         const valFormatado = valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         navigator.clipboard.writeText(valFormatado).then(() => {
+            // Animação do Ícone
             const iconeOriginal = btnElem.innerHTML;
             btnElem.innerHTML = svgCheck;
-            setTimeout(() => { btnElem.innerHTML = iconeOriginal; }, 1000);
+            
+            // Pega a linha (<tr>) e adiciona a classe de animação
+            const tr = btnElem.closest('tr');
+            if(tr) {
+                tr.classList.remove('flash-row'); 
+                void tr.offsetWidth; // Reflow pra reiniciar animação se clicar duas vezes
+                tr.classList.add('flash-row');
+            }
+
+            setTimeout(() => { 
+                btnElem.innerHTML = iconeOriginal; 
+                if(tr) tr.classList.remove('flash-row');
+            }, 1500);
         });
+    }
+
+    function toggleAccordion(id) {
+        const btn = document.getElementById(`acc-btn-${id}`);
+        const content = document.getElementById(`acc-content-${id}`);
+        if(content.classList.contains('open')) {
+            content.classList.remove('open');
+            btn.classList.remove('open');
+        } else {
+            content.classList.add('open');
+            btn.classList.add('open');
+        }
     }
 
     // --- MÓDULO 1: IMPORTAR XML ---
@@ -473,6 +558,13 @@
         const cnpj = xmlDoc.getElementsByTagName("CNPJ")[0]?.textContent || "00.000.000/0000-00";
         const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
         
+        // Extração da Data de Emissão para o Relatório FormPrice
+        let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0]?.textContent || "";
+        let dataEmissaoFormatada = "";
+        if(dhEmi) {
+            dataEmissaoFormatada = new Date(dhEmi).toLocaleDateString('pt-BR');
+        }
+
         const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
         const vBC_tot = parseFloat(totais?.getElementsByTagName("vBC")[0]?.textContent || 0);
         const vICMS_tot = parseFloat(totais?.getElementsByTagName("vICMS")[0]?.textContent || 0);
@@ -486,13 +578,16 @@
 
         for (let i = 0; i < itensXML.length; i++) {
             const item = itensXML[i];
+            
+            // Nome do Produto para o relatório FormPrice
+            const xProd = item.getElementsByTagName("xProd")[0]?.textContent || "Produto Sem Nome";
+            
             const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "";
             const cest = item.getElementsByTagName("CEST")[0]?.textContent || "-";
             const qCom = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent || 0);
             const vUnCom = parseFloat(item.getElementsByTagName("vUnCom")[0]?.textContent || 0);
             const vProd = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent || 0);
             
-            // Valores que compõem o Valor Total da Operação
             const vIpiNodes = item.getElementsByTagName("vIPI");
             const vIpi = vIpiNodes.length > 0 ? parseFloat(vIpiNodes[0].textContent) : 0;
             const pIPI = item.getElementsByTagName("pIPI")[0]?.textContent || "0";
@@ -502,15 +597,12 @@
             const vOutro = parseFloat(item.getElementsByTagName("vOutro")[0]?.textContent || 0);
             const vDesc = parseFloat(item.getElementsByTagName("vDesc")[0]?.textContent || 0);
 
-            // Captura a Base Original da Nota Fiscal para fazer o Crédito
             let vBC_icms = 0;
             const icmsNode = item.getElementsByTagName("ICMS")[0];
             if (icmsNode) {
                 const vbcNode = icmsNode.getElementsByTagName("vBC")[0];
                 if (vbcNode) vBC_icms = parseFloat(vbcNode.textContent);
             }
-            
-            // Se não veio Base na NF (ex: Simples Nacional CSOSN 102), o MT manda usar o Valor dos Produtos + Extras
             if(vBC_icms === 0) vBC_icms = vProd + vFrete + vSeg + vOutro - vDesc;
 
             const pIcmsNodes = item.getElementsByTagName("pICMS");
@@ -526,11 +618,9 @@
             let fator = info.red === 0 ? 1 : info.red;
 
             if (info.mva > 0) {
-                // Matemática Correta do MT baseada na planilha
                 const valorOperacao = vProd + vIpi + vFrete + vSeg + vOutro - vDesc;
                 baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
                 creditoICMS = Number((vBC_icms * aliqIcms * fator).toFixed(2));
-                
                 stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
                 
                 bcStTotalCalculado += baseST;
@@ -538,14 +628,14 @@
             }
 
             itensCalc.push({
-                item: i+1, ncm, cest, qCom, vUnCom, vProd, vBC_icms, creditoICMS, vIpi, pIPI,
+                item: i+1, xProd, ncm, cest, qCom, vUnCom, vProd, vBC_icms, creditoICMS, vIpi, pIPI,
                 aliqIcms: aliqIcms * 100, mva: info.mva * 100, baseST, stFinal
             });
         }
 
         notasFiscais.push({
             id: Date.now() + Math.floor(Math.random()*1000),
-            nNF, xNome, cnpj, chNFe, vBC_tot, vICMS_tot, vIPI_tot, vSTNota,
+            nNF, xNome, cnpj, chNFe, dataEmissaoFormatada, vBC_tot, vICMS_tot, vIPI_tot, vSTNota,
             bcStTotalCalculado, vStTotalCalculado, itens: itensCalc
         });
         renderizarNotas();
@@ -598,6 +688,8 @@
 
             const card = document.createElement('div');
             card.className = 'card';
+            
+            // Oculto por padrão (itens-nota-container NÃO tem a classe .open)
             card.innerHTML = `
                 <div class="header-nota">
                     <div>
@@ -606,10 +698,14 @@
                             ${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}
                         </p>
                     </div>
-                    <button class="icon-print-btn" onclick="imprimirNota(${nota.id})" title="Imprimir Relatório">${svgPrint}</button>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="icon-print-btn" onclick="imprimirNota(${nota.id})" title="Imprimir Relatório FormPrice">${svgPrint}</button>
+                        <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
+                    </div>
                 </div>
+                
                 <div class="table-responsive">
-                    <table style="margin-bottom: 5px; border-bottom: 2px solid var(--border);">
+                    <table style="margin-bottom: 5px;">
                         <thead>
                             <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado NFe</th><th>BC ST Calc.</th><th>Valor ST Calc.</th></tr>
                         </thead>
@@ -625,18 +721,22 @@
                         </tbody>
                     </table>
                     <div style="text-align: right;">${auditoriaHtml}</div>
-                    
-                    <h4 style="font-size: 13px; color: var(--text-sub); margin: 20px 0 10px 0; font-weight: 500;">Itens da Nota</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
-                                <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
-                                <th>% ICMS</th><th>V.IPI</th><th>% MVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>${htmlItens}</tbody>
-                    </table>
+                </div>
+
+                <div class="itens-nota-container" id="acc-content-${nota.id}">
+                    <h4 style="font-size: 13px; color: var(--text-sub); margin: 0 0 10px 0; font-weight: 500;">Itens da Nota</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
+                                    <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
+                                    <th>% ICMS</th><th>V.IPI</th><th>% MVA Aplicada</th>
+                                </tr>
+                            </thead>
+                            <tbody>${htmlItens}</tbody>
+                        </table>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
@@ -648,70 +748,249 @@
     function imprimirNota(id) {
         const nota = notasFiscais.find(n => n.id === id);
         if(!nota) return;
+
+        const dataAtual = new Date();
+        const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
+        const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+        // FormPrice Layout
         const htmlStr = `
-            <html><head><title>Memória de Cálculo - NF ${nota.nNF}</title>
-            <style>
-                body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px;}
-                th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-                th { background: #f0f0f0; } .header-box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-            </style>
-            </head><body>
-                <h2 style="text-align: center;">Cálculo de ST de Nota Fiscal - Emitido em: ${new Date().toLocaleString()}</h2>
-                <div class="header-box">
-                    <strong>Nota:</strong> ${nota.nNF} | <strong>Chave de Acesso:</strong> ${nota.chNFe}<br>
-                    <strong>Razão Social:</strong> ${nota.xNome} | <strong>CNPJ:</strong> ${nota.cnpj}
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <title>Memória de Cálculo do ICMS ST</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        font-size: 11px;
+                        margin: 0;
+                        padding: 20px 30px;
+                        color: #000;
+                    }
+                    .header-top {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 10px;
+                    }
+                    .logo {
+                        max-width: 150px;
+                    }
+                    .header-title {
+                        font-size: 20px;
+                        font-weight: normal;
+                        text-align: center;
+                        flex-grow: 1;
+                        margin-right: 150px; /* balance logo */
+                    }
+                    .line-separator {
+                        border-top: 1px solid #000;
+                        margin-bottom: 10px;
+                    }
+                    .info-grid {
+                        display: grid;
+                        grid-template-columns: 100px 1fr 100px;
+                        row-gap: 4px;
+                        margin-bottom: 20px;
+                    }
+                    .info-grid span { white-space: nowrap; }
+                    .pg-number { text-align: right; }
+                    
+                    .calc-info {
+                        display: flex;
+                        border-left: 2px solid #000;
+                        padding-left: 10px;
+                        margin-left: 200px; /* spacer */
+                    }
+                    .calc-col {
+                        display: flex;
+                        flex-direction: column;
+                        margin-right: 40px;
+                        gap: 4px;
+                    }
+
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 10px;
+                        font-size: 10px;
+                    }
+                    th {
+                        background-color: #333333;
+                        color: #fff;
+                        font-weight: normal;
+                        text-align: right;
+                        padding: 6px 4px;
+                    }
+                    th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
+                    
+                    td {
+                        padding: 6px 4px;
+                        text-align: right;
+                        border-bottom: 1px solid #eee;
+                    }
+                    td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
+                    
+                    .row-conv {
+                        background-color: #555555;
+                        color: #fff;
+                        font-weight: normal;
+                    }
+                    .row-conv td {
+                        padding: 4px;
+                        text-align: left;
+                    }
+
+                    .totals-container {
+                        display: flex;
+                        justify-content: space-around;
+                        margin-top: 40px;
+                        text-align: center;
+                    }
+                    .total-box {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                    }
+                    .total-title {
+                        font-size: 12px;
+                        margin-bottom: 8px;
+                        max-width: 100px;
+                    }
+                    .total-val {
+                        font-size: 14px;
+                        font-weight: bold;
+                        border-top: 2px solid #d4af37; /* amarelo ouro do formprice */
+                        padding-top: 8px;
+                        width: 100%;
+                    }
+                    
+                    @media print {
+                        @page { size: landscape; margin: 10mm; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header-top">
+                    <img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo">
+                    <div class="header-title">Memória de Cálculo do ICMS ST</div>
                 </div>
-                <h3>Produtos</h3>
+                <div class="line-separator"></div>
+                
+                <div class="info-grid">
+                    <span>Empresa:</span>
+                    <span>LN COMERCIO DE ELETRONICOS LTDA</span>
+                    <span class="pg-number">Página 1 de 1</span>
+                    
+                    <span>CNPJ:</span>
+                    <span>01030685002397</span>
+                    <span></span>
+                    
+                    <span style="margin-top: 10px;">Fornecedor:</span>
+                    <span style="margin-top: 10px;">${nota.xNome}</span>
+                    <span></span>
+                    
+                    <span>Nota fiscal:</span>
+                    <span>${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span>
+                    <span></span>
+                </div>
+
+                <div style="display:flex; margin-bottom: 20px;">
+                    <div class="calc-col" style="width: 250px;">
+                        <div>Calculado por: &nbsp;&nbsp; PAULO</div>
+                        <div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
+                    </div>
+                    <div class="calc-info">
+                        <div class="calc-col">
+                            <div>Impresso por: &nbsp;&nbsp; PAULO</div>
+                            <div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
+                        </div>
+                    </div>
+                </div>
+
                 <table>
                     <thead>
                         <tr>
-                            <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
-                            <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
-                            <th>% ICMS</th><th>V.IPI</th><th>% MVA</th>
+                            <th>Nota</th>
+                            <th>NCM</th>
+                            <th>Produto</th>
+                            <th>Valor Un.</th>
+                            <th>Valor Total</th>
+                            <th>IPI</th>
+                            <th>MVA</th>
+                            <th>Aliq.<br>Créd.</th>
+                            <th>Aliq.<br>ICMS</th>
+                            <th>Valor Débito</th>
+                            <th>Valor Crédito</th>
+                            <th>Base ST</th>
+                            <th>ICMS ST</th>
+                            <th>FECEP ST</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${nota.itens.map(it => `
-                            <tr>
-                                <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
-                                <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td><strong>R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                                <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
-                                <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>${it.mva.toFixed(2)}%</td>
-                            </tr>
-                        `).join('')}
+                        <tr class="row-conv"><td colspan="14">Convênio 52/91</td></tr>
+                        ${nota.itens.map(it => {
+                            let valorDebito = (it.baseST * 0.17); // 17% interno
+                            return `
+                                <tr>
+                                    <td>${nota.nNF}</td>
+                                    <td>${it.ncm}</td>
+                                    <td>${it.xProd.substring(0, 30)}...</td>
+                                    <td>R$${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                                    <td>${Number(it.aliqIcms).toLocaleString('pt-BR')}</td>
+                                    <td>17</td>
+                                    <td>R$${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                    <td>R$0,00</td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
-                <h3>Totais da Nota</h3>
-                <table>
-                    <thead>
-                        <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado na NF</th><th>BC ST Calc.</th><th>ST Calculado Final</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>R$ ${nota.vBC_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                            <td>R$ ${nota.vICMS_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                            <td>R$ ${nota.vIPI_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                            <td><strong>R$ ${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                            <td>R$ ${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                            <td><strong>R$ ${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
+
+                <div class="totals-container">
+                    <div class="total-box">
+                        <div class="total-title">Total de<br>Produtos</div>
+                        <div class="total-val">${nota.itens.length}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">ICMS-ST<br>Recolhido<br>Antecipado</div>
+                        <div class="total-val">R$0,00</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">FECEP-ST<br>Recolhido<br>Antecipado</div>
+                        <div class="total-val">R$0,00</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor Total<br>ICMS-ST</div>
+                        <div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor Total<br>FECEP-ST</div>
+                        <div class="total-val">R$0,00</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor Total<br>Base-ST</div>
+                        <div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                </div>
+
                 <script>window.print();<\/script>
-            </body></html>
+            </body>
+            </html>
         `;
         const janela = window.open('', '_blank');
         janela.document.write(htmlStr);
         janela.document.close();
     }
 
-    // --- MÓDULO 2: CÁLCULO MANUAL (Atualizado para a Nova Matemática) ---
+    // --- MÓDULO 2: CÁLCULO MANUAL ---
     function limparNum(t) {
         if(!t) return 0;
         return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
@@ -740,14 +1019,12 @@
         const vProd = limparNum(document.getElementById('vlr').value);
         const vIpi = limparNum(document.getElementById('ipi').value);
         
-        // Novos Campos
         const vFrete = limparNum(document.getElementById('frete_manual').value);
         const vDesc = limparNum(document.getElementById('desc_manual').value);
         let vBC_icms = limparNum(document.getElementById('bc_icms_manual').value);
         
         if (!ncm) return;
         
-        // Fallback: Se não informou a Base Reduzida da nota, usa o Valor Líquido do Produto + Frete
         if (vBC_icms === 0) vBC_icms = vProd + vFrete - vDesc;
 
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
@@ -816,10 +1093,14 @@
 
         const info = dbNcm[query];
         if (info) {
-            const mvaDemais = (info.mva * 100).toFixed(2);
-            const mvaOut = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : '-';
-            const mvaAta = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : '-';
+            let mDemais = info.mvaDemais !== undefined ? info.mvaDemais : info.mva;
+            const mvaDemaisStr = mDemais > 0 ? (mDemais * 100).toFixed(2) : '-';
+            const mvaOutStr = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : '-';
+            const mvaAtaStr = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : '-';
+            const mvaAtivaStr = (info.mva * 100).toFixed(2);
+            
             const redBc = (info.red * 100).toFixed(2);
+            const isNT = info.red === 0;
             const categoria = info.categoria || 'Não informada';
             const fundamento = info.fundamento || 'Não informada';
             const cest = info.cest || '---';
@@ -841,16 +1122,20 @@
                         </div>
                         <div class="tag-row">${svgTag} <strong>Classificação:</strong> ${categoria}</div>
                         <div class="tag-row">${svgTag} <strong>Legislação:</strong> ${fundamento}</div>
-                        <div class="tag-row">${svgPerc} <strong>% Redução BC:</strong> ${redBc}%</div>
+                        <div class="tag-row">${svgPerc} <strong>% Redução BC:</strong> ${isNT ? 'NT (Não Tem)' : redBc + '%'}</div>
                     </div>
 
                     <div>
                         <div class="mva-section-title">MVA / CRÉDITO</div>
                         <div class="mva-grid-pro">
-                            <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOut !== '-' ? mvaOut + '%' : '-'}</span></div>
-                            <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAta !== '-' ? mvaAta + '%' : '-'}</span></div>
-                            <div class="mva-box-pro"><span class="mva-box-label">Demais (Op. Inter)</span><span class="mva-box-val">${mvaDemais}%</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOutStr !== '-' ? mvaOutStr + '%' : '-'}</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAtaStr !== '-' ? mvaAtaStr + '%' : '-'}</span></div>
+                            <div class="mva-box-pro"><span class="mva-box-label">Demais (Op. Inter)</span><span class="mva-box-val">${mvaDemaisStr !== '-' ? mvaDemaisStr + '%' : '-'}</span></div>
                         </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 10px; background: var(--success-bg); border-radius: 8px; font-size: 13px; color: var(--success); font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                        ${svgCheck} MVA Oficial do Cálculo: ${mvaAtivaStr}% (Alinhado à regra de Redução)
                     </div>
 
                     <div class="ncm-actions-pro">
@@ -870,11 +1155,13 @@
         
         if (ncmBase && dbNcm[ncmBase]) {
             const inf = dbNcm[ncmBase];
+            let mDemais = inf.mvaDemais !== undefined ? inf.mvaDemais : inf.mva;
+            
             document.getElementById('form-ncm').value = isClone ? '' : ncmBase;
             document.getElementById('form-cest').value = inf.cest || '';
             document.getElementById('form-cat').value = inf.categoria || '';
             document.getElementById('form-fund').value = inf.fundamento || '';
-            document.getElementById('form-mva').value = (inf.mva * 100).toFixed(2);
+            document.getElementById('form-mva').value = (mDemais * 100).toFixed(2);
             document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
             document.getElementById('form-mva-ata').value = (inf.mvaAta * 100).toFixed(2);
             document.getElementById('form-mva-out').value = (inf.mvaOut * 100).toFixed(2);
@@ -899,7 +1186,7 @@
 
     function salvarNCM() {
         const ncm = document.getElementById('form-ncm').value.trim();
-        const mva = parseFloat(document.getElementById('form-mva').value.replace(',','.')) / 100 || 0;
+        const mvaDemais = parseFloat(document.getElementById('form-mva').value.replace(',','.')) / 100 || 0;
         const red = parseFloat(document.getElementById('form-red').value.replace(',','.')) / 100 || 0;
         const cest = document.getElementById('form-cest').value.trim();
         const categoria = document.getElementById('form-cat').value.trim();
@@ -911,7 +1198,20 @@
 
         const tipoOriginal = dbNcm[ncm] ? dbNcm[ncm].tipo : 'Substituição Tributária';
 
-        const payload = { mva, red, cest, categoria, fundamento, mvaAta, mvaOut, tipo: tipoOriginal };
+        let isNT = red === 0;
+        let mvaCalculo = isNT ? mvaOut : mvaDemais;
+
+        const payload = { 
+            mva: mvaCalculo, 
+            mvaDemais: mvaDemais, 
+            red: red, 
+            cest: cest, 
+            categoria: categoria, 
+            fundamento: fundamento, 
+            mvaAta: mvaAta, 
+            mvaOut: mvaOut, 
+            tipo: tipoOriginal 
+        };
         dbNcm[ncm] = payload;
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
@@ -925,7 +1225,6 @@
 
     // --- MÓDULO 4: EXTRATOR DE DIFAL ---
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-
     const POS = { dataX: 140, dataY: 617, colDescX: 175, colValorX: 405, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
 
     const dropZoneDifal = document.getElementById('drop-zone-difal');
