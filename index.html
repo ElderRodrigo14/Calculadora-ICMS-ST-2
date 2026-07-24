@@ -18,7 +18,7 @@
             --danger: #f28b82; --danger-bg: rgba(242, 139, 130, 0.1);
             --success: #81c995; --success-bg: rgba(129, 201, 149, 0.1);
             --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.1); --tag-bg: #2a2b2c;
-            --sankhya-green: #34a853; /* Cor verde estilo Sankhya */
+            --sankhya-green: #34a853;
         }
 
         [data-theme="light"] {
@@ -34,73 +34,39 @@
         * { box-sizing: border-box; }
         body { font-family: 'Google Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; transition: 0.3s; }
         
-        /* Modal Overlay (Apenas para NCM agora) */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
         .overlay.active { display: block; }
         
-        /* === NOVO HEADER COM ABAS SUPERIORES === */
         .top-header { background: var(--card-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        
         .topbar-brand { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }
         .logo-container h1 { font-size: 20px; font-weight: 500; margin: 0; background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-theme { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 12px; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 13px; font-family: inherit;}
 
-        /* Wrapper das abas para dar o fundo cinza e borda embaixo */
         .tab-bar-wrapper { background: var(--input-bg); border-bottom: 1px solid var(--border); padding-top: 8px; }
         .tab-bar { display: flex; overflow-x: auto; padding: 0 15px; gap: 2px; }
-        .tab-bar::-webkit-scrollbar { height: 0px; background: transparent; } /* Esconde scrollbar horizontal */
+        .tab-bar::-webkit-scrollbar { height: 0px; background: transparent; }
 
-        /* Estilo da Aba inspirado no Sankhya */
-        .tab-item {
-            padding: 10px 20px;
-            color: var(--text-sub);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: transparent;
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            position: relative;
-            top: 1px; /* Desce a aba 1px para sobrepor a linha de baixo quando ativa */
-            transition: 0.2s;
-            white-space: nowrap;
-        }
+        .tab-item { padding: 10px 20px; color: var(--text-sub); font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid transparent; border-bottom: none; border-radius: 4px 4px 0 0; position: relative; top: 1px; transition: 0.2s; white-space: nowrap; }
         .tab-item svg { width: 16px; height: 16px; fill: currentColor; }
         .tab-item:hover:not(.active) { background: rgba(0,0,0,0.03); color: var(--text-main); }
-        
-        /* Aba Ativa */
-        .tab-item.active {
-            background: var(--bg); /* Mesma cor do conteúdo principal */
-            color: var(--text-main);
-            border-color: var(--border);
-            border-top: 3px solid var(--sankhya-green); /* Detalhe verde do Sankhya */
-            border-bottom: 1px solid var(--bg); /* Apaga a linha da base */
-        }
+        .tab-item.active { background: var(--bg); color: var(--text-main); border-color: var(--border); border-top: 3px solid var(--sankhya-green); border-bottom: 1px solid var(--bg); }
 
-        /* Main Content */
         .main-content { flex: 1; padding: 25px 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
         .module { display: none; width: 100%; }
         .module.active { display: block; }
 
         .card { background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
         
-        /* Drop Zone */
         .drop-zone { border: 1px dashed var(--border); border-radius: 10px; padding: 15px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: var(--text-sub); background: var(--input-bg); transition: 0.2s; }
         .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
         .drop-zone-text h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--text-main); }
         .drop-zone-text p { margin: 2px 0 0 0; font-size: 12px; opacity: 0.8; }
 
-        /* Tables & Lists */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; }
         th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
         td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
         
-        /* Inputs & Buttons */
         input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
         input[type="text"]:focus { border-color: var(--accent); }
         .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
@@ -123,7 +89,6 @@
         .icon-btn.delete:hover { background: var(--danger-bg); color: var(--danger); }
         svg { fill: currentColor; width: 18px; height: 18px; }
 
-        /* NCM Banco Design */
         .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-top: 15px; position: relative; }
         .ncm-header-pro { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
         .ncm-header-pro h2 { font-size: 24px; margin: 0; font-weight: 500; color: var(--text-main); }
@@ -142,7 +107,9 @@
 
         .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
         .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
-        .grid-manual { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        
+        /* Grid para o cálculo manual agora comporta mais campos */
+        .grid-manual { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
         .badge-credito { background: var(--warning-bg); color: var(--warning); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(253, 226, 147, 0.3);}
         .badge-recolher { background: var(--danger-bg); color: var(--danger); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(242, 139, 130, 0.3);}
@@ -153,7 +120,6 @@
 </head>
 <body>
 
-<!-- NOVO HEADER (TOPO) -->
 <header class="top-header">
     <div class="topbar-brand">
         <div class="logo-container">
@@ -162,7 +128,6 @@
         <button class="btn-theme" onclick="toggleTema()" id="btnTema">Claro</button>
     </div>
     
-    <!-- Barra de Abas (Sistema de Guias) -->
     <div class="tab-bar-wrapper">
         <div class="tab-bar">
             <div class="tab-item active" onclick="switchModule('xml')">
@@ -211,10 +176,15 @@
     <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
+            <!-- Grid atualizado para suportar a matemática completa -->
             <div class="grid-manual">
-                <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Clique para auto-colar"></div>
-                <div class="field"><label>Valor Produtos</label><input type="text" id="vlr" placeholder="0,00"></div>
-                <div class="field"><label>Valor IPI</label><input type="text" id="ipi" placeholder="0,00"></div>
+                <div class="field"><label>NCM</label><input type="text" id="ncm" placeholder="Ex: 85171300"></div>
+                <div class="field"><label>Valor Produtos (R$)</label><input type="text" id="vlr" placeholder="0,00"></div>
+                <div class="field"><label>Valor IPI (R$)</label><input type="text" id="ipi" placeholder="0,00"></div>
+                
+                <div class="field"><label>Frete/Seg./Outras (R$)</label><input type="text" id="frete_manual" placeholder="0,00" title="Soma de Frete, Seguro e Outras Despesas"></div>
+                <div class="field"><label>Desconto (R$)</label><input type="text" id="desc_manual" placeholder="0,00"></div>
+                <div class="field"><label>Base ICMS da Nota (R$)</label><input type="text" id="bc_icms_manual" placeholder="Deixe 0 p/ usar Vlr. Produto" title="Se a base for reduzida na nota do fornecedor, preencha aqui"></div>
             </div>
 
             <div class="field" style="margin-bottom: 15px;">
@@ -222,6 +192,7 @@
                 <div class="btn-group" style="margin-top: 5px;">
                     <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                     <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
+                    <button class="btn-aliq" id="a12" onclick="setAliq(0.12)">12%</button>
                 </div>
             </div>
 
@@ -235,7 +206,7 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr><th>NCM</th><th>MVA</th><th>PRODUTOS</th><th>BASE ST</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
+                        <tr><th>NCM</th><th>MVA</th><th>V. OPERAÇÃO</th><th>BASE ST</th><th>CRÉDITO</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
                     </thead>
                     <tbody id="corpoTabelaManual"></tbody>
                 </table>
@@ -299,13 +270,13 @@
     <main class="module" id="module-agrupador">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador de Guias e Notas</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Envie os PDFs das Guias (ex: 2517) e Notas Fiscais (ex: nf 2517). Eles serão organizados numericamente e mesclados em um único arquivo (Guia seguida de Nota).</p>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Envie os PDFs das Guias e Notas. Eles serão ordenados e unidos.</p>
             
             <div id="drop-zone-agrupador" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
                     <h3>Arraste todos os PDFs aqui</h3>
-                    <p>Você pode selecionar dezenas de arquivos de uma vez</p>
+                    <p>Selecione dezenas de arquivos de uma vez</p>
                 </div>
                 <input type="file" id="pdf-input-agrupador" accept=".pdf" multiple style="display: none;">
             </div>
@@ -325,16 +296,16 @@
 <div id="modal-ncm" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border); z-index: 1001; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto;">
     <h3 style="margin-top: 0; margin-bottom: 15px; font-weight: 500;" id="modal-title">Adicionar/Editar NCM</h3>
     <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div><label style="font-size: 12px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm" placeholder="Ex: 85444200"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest" placeholder="Ex: 12.009.00"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat" placeholder="Ex: Materiais elétricos"></div>
-        <div><label style="font-size: 12px; color: var(--text-sub);">Fundamento Legal</label><input type="text" id="form-fund" placeholder="Ex: Art. 53, Anexo V, RCIMS MT"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">NCM</label><input type="text" id="form-ncm"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">CEST</label><input type="text" id="form-cest"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">Classificação Tributária</label><input type="text" id="form-cat"></div>
+        <div><label style="font-size: 12px; color: var(--text-sub);">Fundamento Legal</label><input type="text" id="form-fund"></div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red" placeholder="Ex: 41.17"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva" placeholder="Ex: 63.28"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata" placeholder="0"></div>
-            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out" placeholder="0"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% Redução BC</label><input type="text" id="form-red"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA (Demais)</label><input type="text" id="form-mva"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Atacadista</label><input type="text" id="form-mva-ata"></div>
+            <div><label style="font-size: 12px; color: var(--text-sub);">% MVA Créd. Outorg.</label><input type="text" id="form-mva-out"></div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -345,7 +316,6 @@
 </div>
 
 <script>
-    // --- ICONES ---
     const svgCopy = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
     const svgDel = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
     const svgCheck = `<svg viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
@@ -354,13 +324,11 @@
     const svgPerc = `<svg viewBox="0 0 24 24"><path d="M18.5 3H5.5C4.12 3 3 4.12 3 5.5v13C3 19.88 4.12 21 5.5 21h13c1.38 0 2.5-1.12 2.5-2.5v-13C21 4.12 19.88 3 18.5 3zM10.16 16c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm5.68 3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm0-3.64c-.5 0-.91-.41-.91-.91s.41-.91.91-.91.91.41.91.91-.41.91-.91.91zm-4.32-2.1l4.08-4.08 1.28 1.28-4.08 4.08-1.28-1.28z"/></svg>`;
     const svgPrint = `<svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>`;
 
-    // --- ESTADO GLOBAL ---
     let dbNcm = {};
     let notasFiscais = [];
     let historicoManual = [];
     let aliqAtivaManual = 0.04;
 
-    // Função auxiliar para extrair apenas os números limpando textos como "NT", "D/C", etc.
     const parseNumStr = (val) => {
         if(!val) return 0;
         const cleaned = val.toString().replace(/NT|D\/C|-/g, '').trim();
@@ -370,7 +338,6 @@
     window.onload = async function() {
         let carregouNovo = false;
 
-        // 1. TENTA CARREGAR O NOVO ARQUIVO PRIMEIRO
         try {
             const r = await fetch('BASE NCM nova.csv');
             if (r.ok) {
@@ -379,8 +346,6 @@
                     if(i === 0 || !linha.trim()) return;
                     const col = linha.split(';');
                     
-                    // Mapeamento baseado no Print 2 do Excel (Colunas A até I)
-                    // 0:NCM | 1:CEST | 2:TIPO(ST ou D/C) | 3:RED BC | 4:LEGISLAÇÃO | 5:CLASSE TRIB | 6:MVA OUT | 7:MVA ATA | 8:MVA DEMAIS
                     dbNcm[col[0].trim()] = {
                         cest: col[1]?.trim() || '---',
                         tipo: col[2]?.trim() || 'Não informada',
@@ -389,17 +354,13 @@
                         categoria: col[5]?.trim() || 'Não informada',
                         mvaOut: parseNumStr(col[6]) / 100,
                         mvaAta: parseNumStr(col[7]) / 100,
-                        mva: parseNumStr(col[8]) / 100
+                        mva: parseNumStr(col[8]) / 100 // Mantido o padrão original da base "Demais"
                     };
                 });
                 carregouNovo = true;
-                console.log("Arquivo 'BASE NCM nova.csv' carregado com sucesso!");
             }
-        } catch (e) {
-            console.log("Arquivo novo não encontrado, tentando plano B...");
-        }
+        } catch (e) { console.log("Arquivo novo não encontrado, tentando plano B..."); }
 
-        // 2. PLANO B (FALLBACK): SE O NOVO FALHAR, CARREGA O ANTIGO
         if (!carregouNovo) {
             try {
                 const r = await fetch('BASE NCM.csv');
@@ -419,17 +380,15 @@
                             tipo: 'Substituição Tributária'
                         };
                     });
-                    console.log("Arquivo antigo 'BASE NCM.csv' carregado como backup.");
                 }
-            } catch (e) { console.log("Aviso: Nenhum CSV de NCM encontrado."); }
+            } catch (e) {}
         }
 
-        // Mescla edições personalizadas do LocalStorage
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
         dbNcm = { ...dbNcm, ...customDb };
 
-        // AUTO-PASTE MANUAL
-        ['ncm', 'vlr', 'ipi'].forEach(id => {
+        // AUTO-PASTE MANUAL para as 6 colunas (suporta copiar do Excel direto)
+        ['ncm', 'vlr', 'ipi', 'frete_manual', 'desc_manual', 'bc_icms_manual'].forEach(id => {
             const el = document.getElementById(id);
             el.onclick = async function() {
                 if (navigator.clipboard && navigator.clipboard.readText) {
@@ -446,16 +405,16 @@
     function distribuirValores(text) {
         if (!text) return;
         const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
+        const campos = ['ncm', 'vlr', 'ipi', 'frete_manual', 'desc_manual', 'bc_icms_manual'];
         if (partes.length >= 3) {
-            document.getElementById('ncm').value = partes[0].trim();
-            document.getElementById('vlr').value = partes[1].trim();
-            document.getElementById('ipi').value = partes[2].trim();
+            for(let i = 0; i < Math.min(partes.length, 6); i++) {
+                document.getElementById(campos[i]).value = partes[i].trim();
+            }
         } else {
             document.activeElement.value = text.trim();
         }
     }
 
-    // --- UI GERAL ---
     function switchModule(mod) {
         document.querySelectorAll('.module').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
@@ -532,9 +491,28 @@
             const qCom = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent || 0);
             const vUnCom = parseFloat(item.getElementsByTagName("vUnCom")[0]?.textContent || 0);
             const vProd = parseFloat(item.getElementsByTagName("vProd")[0]?.textContent || 0);
-            const vBC_icms = parseFloat(item.getElementsByTagName("vBC")[0]?.textContent || 0);
-            const vICMS = parseFloat(item.getElementsByTagName("vICMS")[0]?.textContent || 0);
             
+            // Valores que compõem o Valor Total da Operação
+            const vIpiNodes = item.getElementsByTagName("vIPI");
+            const vIpi = vIpiNodes.length > 0 ? parseFloat(vIpiNodes[0].textContent) : 0;
+            const pIPI = item.getElementsByTagName("pIPI")[0]?.textContent || "0";
+            
+            const vFrete = parseFloat(item.getElementsByTagName("vFrete")[0]?.textContent || 0);
+            const vSeg = parseFloat(item.getElementsByTagName("vSeg")[0]?.textContent || 0);
+            const vOutro = parseFloat(item.getElementsByTagName("vOutro")[0]?.textContent || 0);
+            const vDesc = parseFloat(item.getElementsByTagName("vDesc")[0]?.textContent || 0);
+
+            // Captura a Base Original da Nota Fiscal para fazer o Crédito
+            let vBC_icms = 0;
+            const icmsNode = item.getElementsByTagName("ICMS")[0];
+            if (icmsNode) {
+                const vbcNode = icmsNode.getElementsByTagName("vBC")[0];
+                if (vbcNode) vBC_icms = parseFloat(vbcNode.textContent);
+            }
+            
+            // Se não veio Base na NF (ex: Simples Nacional CSOSN 102), o MT manda usar o Valor dos Produtos + Extras
+            if(vBC_icms === 0) vBC_icms = vProd + vFrete + vSeg + vOutro - vDesc;
+
             const pIcmsNodes = item.getElementsByTagName("pICMS");
             let aliqIcms = 0.04; 
             if (pIcmsNodes.length > 0) {
@@ -543,23 +521,24 @@
                 else if (pIcmsVal > 0) aliqIcms = pIcmsVal / 100;
             }
             
-            const vIpiNodes = item.getElementsByTagName("vIPI");
-            const vIpi = vIpiNodes.length > 0 ? parseFloat(vIpiNodes[0].textContent) : 0;
-            const pIPI = item.getElementsByTagName("pIPI")[0]?.textContent || "0";
-
             const info = dbNcm[ncm] || { mva: 0, red: 0 };
-            let baseST = 0, stFinal = 0;
+            let baseST = 0, stFinal = 0, creditoICMS = 0;
             let fator = info.red === 0 ? 1 : info.red;
 
             if (info.mva > 0) {
-                baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
-                stFinal = Number(((baseST * 0.17) - ((vProd * aliqIcms) * fator)).toFixed(2));
+                // Matemática Correta do MT baseada na planilha
+                const valorOperacao = vProd + vIpi + vFrete + vSeg + vOutro - vDesc;
+                baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
+                creditoICMS = Number((vBC_icms * aliqIcms * fator).toFixed(2));
+                
+                stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
+                
                 bcStTotalCalculado += baseST;
                 vStTotalCalculado += stFinal;
             }
 
             itensCalc.push({
-                item: i+1, ncm, cest, qCom, vUnCom, vProd, vBC_icms, vICMS, vIpi, pIPI,
+                item: i+1, ncm, cest, qCom, vUnCom, vProd, vBC_icms, creditoICMS, vIpi, pIPI,
                 aliqIcms: aliqIcms * 100, mva: info.mva * 100, baseST, stFinal
             });
         }
@@ -580,16 +559,15 @@
             const htmlItens = nota.itens.map(it => `
                 <tr>
                     <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
-                    <td>R$ ${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                    <td>R$ ${it.vICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>
                         <div class="val-container">
                             R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}
                             ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)" title="Copiar">${svgCopy}</button>` : ''}
                         </div>
                     </td>
+                    <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                     <td>
                         <div class="val-container">
                             <span class="${it.stFinal > 0 ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
@@ -597,7 +575,6 @@
                         </div>
                     </td>
                     <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
-                    <td>${Number(it.pIPI).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
                     <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>${it.mva.toFixed(2)}%</td>
                 </tr>
@@ -653,9 +630,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Unit</th><th>V.Total</th>
-                                <th>BC ICMS</th><th>V.ICMS</th><th>BC ICMS-ST</th><th>V.ICMS-ST</th>
-                                <th>% ICMS</th><th>% IPI</th><th>V.IPI</th><th>% MVA</th>
+                                <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
+                                <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
+                                <th>% ICMS</th><th>V.IPI</th><th>% MVA</th>
                             </tr>
                         </thead>
                         <tbody>${htmlItens}</tbody>
@@ -689,23 +666,21 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Item</th><th>Qtd.</th><th>NCM</th><th>CEST</th><th>V.Unit</th><th>V.Total</th>
-                            <th>BC ICMS</th><th>V.ICMS</th><th>BC ICMS-ST</th><th>V.ICMS-ST</th>
-                            <th>% ICMS</th><th>% IPI</th><th>V.IPI</th><th>% MVA</th>
+                            <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
+                            <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
+                            <th>% ICMS</th><th>V.IPI</th><th>% MVA</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${nota.itens.map(it => `
                             <tr>
                                 <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
-                                <td>R$ ${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$ ${it.vICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td><strong>R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                                 <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
-                                <td>${Number(it.pIPI).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
                                 <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                                 <td>${it.mva.toFixed(2)}%</td>
                             </tr>
@@ -736,7 +711,7 @@
         janela.document.close();
     }
 
-    // --- MÓDULO 2: CÁLCULO MANUAL ---
+    // --- MÓDULO 2: CÁLCULO MANUAL (Atualizado para a Nova Matemática) ---
     function limparNum(t) {
         if(!t) return 0;
         return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
@@ -746,11 +721,13 @@
         aliqAtivaManual = v;
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
+        document.getElementById('a12').classList.toggle('active', v === 0.12);
+        
         if (historicoManual.length > 0) {
             historicoManual = historicoManual.map(it => {
                 if (it.mva > 0) {
-                    let fator = it.fator;
-                    it.stFinal = Number(((it.baseST * 0.17) - ((it.vProd * aliqAtivaManual) * fator)).toFixed(2));
+                    it.creditoICMS = Number((it.vBC_icms * aliqAtivaManual * it.fator).toFixed(2));
+                    it.stFinal = Number(((it.baseST * 0.17) - it.creditoICMS).toFixed(2));
                 }
                 return it;
             });
@@ -762,23 +739,37 @@
         const ncm = document.getElementById('ncm').value.trim();
         const vProd = limparNum(document.getElementById('vlr').value);
         const vIpi = limparNum(document.getElementById('ipi').value);
+        
+        // Novos Campos
+        const vFrete = limparNum(document.getElementById('frete_manual').value);
+        const vDesc = limparNum(document.getElementById('desc_manual').value);
+        let vBC_icms = limparNum(document.getElementById('bc_icms_manual').value);
+        
         if (!ncm) return;
+        
+        // Fallback: Se não informou a Base Reduzida da nota, usa o Valor Líquido do Produto + Frete
+        if (vBC_icms === 0) vBC_icms = vProd + vFrete - vDesc;
 
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
-        let baseST = 0, stFinal = 0;
+        let baseST = 0, stFinal = 0, creditoICMS = 0, valorOperacao = 0;
         let fator = info.red === 0 ? 1 : info.red;
 
         if (info.mva > 0) {
-            baseST = Number(((vProd + vIpi) * (1 + info.mva) * fator).toFixed(2));
-            stFinal = Number(((baseST * 0.17) - ((vProd * aliqAtivaManual) * fator)).toFixed(2));
+            valorOperacao = vProd + vIpi + vFrete - vDesc;
+            baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
+            creditoICMS = Number((vBC_icms * aliqAtivaManual * fator).toFixed(2));
+            stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
         }
 
-        historicoManual.push({ ncm, mva: info.mva, vProd, baseST, stFinal, fator });
+        historicoManual.push({ ncm, mva: info.mva, valorOperacao, vBC_icms, baseST, creditoICMS, stFinal, fator });
         atualizarTabelaManual();
         
         document.getElementById('ncm').value = '';
         document.getElementById('vlr').value = '';
         document.getElementById('ipi').value = '';
+        document.getElementById('frete_manual').value = '';
+        document.getElementById('desc_manual').value = '';
+        document.getElementById('bc_icms_manual').value = '';
     }
 
     function atualizarTabelaManual() {
@@ -790,9 +781,10 @@
             html += `<tr>
                 <td>${it.ncm}</td>
                 <td class="${isZero ? 'isento-txt' : ''}">${(it.mva*100).toFixed(2)}%</td>
-                <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${it.valorOperacao.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                 <td><div class="val-container"><span class="${isZero ? 'isento-txt' : ''}">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
                     ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}</div></td>
+                <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                 <td><div class="val-container"><span class="${!isZero ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
                     ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}</div></td>
                 <td style="text-align:center;"><button class="icon-btn delete" onclick="removerLinhaManual(${idx})">${svgDel}</button></td>
@@ -813,6 +805,7 @@
         historicoManual = [];
         document.getElementById('resManualCard').style.display = 'none';
         document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
+        document.getElementById('frete_manual').value = ''; document.getElementById('desc_manual').value = ''; document.getElementById('bc_icms_manual').value = '';
     }
 
     // --- MÓDULO 3: BANCO NCM ---
@@ -832,7 +825,6 @@
             const cest = info.cest || '---';
             const tipo = info.tipo || 'Substituição Tributária';
 
-            // Muda a cor da badge de ST se for D/C (Débito e Crédito)
             let stBadgeStyle = tipo.includes('D/C') ? 'background: var(--accent-bg); color: var(--accent);' : '';
 
             resDiv.innerHTML = `
@@ -917,7 +909,6 @@
 
         if (!ncm) { alert("Preencha o NCM!"); return; }
 
-        // Mantém o 'tipo' original caso esteja apenas editando, senão assume ST
         const tipoOriginal = dbNcm[ncm] ? dbNcm[ncm].tipo : 'Substituição Tributária';
 
         const payload = { mva, red, cest, categoria, fundamento, mvaAta, mvaOut, tipo: tipoOriginal };
@@ -1146,7 +1137,6 @@
         
         mostrarLogMesclar("Analisando e ordenando arquivos...");
 
-        // Lógica de Ordenação: Numérico Crescente -> Guia -> Nota (NF)
         arquivosParaMesclar.sort((a, b) => {
             const numA = parseInt(a.name.match(/\d+/)?.[0] || 0);
             const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
