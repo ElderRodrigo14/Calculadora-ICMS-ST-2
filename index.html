@@ -1,3 +1,28 @@
+Feito, Elder! As 3 novas lógicas que você pediu foram incorporadas.
+
+Aqui está o resumo do que foi ajustado nesta versão:
+
+1. **Extrator DIFAL Turbinado & Paginação Infinita:**
+* A leitura do PDF agora busca automaticamente pelas palavras **"Multa"** e **"Juros"** usando expressões regulares inteligentes, capturando os valores e já somando ao total.
+* O motor de geração de PDF foi reescrito: agora ele divide suas notas de 18 em 18. Se você enviar 40 notas, ele criará perfeitamente um único PDF com 3 páginas no formato do seu modelo, sem perder nenhum dado.
+
+
+2. **Cálculo Manual Fixo & Limpo:**
+* O botão de 12% e o campo de Desconto foram **removidos**.
+* Agora, ao clicar em "Calcular Manual", a linha inserida na tabela **congela**. Se você alterar a alíquota (de 4% para 7%), as linhas antigas que já foram jogadas para baixo na tabela não se alteram mais, preservando o histórico da sua memória de cálculo manual na tela.
+
+
+3. **Memória de Cálculo (FormPrice) 100% Fiel & Dinâmica:**
+* Adicionei a opção para você escolher entre **Imprimir Retrato** (Vertical) ou **Imprimir Paisagem** (Horizontal) nos botões da nota.
+* Refiz o layout para ficar idêntico ao seu *print*: apliquei as bordas pretas apenas nas células (`td`), mantendo o cabeçalho (`th`) escuro e sem bordas.
+* Os totalizadores no rodapé agora puxam a *Base ST Calculada* e o *ST Destacado NFe (Recolhido Antecipado)* corretamente.
+* Se o ST Destacado for maior que o Calculado (imposto a maior), um **alerta de RESSARCIMENTO/CRÉDITO** em negrito e com borda em destaque será inserido automaticamente no final do relatório para a sua equipe fiscal bater o olho e ver o crédito!
+
+
+
+Substitua todo o seu arquivo `index.html` por este novo código atualizado:
+
+```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -74,11 +99,8 @@
         .btn-main:disabled { background-color: var(--border); color: var(--text-sub); cursor: not-allowed; opacity: 0.7; }
         .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-secondary:hover { background: var(--input-bg); }
-        
-        .icon-print-btn { background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); border-radius: 50%; padding: 8px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .icon-print-btn:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
 
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; max-width: 300px;}
         .btn-aliq { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: inherit; font-weight: 500;}
         .btn-aliq.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
 
@@ -106,7 +128,7 @@
         .mva-box-val { font-size: 16px; font-weight: 700; color: var(--text-main); }
 
         .ncm-actions-pro { display: flex; gap: 10px; margin-top: 20px; }
-        .total-box { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
+        .total-box-manual { margin-top: 15px; padding: 15px; background: var(--accent-bg); border-radius: 10px; text-align: right; font-size: 22px; color: var(--accent); font-weight: 500; }
         
         .grid-manual { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
         
@@ -116,7 +138,6 @@
         .header-nota { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .isento-txt { color: var(--text-sub); font-style: italic; }
 
-        /* NOVA ANIMAÇÃO DE FLASH AO COPIAR */
         @keyframes flashRow {
             0% { background-color: var(--success-bg); }
             100% { background-color: transparent; }
@@ -125,21 +146,22 @@
             animation: flashRow 1.5s ease-out;
         }
 
-        /* ESTILO DO ACCORDION DO XML */
         .accordion-btn {
             background: transparent;
-            border: none;
+            border: 1px solid var(--border);
             color: var(--text-main);
             cursor: pointer;
-            padding: 5px;
+            padding: 5px 8px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
+            transition: 0.2s;
         }
-        .accordion-btn.open {
-            transform: rotate(180deg);
-        }
+        .accordion-btn:hover { background: var(--input-bg); }
+        .accordion-btn svg { transition: transform 0.3s ease; }
+        .accordion-btn.open svg { transform: rotate(180deg); }
+        
         .itens-nota-container {
             display: none;
             margin-top: 15px;
@@ -215,21 +237,19 @@
                 <div class="field"><label>Valor IPI (R$)</label><input type="text" id="ipi" placeholder="0,00"></div>
                 
                 <div class="field"><label>Frete/Seg./Outras (R$)</label><input type="text" id="frete_manual" placeholder="0,00" title="Soma de Frete, Seguro e Outras Despesas"></div>
-                <div class="field"><label>Desconto (R$)</label><input type="text" id="desc_manual" placeholder="0,00"></div>
                 <div class="field"><label>Base ICMS da Nota (R$)</label><input type="text" id="bc_icms_manual" placeholder="Deixe 0 p/ usar Vlr. Produto" title="Se a base for reduzida na nota do fornecedor, preencha aqui"></div>
             </div>
 
             <div class="field" style="margin-bottom: 15px;">
-                <label>Alíquota Interestadual</label>
+                <label>Alíquota Interestadual (Não recalcula linhas antigas)</label>
                 <div class="btn-group" style="margin-top: 5px;">
                     <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                     <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
-                    <button class="btn-aliq" id="a12" onclick="setAliq(0.12)">12%</button>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px;">
-                <button class="btn-main" style="flex: 2;" onclick="processarManual()">Calcular Manual</button>
+                <button class="btn-main" style="flex: 2;" onclick="processarManual()">Calcular Linha Manual</button>
                 <button class="btn-secondary" style="flex: 1;" onclick="limparManual()">Limpar Tabela</button>
             </div>
         </div>
@@ -243,7 +263,7 @@
                     <tbody id="corpoTabelaManual"></tbody>
                 </table>
             </div>
-            <div class="total-box" id="totalStManual">Total ST: R$ 0,00</div>
+            <div class="total-box-manual" id="totalStManual">Total ST: R$ 0,00</div>
         </div>
     </main>
 
@@ -265,12 +285,12 @@
     <main class="module" id="module-difal">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faça o upload dos PDFs das notas, revise os valores e gere o protocolo formatado.</p>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faz a extração inteligente e gera páginas ilimitadas.</p>
             
             <div id="drop-zone-difal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
-                    <h3>Arraste PDFs da Nota aqui</h3>
+                    <h3>Arraste PDFs da Nota/Guia aqui</h3>
                     <p>Ou clique para selecionar</p>
                 </div>
                 <input type="file" id="pdf-input-difal" accept=".pdf" multiple style="display: none;">
@@ -281,8 +301,8 @@
         </div>
 
         <div id="previewSectionDifal" class="card" style="display: none;">
-            <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados</h3>
-            <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Altere os valores se necessário. Somente o que está aqui será impresso.</p>
+            <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados (Paginação Automática)</h3>
+            <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Todos os itens abaixo serão incluídos no PDF final.</p>
             
             <div class="table-responsive">
                 <table id="tabelaPreviewDifal">
@@ -447,26 +467,28 @@
         dbNcm = { ...dbNcm, ...customDb };
 
         // AUTO-PASTE MANUAL
-        ['ncm', 'vlr', 'ipi', 'frete_manual', 'desc_manual', 'bc_icms_manual'].forEach(id => {
+        ['ncm', 'vlr', 'ipi', 'frete_manual', 'bc_icms_manual'].forEach(id => {
             const el = document.getElementById(id);
-            el.onclick = async function() {
-                if (navigator.clipboard && navigator.clipboard.readText) {
-                    try { distribuirValores(await navigator.clipboard.readText()); } catch (err) {}
-                }
-            };
-            el.onpaste = function(e) {
-                distribuirValores(e.clipboardData.getData('text'));
-                e.preventDefault();
-            };
+            if(el) {
+                el.onclick = async function() {
+                    if (navigator.clipboard && navigator.clipboard.readText) {
+                        try { distribuirValores(await navigator.clipboard.readText()); } catch (err) {}
+                    }
+                };
+                el.onpaste = function(e) {
+                    distribuirValores(e.clipboardData.getData('text'));
+                    e.preventDefault();
+                };
+            }
         });
     };
 
     function distribuirValores(text) {
         if (!text) return;
         const partes = text.split(/[\t\s]{2,}/).filter(p => p.trim() !== "");
-        const campos = ['ncm', 'vlr', 'ipi', 'frete_manual', 'desc_manual', 'bc_icms_manual'];
+        const campos = ['ncm', 'vlr', 'ipi', 'frete_manual', 'bc_icms_manual'];
         if (partes.length >= 3) {
-            for(let i = 0; i < Math.min(partes.length, 6); i++) {
+            for(let i = 0; i < Math.min(partes.length, campos.length); i++) {
                 document.getElementById(campos[i]).value = partes[i].trim();
             }
         } else {
@@ -492,22 +514,17 @@
         }
     }
 
-    // Função de cópia com animação
     function copiarParaArea(valor, btnElem) {
         const valFormatado = valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         navigator.clipboard.writeText(valFormatado).then(() => {
-            // Animação do Ícone
             const iconeOriginal = btnElem.innerHTML;
             btnElem.innerHTML = svgCheck;
-            
-            // Pega a linha (<tr>) e adiciona a classe de animação
             const tr = btnElem.closest('tr');
             if(tr) {
                 tr.classList.remove('flash-row'); 
-                void tr.offsetWidth; // Reflow pra reiniciar animação se clicar duas vezes
+                void tr.offsetWidth;
                 tr.classList.add('flash-row');
             }
-
             setTimeout(() => { 
                 btnElem.innerHTML = iconeOriginal; 
                 if(tr) tr.classList.remove('flash-row');
@@ -558,7 +575,6 @@
         const cnpj = xmlDoc.getElementsByTagName("CNPJ")[0]?.textContent || "00.000.000/0000-00";
         const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
         
-        // Extração da Data de Emissão para o Relatório FormPrice
         let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0]?.textContent || "";
         let dataEmissaoFormatada = "";
         if(dhEmi) {
@@ -578,10 +594,7 @@
 
         for (let i = 0; i < itensXML.length; i++) {
             const item = itensXML[i];
-            
-            // Nome do Produto para o relatório FormPrice
             const xProd = item.getElementsByTagName("xProd")[0]?.textContent || "Produto Sem Nome";
-            
             const ncm = item.getElementsByTagName("NCM")[0]?.textContent || "";
             const cest = item.getElementsByTagName("CEST")[0]?.textContent || "-";
             const qCom = parseFloat(item.getElementsByTagName("qCom")[0]?.textContent || 0);
@@ -689,7 +702,6 @@
             const card = document.createElement('div');
             card.className = 'card';
             
-            // Oculto por padrão (itens-nota-container NÃO tem a classe .open)
             card.innerHTML = `
                 <div class="header-nota">
                     <div>
@@ -699,7 +711,12 @@
                         </p>
                     </div>
                     <div style="display:flex; gap: 8px;">
-                        <button class="icon-print-btn" onclick="imprimirNota(${nota.id})" title="Imprimir Relatório FormPrice">${svgPrint}</button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Imprimir Vertical (Retrato)">
+                            ${svgPrint} Retrato
+                        </button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Imprimir Horizontal (Paisagem)">
+                            ${svgPrint} Paisagem
+                        </button>
                         <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
                     </div>
                 </div>
@@ -745,7 +762,7 @@
 
     function limparNotas() { notasFiscais = []; renderizarNotas(); }
 
-    function imprimirNota(id) {
+    function imprimirNota(id, orientation) {
         const nota = notasFiscais.find(n => n.id === id);
         if(!nota) return;
 
@@ -753,7 +770,20 @@
         const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
         const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
-        // FormPrice Layout
+        let diff = nota.vStTotalCalculado - nota.vSTNota;
+        let creditoBanner = '';
+        if (nota.vSTNota > 0) {
+            if (diff < -0.01) {
+                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;">
+                    <span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - VALOR: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}
+                </div>`;
+            } else if (diff > 0.01) {
+                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;">
+                    <span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}
+                </div>`;
+            }
+        }
+
         const htmlStr = `
             <!DOCTYPE html>
             <html lang="pt-br">
@@ -782,7 +812,7 @@
                         font-weight: normal;
                         text-align: center;
                         flex-grow: 1;
-                        margin-right: 150px; /* balance logo */
+                        margin-right: 150px;
                     }
                     .line-separator {
                         border-top: 1px solid #000;
@@ -801,7 +831,7 @@
                         display: flex;
                         border-left: 2px solid #000;
                         padding-left: 10px;
-                        margin-left: 200px; /* spacer */
+                        margin-left: 200px; 
                     }
                     .calc-col {
                         display: flex;
@@ -822,13 +852,14 @@
                         font-weight: normal;
                         text-align: right;
                         padding: 6px 4px;
+                        border: none;
                     }
                     th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
                     
                     td {
                         padding: 6px 4px;
                         text-align: right;
-                        border-bottom: 1px solid #eee;
+                        border: 1px solid #000;
                     }
                     td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
                     
@@ -840,6 +871,7 @@
                     .row-conv td {
                         padding: 4px;
                         text-align: left;
+                        border: 1px solid #000;
                     }
 
                     .totals-container {
@@ -861,13 +893,14 @@
                     .total-val {
                         font-size: 14px;
                         font-weight: bold;
-                        border-top: 2px solid #d4af37; /* amarelo ouro do formprice */
+                        border-top: 2px solid #d4af37;
                         padding-top: 8px;
                         width: 100%;
                     }
                     
                     @media print {
-                        @page { size: landscape; margin: 10mm; }
+                        @page { size: ${orientation}; margin: 10mm; }
+                        body { padding: 0; }
                     }
                 </style>
             </head>
@@ -931,7 +964,7 @@
                     <tbody>
                         <tr class="row-conv"><td colspan="14">Convênio 52/91</td></tr>
                         ${nota.itens.map(it => {
-                            let valorDebito = (it.baseST * 0.17); // 17% interno
+                            let valorDebito = (it.baseST * 0.17); 
                             return `
                                 <tr>
                                     <td>${nota.nNF}</td>
@@ -961,7 +994,7 @@
                     </div>
                     <div class="total-box">
                         <div class="total-title">ICMS-ST<br>Recolhido<br>Antecipado</div>
-                        <div class="total-val">R$0,00</div>
+                        <div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
                     </div>
                     <div class="total-box">
                         <div class="total-title">FECEP-ST<br>Recolhido<br>Antecipado</div>
@@ -980,6 +1013,8 @@
                         <div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
                     </div>
                 </div>
+                
+                ${creditoBanner}
 
                 <script>window.print();<\/script>
             </body>
@@ -1000,39 +1035,25 @@
         aliqAtivaManual = v;
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
-        document.getElementById('a12').classList.toggle('active', v === 0.12);
-        
-        if (historicoManual.length > 0) {
-            historicoManual = historicoManual.map(it => {
-                if (it.mva > 0) {
-                    it.creditoICMS = Number((it.vBC_icms * aliqAtivaManual * it.fator).toFixed(2));
-                    it.stFinal = Number(((it.baseST * 0.17) - it.creditoICMS).toFixed(2));
-                }
-                return it;
-            });
-            atualizarTabelaManual();
-        }
+        // O histórico NÃO é mais recalculado ao clicar na alíquota
     }
 
     function processarManual() {
         const ncm = document.getElementById('ncm').value.trim();
         const vProd = limparNum(document.getElementById('vlr').value);
         const vIpi = limparNum(document.getElementById('ipi').value);
-        
         const vFrete = limparNum(document.getElementById('frete_manual').value);
-        const vDesc = limparNum(document.getElementById('desc_manual').value);
         let vBC_icms = limparNum(document.getElementById('bc_icms_manual').value);
         
         if (!ncm) return;
-        
-        if (vBC_icms === 0) vBC_icms = vProd + vFrete - vDesc;
+        if (vBC_icms === 0) vBC_icms = vProd + vFrete;
 
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
         let baseST = 0, stFinal = 0, creditoICMS = 0, valorOperacao = 0;
         let fator = info.red === 0 ? 1 : info.red;
 
         if (info.mva > 0) {
-            valorOperacao = vProd + vIpi + vFrete - vDesc;
+            valorOperacao = vProd + vIpi + vFrete;
             baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
             creditoICMS = Number((vBC_icms * aliqAtivaManual * fator).toFixed(2));
             stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
@@ -1045,7 +1066,6 @@
         document.getElementById('vlr').value = '';
         document.getElementById('ipi').value = '';
         document.getElementById('frete_manual').value = '';
-        document.getElementById('desc_manual').value = '';
         document.getElementById('bc_icms_manual').value = '';
     }
 
@@ -1082,7 +1102,7 @@
         historicoManual = [];
         document.getElementById('resManualCard').style.display = 'none';
         document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
-        document.getElementById('frete_manual').value = ''; document.getElementById('desc_manual').value = ''; document.getElementById('bc_icms_manual').value = '';
+        document.getElementById('frete_manual').value = ''; document.getElementById('bc_icms_manual').value = '';
     }
 
     // --- MÓDULO 3: BANCO NCM ---
@@ -1276,14 +1296,22 @@
                 const matchNf = text.match(/N\.\s*([\d\.]+)/);
                 const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/);
                 const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
+                
+                // Extração inteligente de Multa e Juros (mesmo que não tenha 'R$')
+                const matchMulta = text.match(/Multa[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+                const matchJuros = text.match(/Juros[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
 
                 let numeroNf = matchNf ? matchNf[1] : "N/A";
                 let valorDifal = matchDifal ? parseFloat(matchDifal[1].replace('.', '').replace(',', '.')) : 0;
                 let valorFcp = matchFcp ? parseFloat(matchFcp[1].replace('.', '').replace(',', '.')) : 0;
+                let valorMulta = matchMulta ? parseFloat(matchMulta[1].replace('.', '').replace(',', '.')) : 0;
+                let valorJuros = matchJuros ? parseFloat(matchJuros[1].replace('.', '').replace(',', '.')) : 0;
+
+                let valorTotal = valorDifal + valorFcp + valorMulta + valorJuros;
 
                 if (numeroNf !== "N/A") {
-                    dadosExtraidos.push({ nf: numeroNf, valor: (valorDifal + valorFcp) });
-                    mostrarLogDifal(`✅ NF ${numeroNf} lida com sucesso.`);
+                    dadosExtraidos.push({ nf: numeroNf, valor: valorTotal });
+                    mostrarLogDifal(`✅ NF ${numeroNf} lida: Difal+FCP + Multa (R$ ${valorMulta}) + Juros (R$ ${valorJuros})`);
                 } else {
                     mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`);
                 }
@@ -1299,7 +1327,7 @@
             return;
         }
 
-        status.innerText = "Verifique a prévia abaixo e edite se necessário.";
+        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote.";
         renderizarTabelaDifal(dadosExtraidos);
     }
 
@@ -1307,12 +1335,7 @@
         const tbody = document.querySelector('#tabelaPreviewDifal tbody');
         tbody.innerHTML = '';
         
-        const limitados = dados.slice(0, 18);
-        if(dados.length > 18) {
-            mostrarLogDifal(`\n⚠️ Atenção: ${dados.length} notas carregadas, mas o protocolo PDF suporta apenas 18. Exibindo as primeiras 18.`);
-        }
-
-        limitados.forEach((dado, index) => {
+        dados.forEach((dado, index) => {
             const tr = document.createElement('tr');
             
             const tdDesc = document.createElement('td');
@@ -1350,33 +1373,43 @@
         
         const originalText = btnGerar.innerText;
         btnGerar.disabled = true;
-        btnGerar.innerText = "⏳ Gerando PDF...";
+        btnGerar.innerText = "⏳ Gerando Paginação Automática...";
         
         try {
             const response = await fetch('./modelo.pdf'); 
             if (!response.ok) throw new Error("O arquivo 'modelo.pdf' não foi encontrado.");
             
             const existingPdfBytes = await response.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-            const firstPage = pdfDoc.getPages()[0];
-
+            const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+            
+            const pdfDoc = await PDFLib.PDFDocument.create();
             const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
             const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
 
             const dataHoje = new Date().toLocaleDateString('pt-BR');
-            firstPage.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
-
             const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
             
-            linhas.forEach((tr, index) => {
-                const descTexto = tr.querySelector('td:nth-child(1) input').value;
-                const valTexto = tr.querySelector('td:nth-child(2) input').value;
-                
-                const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
+            // Paginação Infinita: Separa tudo de 18 em 18 linhas
+            const chunks = [];
+            for (let i = 0; i < linhas.length; i += 18) {
+                chunks.push(Array.from(linhas).slice(i, i + 18));
+            }
 
-                firstPage.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold });
-                firstPage.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
-            });
+            for (const chunk of chunks) {
+                const [page] = await pdfDoc.copyPages(templateDoc, [0]);
+                pdfDoc.addPage(page);
+                
+                page.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
+
+                chunk.forEach((tr, index) => {
+                    const descTexto = tr.querySelector('td:nth-child(1) input').value;
+                    const valTexto = tr.querySelector('td:nth-child(2) input').value;
+                    const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
+
+                    page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold });
+                    page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
+                });
+            }
 
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -1387,7 +1420,7 @@
             a.click();
             window.URL.revokeObjectURL(url);
 
-            status.innerText = "✅ Protocolo gerado e baixado com sucesso!";
+            status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`;
             status.style.color = "var(--success)";
         } catch (error) {
             status.innerText = `Erro ao gerar PDF: ${error.message}`;
@@ -1440,9 +1473,7 @@
             const numA = parseInt(a.name.match(/\d+/)?.[0] || 0);
             const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
             
-            if (numA !== numB) {
-                return numA - numB; 
-            }
+            if (numA !== numB) return numA - numB; 
             
             const isNfA = a.name.toLowerCase().includes('nf');
             const isNfB = b.name.toLowerCase().includes('nf');
@@ -1496,3 +1527,5 @@
 </script>
 </body>
 </html>
+
+```
