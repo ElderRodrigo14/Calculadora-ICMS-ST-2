@@ -1,28 +1,3 @@
-Feito, Elder! As 3 novas lógicas que você pediu foram incorporadas.
-
-Aqui está o resumo do que foi ajustado nesta versão:
-
-1. **Extrator DIFAL Turbinado & Paginação Infinita:**
-* A leitura do PDF agora busca automaticamente pelas palavras **"Multa"** e **"Juros"** usando expressões regulares inteligentes, capturando os valores e já somando ao total.
-* O motor de geração de PDF foi reescrito: agora ele divide suas notas de 18 em 18. Se você enviar 40 notas, ele criará perfeitamente um único PDF com 3 páginas no formato do seu modelo, sem perder nenhum dado.
-
-
-2. **Cálculo Manual Fixo & Limpo:**
-* O botão de 12% e o campo de Desconto foram **removidos**.
-* Agora, ao clicar em "Calcular Manual", a linha inserida na tabela **congela**. Se você alterar a alíquota (de 4% para 7%), as linhas antigas que já foram jogadas para baixo na tabela não se alteram mais, preservando o histórico da sua memória de cálculo manual na tela.
-
-
-3. **Memória de Cálculo (FormPrice) 100% Fiel & Dinâmica:**
-* Adicionei a opção para você escolher entre **Imprimir Retrato** (Vertical) ou **Imprimir Paisagem** (Horizontal) nos botões da nota.
-* Refiz o layout para ficar idêntico ao seu *print*: apliquei as bordas pretas apenas nas células (`td`), mantendo o cabeçalho (`th`) escuro e sem bordas.
-* Os totalizadores no rodapé agora puxam a *Base ST Calculada* e o *ST Destacado NFe (Recolhido Antecipado)* corretamente.
-* Se o ST Destacado for maior que o Calculado (imposto a maior), um **alerta de RESSARCIMENTO/CRÉDITO** em negrito e com borda em destaque será inserido automaticamente no final do relatório para a sua equipe fiscal bater o olho e ver o crédito!
-
-
-
-Substitua todo o seu arquivo `index.html` por este novo código atualizado:
-
-```html
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -1527,5 +1502,3 @@ Substitua todo o seu arquivo `index.html` por este novo código atualizado:
 </script>
 </body>
 </html>
-
-```
