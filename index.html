@@ -118,35 +118,22 @@
             0% { background-color: var(--success-bg); }
             100% { background-color: transparent; }
         }
-        .flash-row td {
-            animation: flashRow 1.5s ease-out;
-        }
+        .flash-row td { animation: flashRow 1.5s ease-out; }
 
         .accordion-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            cursor: pointer;
-            padding: 5px 8px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
+            background: transparent; border: 1px solid var(--border); color: var(--text-main);
+            cursor: pointer; padding: 5px 8px; border-radius: 4px; display: flex;
+            align-items: center; justify-content: center; transition: 0.2s;
         }
         .accordion-btn:hover { background: var(--input-bg); }
         .accordion-btn svg { transition: transform 0.3s ease; }
         .accordion-btn.open svg { transform: rotate(180deg); }
         
-        .itens-nota-container {
-            display: none;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed var(--border);
-        }
-        .itens-nota-container.open {
-            display: block;
-        }
+        .itens-nota-container { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); }
+        .itens-nota-container.open { display: block; }
+        
+        .badge-status { padding: 4px 10px; border-radius: 12px; font-weight: 500; display: inline-block; background: var(--input-bg); color: var(--text-sub); border: 1px solid var(--border); }
+        .badge-status.ok { background: var(--success-bg); color: var(--success); border-color: rgba(129,201,149,0.3); }
     </style>
 </head>
 <body>
@@ -208,31 +195,53 @@
         <div id="notas-container"></div>
     </main>
 
-    <!-- MÓDULO 6: ST MENSAL -->
+    <!-- MÓDULO 6: ST MENSAL EM LOTE -->
     <main class="module" id="module-mensal">
         <div class="card">
-            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Cálculo ICMS ST - Apuração Mensal</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Arraste a planilha de relatório (KADRI/ERP) (.xls ou .xlsx) para calcular todas as notas do mês em lote automaticamente.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h2 style="margin: 0; color: var(--text-main); font-weight: 500;">Cálculo ICMS ST - Apuração Mensal (Lote)</h2>
+                <button class="btn-secondary" onclick="limparMensal()" style="padding: 4px 10px; font-size: 12px; color: var(--danger); border-color: var(--danger);">Limpar Arquivos</button>
+            </div>
+            <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
+                1) Arraste a planilha principal e a planilha de produtos/info fiscais na área abaixo. Pode arrastar todas de uma vez.<br>
+                2) O motor cruzará os dados automaticamente filtrando as operações (200, 237 e 230) e relacionando Cód. Produto -> NCM -> Regra Fiscal (MVA).<br>
+                3) O relatório final sai de forma agrupada por Nota, condensando o resultado em poucas páginas prontas para impressão.
+            </p>
             
             <div id="drop-zone-mensal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
-                    <h3>Arraste a Planilha Mensal aqui</h3>
-                    <p>Formatos suportados: .xls, .xlsx, .csv</p>
+                    <h3>Arraste as Planilhas (Principal, Produtos, Info) aqui</h3>
+                    <p>Formatos suportados: .xls, .xlsx</p>
                 </div>
-                <input type="file" id="excel-input-mensal" accept=".xls,.xlsx,.csv" style="display: none;">
+                <input type="file" id="excel-input-mensal" accept=".xls,.xlsx" multiple style="display: none;">
             </div>
+            
+            <div id="mensal-status" style="margin-top: 15px; font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <span id="badge-main" class="badge-status">⏳ Principal (Pendente)</span>
+                <span id="badge-prod" class="badge-status">⏳ Produtos (Pendente)</span>
+                <span id="badge-info" class="badge-status">⏳ Info Fiscais (Pendente)</span>
+            </div>
+        
+            <button class="btn-main" style="margin-top: 20px; width: 100%; justify-content: center; font-size: 15px;" onclick="gerarCalculoMensal()">🚀 Processar Lote e Gerar Resumo</button>
         </div>
         
         <div id="mensal-result-card" class="card" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                <h3 style="margin: 0; font-weight: 500;">Resumo da Apuração Mensal (Visualização)</h3>
-                <button class="btn-main" onclick="imprimirRelatorioMensal()">🖨️ Imprimir Relatório Mensal consolidado</button>
+                <h3 style="margin: 0; font-weight: 500;">Resumo da Apuração Mensal (Agrupado por NF)</h3>
+                <button class="btn-main" onclick="imprimirRelatorioMensal()">🖨️ Imprimir Resumo Mensal FormPrice</button>
             </div>
-            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table style="width: 100%;">
-                    <thead>
-                        <tr><th>Nota</th><th>NCM</th><th>Produto</th><th>V.Total (Operação)</th><th>MVA Calc.</th><th>Crédito</th><th>Base ST</th><th>ICMS ST</th></tr>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                <table style="width: 100%; margin-top: 0;">
+                    <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
+                        <tr>
+                            <th>Nro Nota</th>
+                            <th>Fornecedor / Operação</th>
+                            <th style="text-align:center;">Qtd Itens</th>
+                            <th>Valor Total (Operação)</th>
+                            <th>Base ST Total</th>
+                            <th>ICMS ST Total</th>
+                        </tr>
                     </thead>
                     <tbody id="corpo-tabela-mensal"></tbody>
                 </table>
@@ -403,7 +412,6 @@
 
     window.onload = async function() {
         let carregouNovo = false;
-
         try {
             const r = await fetch('BASE NCM nova.csv');
             if (r.ok) {
@@ -419,24 +427,17 @@
                     let mvaOut = parseNumStr(col[6]) / 100;
                     let mvaAta = parseNumStr(col[7]) / 100;
                     let mvaDemais = parseNumStr(col[8]) / 100;
-
                     let mvaCalculo = isNT ? mvaOut : mvaDemais;
                     
                     dbNcm[col[0].trim()] = {
-                        cest: col[1]?.trim() || '---',
-                        tipo: col[2]?.trim() || 'Não informada',
-                        red: red,
-                        fundamento: col[4]?.trim() || 'Não informada',
-                        categoria: col[5]?.trim() || 'Não informada',
-                        mvaOut: mvaOut,
-                        mvaAta: mvaAta,
-                        mvaDemais: mvaDemais, 
-                        mva: mvaCalculo
+                        cest: col[1]?.trim() || '---', tipo: col[2]?.trim() || 'Não informada', red: red,
+                        fundamento: col[4]?.trim() || 'Não informada', categoria: col[5]?.trim() || 'Não informada',
+                        mvaOut: mvaOut, mvaAta: mvaAta, mvaDemais: mvaDemais, mva: mvaCalculo
                     };
                 });
                 carregouNovo = true;
             }
-        } catch (e) { console.log("Arquivo novo não encontrado, tentando plano B..."); }
+        } catch (e) { }
 
         if (!carregouNovo) {
             try {
@@ -446,27 +447,18 @@
                     txt.split(/\r?\n/).forEach((linha, i) => {
                         if(i === 0 || !linha.trim()) return;
                         const col = linha.split(';');
-                        
                         let redStr = col[3] ? col[3].trim().toUpperCase() : 'NT';
                         let isNT = redStr === 'NT' || redStr === '-' || redStr === '' || parseNumStr(redStr) === 0;
                         let red = isNT ? 0 : parseNumStr(redStr) / 100;
-
                         let mvaDemais = parseNumStr(col[1]) / 100;
                         let mvaAta = parseNumStr(col[2]) / 100;
                         let mvaOut = parseNumStr(col[4]) / 100;
-
                         let mvaCalculo = isNT ? mvaOut : mvaDemais;
 
                         dbNcm[col[0].trim()] = {
-                            mva: mvaCalculo,
-                            mvaDemais: mvaDemais,
-                            mvaAta: mvaAta,
-                            red: red,
-                            mvaOut: mvaOut,
-                            categoria: col[5]?.trim() || 'Não informada',
-                            fundamento: 'Conforme Legislação',
-                            cest: '---',
-                            tipo: 'Substituição Tributária'
+                            mva: mvaCalculo, mvaDemais: mvaDemais, mvaAta: mvaAta, red: red, mvaOut: mvaOut,
+                            categoria: col[5]?.trim() || 'Não informada', fundamento: 'Conforme Legislação',
+                            cest: '---', tipo: 'Substituição Tributária'
                         };
                     });
                 }
@@ -474,12 +466,9 @@
         }
 
         const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
-        for(let key in customDb) {
-            if(customDb[key].mvaDemais === undefined) customDb[key].mvaDemais = customDb[key].mva;
-        }
+        for(let key in customDb) { if(customDb[key].mvaDemais === undefined) customDb[key].mvaDemais = customDb[key].mva; }
         dbNcm = { ...dbNcm, ...customDb };
 
-        // AUTO-PASTE MANUAL
         ['ncm', 'vlr', 'ipi', 'frete_manual', 'bc_icms_manual'].forEach(id => {
             const el = document.getElementById(id);
             if(el) {
@@ -489,8 +478,7 @@
                     }
                 };
                 el.onpaste = function(e) {
-                    distribuirValores(e.clipboardData.getData('text'));
-                    e.preventDefault();
+                    distribuirValores(e.clipboardData.getData('text')); e.preventDefault();
                 };
             }
         });
@@ -519,11 +507,9 @@
     function toggleTema() {
         const doc = document.documentElement;
         if (doc.getAttribute('data-theme') === 'light') {
-            doc.removeAttribute('data-theme');
-            document.getElementById('btnTema').innerText = 'Claro';
+            doc.removeAttribute('data-theme'); document.getElementById('btnTema').innerText = 'Claro';
         } else {
-            doc.setAttribute('data-theme', 'light');
-            document.getElementById('btnTema').innerText = 'Escuro';
+            doc.setAttribute('data-theme', 'light'); document.getElementById('btnTema').innerText = 'Escuro';
         }
     }
 
@@ -534,9 +520,7 @@
             btnElem.innerHTML = svgCheck;
             const tr = btnElem.closest('tr');
             if(tr) {
-                tr.classList.remove('flash-row'); 
-                void tr.offsetWidth;
-                tr.classList.add('flash-row');
+                tr.classList.remove('flash-row'); void tr.offsetWidth; tr.classList.add('flash-row');
             }
             setTimeout(() => { 
                 btnElem.innerHTML = iconeOriginal; 
@@ -549,18 +533,15 @@
         const btn = document.getElementById(`acc-btn-${id}`);
         const content = document.getElementById(`acc-content-${id}`);
         if(content.classList.contains('open')) {
-            content.classList.remove('open');
-            btn.classList.remove('open');
+            content.classList.remove('open'); btn.classList.remove('open');
         } else {
-            content.classList.add('open');
-            btn.classList.add('open');
+            content.classList.add('open'); btn.classList.add('open');
         }
     }
 
     // --- MÓDULO 1: IMPORTAR XML ---
     const dropZone = document.getElementById('drop-zone');
     const xmlInput = document.getElementById('xml-input');
-
     dropZone.onclick = () => xmlInput.click();
     xmlInput.onchange = (e) => processarArquivosXML(e.target.files);
     dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
@@ -590,9 +571,7 @@
         
         let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0]?.textContent || "";
         let dataEmissaoFormatada = "";
-        if(dhEmi) {
-            dataEmissaoFormatada = new Date(dhEmi).toLocaleDateString('pt-BR');
-        }
+        if(dhEmi) dataEmissaoFormatada = new Date(dhEmi).toLocaleDateString('pt-BR');
 
         const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
         const vBC_tot = parseFloat(totais?.getElementsByTagName("vBC")[0]?.textContent || 0);
@@ -602,8 +581,7 @@
         
         const itensXML = xmlDoc.getElementsByTagName("det");
         const itensCalc = [];
-        let bcStTotalCalculado = 0;
-        let vStTotalCalculado = 0;
+        let bcStTotalCalculado = 0; let vStTotalCalculado = 0;
 
         for (let i = 0; i < itensXML.length; i++) {
             const item = itensXML[i];
@@ -648,9 +626,7 @@
                 baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
                 creditoICMS = Number((vBC_icms * aliqIcms * fator).toFixed(2));
                 stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
-                
-                bcStTotalCalculado += baseST;
-                vStTotalCalculado += stFinal;
+                bcStTotalCalculado += baseST; vStTotalCalculado += stFinal;
             }
 
             itensCalc.push({
@@ -660,9 +636,8 @@
         }
 
         notasFiscais.push({
-            id: Date.now() + Math.floor(Math.random()*1000),
-            nNF, xNome, cnpj, chNFe, dataEmissaoFormatada, vBC_tot, vICMS_tot, vIPI_tot, vSTNota,
-            bcStTotalCalculado, vStTotalCalculado, itens: itensCalc
+            id: Date.now() + Math.floor(Math.random()*1000), nNF, xNome, cnpj, chNFe, dataEmissaoFormatada, 
+            vBC_tot, vICMS_tot, vIPI_tot, vSTNota, bcStTotalCalculado, vStTotalCalculado, itens: itensCalc
         });
         renderizarNotas();
     }
@@ -677,19 +652,9 @@
                     <td>${it.item}</td><td>${it.qCom}</td><td>${it.ncm}</td><td>${it.cest}</td>
                     <td>R$ ${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>R$ ${it.vBC_icms.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                    <td>
-                        <div class="val-container">
-                            R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                            ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)" title="Copiar">${svgCopy}</button>` : ''}
-                        </div>
-                    </td>
+                    <td><div class="val-container">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})} ${it.baseST > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)" title="Copiar">${svgCopy}</button>` : ''}</div></td>
                     <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                    <td>
-                        <div class="val-container">
-                            <span class="${it.stFinal > 0 ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
-                            ${it.stFinal > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)" title="Copiar">${svgCopy}</button>` : ''}
-                        </div>
-                    </td>
+                    <td><div class="val-container"><span class="${it.stFinal > 0 ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span> ${it.stFinal > 0 ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)" title="Copiar">${svgCopy}</button>` : ''}</div></td>
                     <td>${Number(it.aliqIcms).toLocaleString('pt-BR', {maximumFractionDigits:2})}%</td>
                     <td>R$ ${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                     <td>${it.mva.toFixed(2)}%</td>
@@ -700,45 +665,30 @@
             let auditoriaHtml = '';
             if (nota.vSTNota > 0) {
                 if (diff > 0.01) {
-                    auditoriaHtml = `<div class="badge-recolher" style="margin-top: 15px;">
-                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        IMPOSTO A RECOLHER (R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})})
-                    </div>`;
+                    auditoriaHtml = `<div class="badge-recolher" style="margin-top: 15px;">${svgScale} IMPOSTO A RECOLHER (R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div>`;
                 } else if (diff < -0.01) {
-                    auditoriaHtml = `<div class="badge-credito" style="margin-top: 15px;">
-                        <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                        IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})})
-                    </div>`;
+                    auditoriaHtml = `<div class="badge-credito" style="margin-top: 15px;">${svgScale} IMPOSTO RECOLHIDO A MAIS (CRÉDITO: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})})</div>`;
                 }
             }
 
             const card = document.createElement('div');
             card.className = 'card';
-            
             card.innerHTML = `
                 <div class="header-nota">
                     <div>
                         <h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3>
-                        <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">
-                            ${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}
-                        </p>
+                        <p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}</p>
                     </div>
                     <div style="display:flex; gap: 8px;">
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Imprimir Vertical (Retrato)">
-                            ${svgPrint} Retrato
-                        </button>
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Imprimir Horizontal (Paisagem)">
-                            ${svgPrint} Paisagem
-                        </button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Imprimir Vertical">${svgPrint} Retrato</button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Imprimir Horizontal">${svgPrint} Paisagem</button>
                         <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
                     </div>
                 </div>
                 
                 <div class="table-responsive">
                     <table style="margin-bottom: 5px;">
-                        <thead>
-                            <tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado NFe</th><th>BC ST Calc.</th><th>Valor ST Calc.</th></tr>
-                        </thead>
+                        <thead><tr><th>BC ICMS NFe</th><th>Valor ICMS NFe</th><th>Valor IPI NFe</th><th>ST Destacado NFe</th><th>BC ST Calc.</th><th>Valor ST Calc.</th></tr></thead>
                         <tbody>
                             <tr>
                                 <td>R$ ${nota.vBC_tot.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
@@ -758,11 +708,7 @@
                     <div class="table-responsive">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th>
-                                    <th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th>
-                                    <th>% ICMS</th><th>V.IPI</th><th>% MVA Aplicada</th>
-                                </tr>
+                                <tr><th>Item</th><th>Qtd</th><th>NCM</th><th>CEST</th><th>V.Produtos</th><th>BC ICMS NF</th><th>BC ICMS-ST</th><th>Crédito NF</th><th>V.ICMS-ST</th><th>% ICMS</th><th>V.IPI</th><th>% MVA Aplicada</th></tr>
                             </thead>
                             <tbody>${htmlItens}</tbody>
                         </table>
@@ -778,7 +724,6 @@
     function imprimirNota(id, orientation) {
         const nota = notasFiscais.find(n => n.id === id);
         if(!nota) return;
-
         const dataAtual = new Date();
         const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
         const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
@@ -787,252 +732,69 @@
         let creditoBanner = '';
         if (nota.vSTNota > 0) {
             if (diff < -0.01) {
-                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;">
-                    <span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - VALOR: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                </div>`;
+                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - VALOR: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
             } else if (diff > 0.01) {
-                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;">
-                    <span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}
-                </div>`;
+                creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
             }
         }
 
-        const htmlStr = `
-            <!DOCTYPE html>
-            <html lang="pt-br">
-            <head>
-                <meta charset="UTF-8">
-                <title>Memória de Cálculo do ICMS ST</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        font-size: 11px;
-                        margin: 0;
-                        padding: 20px 30px;
-                        color: #000;
-                    }
-                    .header-top {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        margin-bottom: 10px;
-                    }
-                    .logo {
-                        max-width: 150px;
-                    }
-                    .header-title {
-                        font-size: 20px;
-                        font-weight: normal;
-                        text-align: center;
-                        flex-grow: 1;
-                        margin-right: 150px;
-                    }
-                    .line-separator {
-                        border-top: 1px solid #000;
-                        margin-bottom: 10px;
-                    }
-                    .info-grid {
-                        display: grid;
-                        grid-template-columns: 100px 1fr 100px;
-                        row-gap: 4px;
-                        margin-bottom: 20px;
-                    }
-                    .info-grid span { white-space: nowrap; }
-                    .pg-number { text-align: right; }
-                    
-                    .calc-info {
-                        display: flex;
-                        border-left: 2px solid #000;
-                        padding-left: 10px;
-                        margin-left: 200px; 
-                    }
-                    .calc-col {
-                        display: flex;
-                        flex-direction: column;
-                        margin-right: 40px;
-                        gap: 4px;
-                    }
-
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 10px;
-                        font-size: 10px;
-                    }
-                    th {
-                        background-color: #333333;
-                        color: #fff;
-                        font-weight: normal;
-                        text-align: right;
-                        padding: 6px 4px;
-                        border: none;
-                    }
+        const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória de Cálculo do ICMS ST</title><style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px 30px; color: #000; }
+                    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+                    .logo { max-width: 150px; }
+                    .header-title { font-size: 20px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 150px; }
+                    .line-separator { border-top: 1px solid #000; margin-bottom: 10px; }
+                    .info-grid { display: grid; grid-template-columns: 100px 1fr 100px; row-gap: 4px; margin-bottom: 20px; }
+                    .info-grid span { white-space: nowrap; } .pg-number { text-align: right; }
+                    .calc-info { display: flex; border-left: 2px solid #000; padding-left: 10px; margin-left: 200px; }
+                    .calc-col { display: flex; flex-direction: column; margin-right: 40px; gap: 4px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
+                    th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none; }
                     th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
-                    
-                    td {
-                        padding: 6px 4px;
-                        text-align: right;
-                        border: 1px solid #000;
-                    }
+                    td { padding: 6px 4px; text-align: right; border: 1px solid #000; }
                     td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
-                    
-                    .row-conv {
-                        background-color: #555555;
-                        color: #fff;
-                        font-weight: normal;
-                    }
-                    .row-conv td {
-                        padding: 4px;
-                        text-align: left;
-                        border: 1px solid #000;
-                    }
-
-                    .totals-container {
-                        display: flex;
-                        justify-content: space-around;
-                        margin-top: 40px;
-                        text-align: center;
-                    }
-                    .total-box {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                    }
-                    .total-title {
-                        font-size: 12px;
-                        margin-bottom: 8px;
-                        max-width: 100px;
-                    }
-                    .total-val {
-                        font-size: 14px;
-                        font-weight: bold;
-                        border-top: 2px solid #d4af37;
-                        padding-top: 8px;
-                        width: 100%;
-                    }
-                    
-                    @media print {
-                        @page { size: ${orientation}; margin: 10mm; }
-                        body { padding: 0; }
-                    }
-                </style>
-            </head>
+                    .row-conv { background-color: #555555; color: #fff; font-weight: normal; }
+                    .row-conv td { padding: 4px; text-align: left; border: 1px solid #000; }
+                    .totals-container { display: flex; justify-content: space-around; margin-top: 40px; text-align: center; }
+                    .total-box { display: flex; flex-direction: column; align-items: center; }
+                    .total-title { font-size: 12px; margin-bottom: 8px; max-width: 100px; }
+                    .total-val { font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%; }
+                    @media print { @page { size: ${orientation}; margin: 10mm; } body { padding: 0; } }
+                </style></head>
             <body>
-                <div class="header-top">
-                    <img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo">
-                    <div class="header-title">Memória de Cálculo do ICMS ST</div>
-                </div>
+                <div class="header-top"><img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo"><div class="header-title">Memória de Cálculo do ICMS ST</div></div>
                 <div class="line-separator"></div>
-                
                 <div class="info-grid">
-                    <span>Empresa:</span>
-                    <span>LN COMERCIO DE ELETRONICOS LTDA</span>
-                    <span class="pg-number">Página 1 de 1</span>
-                    
-                    <span>CNPJ:</span>
-                    <span>01030685002397</span>
-                    <span></span>
-                    
-                    <span style="margin-top: 10px;">Fornecedor:</span>
-                    <span style="margin-top: 10px;">${nota.xNome}</span>
-                    <span></span>
-                    
-                    <span>Nota fiscal:</span>
-                    <span>${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span>
-                    <span></span>
+                    <span>Empresa:</span><span>LN COMERCIO DE ELETRONICOS LTDA</span><span class="pg-number">Página 1 de 1</span>
+                    <span>CNPJ:</span><span>01030685002397</span><span></span>
+                    <span style="margin-top: 10px;">Fornecedor:</span><span style="margin-top: 10px;">${nota.xNome}</span><span></span>
+                    <span>Nota fiscal:</span><span>${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span><span></span>
                 </div>
-
                 <div style="display:flex; margin-bottom: 20px;">
-                    <div class="calc-col" style="width: 250px;">
-                        <div>Calculado por: &nbsp;&nbsp; PAULO</div>
-                        <div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
-                    </div>
-                    <div class="calc-info">
-                        <div class="calc-col">
-                            <div>Impresso por: &nbsp;&nbsp; PAULO</div>
-                            <div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
-                        </div>
-                    </div>
+                    <div class="calc-col" style="width: 250px;"><div>Calculado por: &nbsp;&nbsp; PAULO</div><div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div>
+                    <div class="calc-info"><div class="calc-col"><div>Impresso por: &nbsp;&nbsp; PAULO</div><div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div></div>
                 </div>
-
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Nota</th>
-                            <th>NCM</th>
-                            <th>Produto</th>
-                            <th>Valor Un.</th>
-                            <th>Valor Total</th>
-                            <th>IPI</th>
-                            <th>MVA</th>
-                            <th>Aliq.<br>Créd.</th>
-                            <th>Aliq.<br>ICMS</th>
-                            <th>Valor Débito</th>
-                            <th>Valor Crédito</th>
-                            <th>Base ST</th>
-                            <th>ICMS ST</th>
-                            <th>FECEP ST</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Nota</th><th>NCM</th><th>Produto</th><th>Valor Un.</th><th>Valor Total</th><th>IPI</th><th>MVA</th><th>Aliq.<br>Créd.</th><th>Aliq.<br>ICMS</th><th>Valor Débito</th><th>Valor Crédito</th><th>Base ST</th><th>ICMS ST</th><th>FECEP ST</th></tr></thead>
                     <tbody>
                         <tr class="row-conv"><td colspan="14">Convênio 52/91</td></tr>
                         ${nota.itens.map(it => {
                             let valorDebito = (it.baseST * 0.17); 
-                            return `
-                                <tr>
-                                    <td>${nota.nNF}</td>
-                                    <td>${it.ncm}</td>
-                                    <td>${it.xProd.substring(0, 30)}...</td>
-                                    <td>R$${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
-                                    <td>${Number(it.aliqIcms).toLocaleString('pt-BR')}</td>
-                                    <td>17</td>
-                                    <td>R$${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                    <td>R$0,00</td>
-                                </tr>
-                            `;
+                            return `<tr><td>${nota.nNF}</td><td>${it.ncm}</td><td>${it.xProd.substring(0, 30)}...</td><td>R$${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${Number(it.aliqIcms).toLocaleString('pt-BR')}</td><td>17</td><td>R$${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$0,00</td></tr>`;
                         }).join('')}
                     </tbody>
                 </table>
-
                 <div class="totals-container">
-                    <div class="total-box">
-                        <div class="total-title">Total de<br>Produtos</div>
-                        <div class="total-val">${nota.itens.length}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">ICMS-ST<br>Recolhido<br>Antecipado</div>
-                        <div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">FECEP-ST<br>Recolhido<br>Antecipado</div>
-                        <div class="total-val">R$0,00</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Valor Total<br>ICMS-ST</div>
-                        <div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Valor Total<br>FECEP-ST</div>
-                        <div class="total-val">R$0,00</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Valor Total<br>Base-ST</div>
-                        <div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                    </div>
+                    <div class="total-box"><div class="total-title">Total de<br>Produtos</div><div class="total-val">${nota.itens.length}</div></div>
+                    <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido<br>Antecipado</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                    <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido<br>Antecipado</div><div class="total-val">R$0,00</div></div>
+                    <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                    <div class="total-box"><div class="total-title">Valor Total<br>FECEP-ST</div><div class="total-val">R$0,00</div></div>
+                    <div class="total-box"><div class="total-title">Valor Total<br>Base-ST</div><div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                 </div>
-                
                 ${creditoBanner}
-
                 <script>window.print();<\/script>
-            </body>
-            </html>
-        `;
+            </body></html>`;
         const janela = window.open('', '_blank');
         janela.document.write(htmlStr);
         janela.document.close();
@@ -1043,224 +805,256 @@
     const excelInputMensal = document.getElementById('excel-input-mensal');
 
     dropZoneMensal.onclick = () => excelInputMensal.click();
-    excelInputMensal.onchange = (e) => processarExcelMensal(e.target.files[0]);
+    excelInputMensal.onchange = (e) => processarArquivosMensal(e.target.files);
     dropZoneMensal.ondragover = (e) => { e.preventDefault(); dropZoneMensal.classList.add('dragover'); };
     dropZoneMensal.ondragleave = () => { dropZoneMensal.classList.remove('dragover'); };
-    dropZoneMensal.ondrop = (e) => { e.preventDefault(); dropZoneMensal.classList.remove('dragover'); processarExcelMensal(e.dataTransfer.files[0]); };
+    dropZoneMensal.ondrop = (e) => { e.preventDefault(); dropZoneMensal.classList.remove('dragover'); processarArquivosMensal(e.dataTransfer.files); };
 
-    let dadosMensal = [];
-    let totalStMensal = 0;
-    let totalBcStMensal = 0;
+    let dadosMain = [];
+    let dbProd = {};
+    let dbInfo = {};
+    let arrayResumo = [];
+    let totalBcGeral = 0;
+    let totalIcmsGeral = 0;
 
-    function processarExcelMensal(file) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-            
-            dadosMensal = [];
-            totalStMensal = 0;
-            totalBcStMensal = 0;
-            let totalProdutos = 0;
-
-            json.forEach(row => {
-                let notaRaw = row['Nro. nota'] || row['Nota'] || row['NF'] || '';
-                let ncmRaw = row['Cód. NCM'] || row['NCM'] || '';
-                if(!notaRaw || !ncmRaw) return;
-
-                let notaNum = parseFloat(notaRaw);
-                let notaStr = isNaN(notaNum) ? String(notaRaw).trim() : String(notaNum.toFixed(0));
-
-                // Processamento seguro do NCM garantindo que não perca os Zeros a esquerda se virar float
-                let ncmStr = isNaN(parseFloat(ncmRaw)) ? String(ncmRaw).trim() : parseFloat(ncmRaw).toFixed(0).padStart(8, '0');
+    function processarArquivosMensal(files) {
+        if (!files || files.length === 0) return;
+        
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
                 
-                let produto = row['Descrição'] || row['Produto'] || row['Nome'] || '';
-                let vUnit = parseFloat(row['VLRUNIT']) || 0;
-                let vTotal = parseFloat(row['Vlr. total']) || 0;
-                let vFrete = parseFloat(row['Vlr. Frete NF']) || 0;
-                let vIPI = parseFloat(row['Vlr. IPI']) || 0;
-                let vCTE = parseFloat(row['Vlr. CTE']) || 0;
-                let bcIcms = parseFloat(row['Base ICMS']) || vTotal;
-                
-                let aliqEfetiva = parseFloat(row['ALIQUOTA EFETIVA']) || parseFloat(row['ALIQICMS']) || 7;
-                
-                let info = dbNcm[ncmStr];
-                let mva = 0;
-                let fator = 1;
-
-                if (info) {
-                    mva = info.mva; 
-                    fator = info.red === 0 ? 1 : info.red;
-                } else {
-                    let bitStr = String(row['BIT'] || 'NT').toUpperCase();
-                    let redSheet = (bitStr === 'NT' || bitStr === '-' || bitStr === '') ? 0 : (parseFloat(bitStr) / 100 || 0);
-                    mva = (parseFloat(row['MVA do Produto']) || 0) / 100;
-                    fator = redSheet === 0 ? 1 : redSheet;
-                }
-
-                let valorOperacao = vTotal + vFrete + vIPI + vCTE;
-                let baseST = Number((valorOperacao * (1 + mva) * fator).toFixed(2));
-                let creditoICMS = Number((bcIcms * (aliqEfetiva / 100) * fator).toFixed(2));
-                let stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
-                
-                dadosMensal.push({
-                    nota: notaStr, ncm: ncmStr, produto, vUnit, vTotal,
-                    freteIpi: vFrete + vIPI + vCTE, bcIcms,
-                    mva, aliqEfetiva, fator, credito: creditoICMS,
-                    baseST, icmsST: stFinal
+                workbook.SheetNames.forEach(sheetName => {
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
+                    if(json.length === 0) return;
+                    
+                    const keys = Object.keys(json[0]);
+                    
+                    if(keys.includes('Cód. Operação') || keys.includes('Cód. Empresa') || keys.includes('Nro. nota')) {
+                        dadosMain = dadosMain.concat(json);
+                        document.getElementById('badge-main').className = 'badge-status ok';
+                        document.getElementById('badge-main').innerText = `✅ Principal (${dadosMain.length} linhas)`;
+                    } 
+                    
+                    if(keys.includes('Código') || keys.includes('Cód. Produto')) {
+                        let foundNcm = keys.find(k => k.toLowerCase().includes('ncm'));
+                        let foundCod = keys.find(k => k.toLowerCase().includes('código') || k.toLowerCase().includes('cód'));
+                        if(foundCod && foundNcm) {
+                            json.forEach(r => { dbProd[String(r[foundCod]).trim()] = String(r[foundNcm]).trim(); });
+                            document.getElementById('badge-prod').className = 'badge-status ok';
+                            document.getElementById('badge-prod').innerText = `✅ Produtos (${Object.keys(dbProd).length} itens)`;
+                        }
+                    }
+                    
+                    if(keys.includes('DÉBITO CRÉDITO / SUBSTITUIÇÃO TRIBUTÁRIA') || keys.includes('PREVISÃO DE REDUÇÃO') || sheetName === 'Info Fiscais') {
+                        let ncmKey = keys.find(k => k.toUpperCase() === 'NCM') || keys[0];
+                        json.forEach(r => {
+                            let ncm = String(r[ncmKey]).replace(/\D/g, '');
+                            if(!ncm) return;
+                            dbInfo[ncm] = {
+                                tipo: String(r['DÉBITO CRÉDITO / SUBSTITUIÇÃO TRIBUTÁRIA'] || '').trim(),
+                                red: r['PREVISÃO DE REDUÇÃO'],
+                                cred_out: r['Créd. Outorgado / Cont. outra UF'],
+                                demais: r['Demais contribuintes (Op. Inter)']
+                            };
+                        });
+                        document.getElementById('badge-info').className = 'badge-status ok';
+                        document.getElementById('badge-info').innerText = `✅ Fiscais (${Object.keys(dbInfo).length} regras)`;
+                    }
                 });
-
-                totalStMensal += stFinal;
-                totalBcStMensal += baseST;
-                totalProdutos++;
-            });
-
-            renderizarTabelaMensal();
-        };
-        reader.readAsArrayBuffer(file);
+            };
+            reader.readAsArrayBuffer(file);
+        });
         excelInputMensal.value = '';
     }
 
-    function renderizarTabelaMensal() {
-        const tbody = document.getElementById('corpo-tabela-mensal');
-        let html = '';
-        
-        // Renderiza limitados na View Web para performance (imprime todos)
-        let limite = Math.min(dadosMensal.length, 100);
-        
-        for(let i=0; i<limite; i++) {
-            let it = dadosMensal[i];
-            html += `<tr>
-                <td>${it.nota}</td>
-                <td>${it.ncm}</td>
-                <td title="${it.produto}">${it.produto.length > 25 ? it.produto.substring(0,25) + '...' : it.produto}</td>
-                <td>R$ ${it.vTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td>${(it.mva*100).toLocaleString('pt-BR',{minimumFractionDigits:2})}%</td>
-                <td><strong style="color:var(--warning);">R$ ${it.credito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                <td>R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td><strong style="color:var(--success);">R$ ${it.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-            </tr>`;
+    function extrairFloat(val) {
+        if(val === undefined || val === null || val === '') return 0;
+        if(typeof val === 'number') return val;
+        let str = String(val).toUpperCase().trim();
+        if(str === 'NT' || str === '-' || str === 'D/C') return 0;
+        str = str.replace('%','').replace(',','.');
+        let num = parseFloat(str);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function gerarCalculoMensal() {
+        if(dadosMain.length === 0) {
+            alert("Aguarde a Planilha Principal ser carregada (arraste os arquivos primeiro).");
+            return;
         }
         
-        if (dadosMensal.length > 100) {
-            html += `<tr><td colspan="8" style="text-align:center; color:var(--text-sub); padding: 15px;">... e mais ${dadosMensal.length - 100} itens ocultos na prévia (visíveis apenas na impressão).</td></tr>`;
+        let relatorioResumo = {};
+        totalBcGeral = 0; totalIcmsGeral = 0; let totalLinhasValidas = 0;
+
+        dadosMain.forEach(row => {
+            let codOp = parseInt(row['Cód. Operação']);
+            if(![200, 237, 230].includes(codOp)) return; 
+
+            let nroNota = String(row['Nro. nota'] || 'S/N').trim();
+            let empresa = String(row['Empresa'] || row['Descrição TOP'] || 'S/E').trim();
+            
+            let codProd = String(row['Cód. Produto']).trim();
+            let ncmRaw = dbProd[codProd] || String(row['Cód. NCM'] || '');
+            let ncm = ncmRaw.replace(/\D/g, '');
+
+            let info = dbInfo[ncm];
+            let mva = 0; let fator = 1;
+
+            if(info) {
+                let redStr = String(info.red).toUpperCase().trim();
+                let isEnum = redStr !== 'NT' && redStr !== '-' && redStr !== '' && redStr !== 'D/C';
+                
+                let redNum = extrairFloat(info.red);
+                let cred_out = extrairFloat(info.cred_out);
+                let demais = extrairFloat(info.demais);
+                
+                if(redNum > 1) redNum /= 100;
+                if(cred_out > 1) cred_out /= 100;
+                if(demais > 1) demais /= 100;
+
+                if (info.tipo === 'D/C') {
+                    mva = 0;
+                } else if (isEnum && redNum > 0) {
+                    mva = demais; fator = redNum;
+                } else if (info.tipo === 'Substituição Tributária') {
+                    mva = cred_out;
+                }
+            } else {
+                mva = extrairFloat(row['MVA do Produto']);
+                if(mva > 1) mva /= 100;
+                
+                let bitStr = String(row['BIT']).toUpperCase().trim();
+                if(bitStr !== 'NT' && bitStr !== '-' && bitStr !== '') {
+                    let bit = extrairFloat(bitStr);
+                    if(bit > 1) bit /= 100;
+                    if(bit > 0) fator = bit;
+                }
+            }
+
+            let vTotal = extrairFloat(row['Vlr. total']);
+            let vFrete = extrairFloat(row['Vlr. Frete NF']);
+            let vIPI = extrairFloat(row['Vlr. IPI']);
+            let vCTE = extrairFloat(row['Vlr. CTE']);
+            let baseIcms = extrairFloat(row['Base ICMS']) || vTotal;
+            
+            let aliqEfetiva = extrairFloat(row['ALIQUOTA EFETIVA']) || extrairFloat(row['ALIQICMS']) || 7;
+
+            let valOp = vTotal + vFrete + vIPI + vCTE;
+            let baseMajorada = valOp * (1 + mva);
+            let baseST = baseMajorada * fator;
+            let creditoICMS = baseIcms * (aliqEfetiva / 100) * fator;
+            let icmsST = (baseST * 0.17) - creditoICMS;
+
+            if (icmsST < 0) icmsST = 0; 
+
+            let key = nroNota + '-' + empresa;
+            if (!relatorioResumo[key]) {
+                relatorioResumo[key] = { nota: nroNota, empresa, valOp: 0, baseST: 0, icmsST: 0, itens: 0 };
+            }
+            relatorioResumo[key].valOp += valOp;
+            relatorioResumo[key].baseST += baseST;
+            relatorioResumo[key].icmsST += icmsST;
+            relatorioResumo[key].itens++;
+
+            totalBcGeral += baseST;
+            totalIcmsGeral += icmsST;
+            totalLinhasValidas++;
+        });
+
+        arrayResumo = Object.values(relatorioResumo);
+        
+        if(arrayResumo.length === 0) {
+            alert("Nenhuma nota com Cód. Operação 200, 237 ou 230 foi encontrada na Planilha Principal.");
+            return;
         }
 
+        const tbody = document.getElementById('corpo-tabela-mensal');
+        let html = '';
+        arrayResumo.slice(0, 150).forEach(r => { // Renderiza preview
+            html += `<tr>
+                <td>${r.nota}</td><td>${r.empresa}</td><td style="text-align:center;">${r.itens}</td>
+                <td>R$ ${r.valOp.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${r.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><strong style="color:var(--success);">R$ ${r.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+            </tr>`;
+        });
+        if(arrayResumo.length > 150) html += `<tr><td colspan="6" style="text-align:center; padding: 15px; color:var(--text-sub);">Exibindo as primeiras 150 notas. O relatório impresso conterá as ${arrayResumo.length} notas processadas.</td></tr>`;
+
         tbody.innerHTML = html;
-        document.getElementById('total-st-mensal').innerText = `Total ST Mensal: R$ ${totalStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('total-st-mensal').innerText = `Total ST Apurado: R$ ${totalIcmsGeral.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
         document.getElementById('mensal-result-card').style.display = 'block';
     }
 
     function imprimirRelatorioMensal() {
+        if(arrayResumo.length === 0) return;
         const dataAtual = new Date();
         const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
         const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
-        const htmlStr = `
-            <!DOCTYPE html>
-            <html lang="pt-br">
-            <head>
-                <meta charset="UTF-8">
-                <title>Apuração Mensal do ICMS ST</title>
-                <style>
-                    body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; padding: 20px 30px; color: #000; }
-                    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-                    .logo { max-width: 150px; }
-                    .header-title { font-size: 18px; font-weight: normal; text-align: center; flex-grow: 1; }
-                    .line-separator { border-top: 1px solid #000; margin-bottom: 15px; }
-                    
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9px; page-break-inside: auto; }
-                    thead { display: table-header-group; }
-                    tr { page-break-inside: avoid; page-break-after: auto; }
-                    th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 5px 4px; border: none; }
-                    th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
-                    td { padding: 4px; text-align: right; border: 1px solid #000; }
-                    td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
-                    
-                    .totals-container { display: flex; justify-content: space-around; margin-top: 30px; text-align: center; page-break-inside: avoid; }
-                    .total-box { display: flex; flex-direction: column; align-items: center; }
-                    .total-title { font-size: 11px; margin-bottom: 8px; max-width: 100px; }
-                    .total-val { font-size: 13px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%; }
-                    
-                    @media print {
-                        @page { size: landscape; margin: 10mm; }
-                        body { padding: 0; }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="header-top">
-                    <img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo">
-                    <div class="header-title">Memória de Cálculo do ICMS ST - Apuração Mensal</div>
-                </div>
-                <div class="line-separator"></div>
-                
-                <div style="margin-bottom: 15px;">
-                    <strong>Impresso por:</strong> Usuário Local &nbsp;&nbsp;&nbsp; <strong>Data/Hora Emissão:</strong> ${dataImpressao} ${horaImpressao}
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nota</th>
-                            <th>NCM</th>
-                            <th>Produto</th>
-                            <th>Valor Un.</th>
-                            <th>Valor Total</th>
-                            <th>Despesas (Frete/IPI/CTE)</th>
-                            <th>MVA Aplicado</th>
-                            <th>Aliq.<br>Créd.</th>
-                            <th>Aliq.<br>ICMS</th>
-                            <th>Valor Crédito</th>
-                            <th>Base ST</th>
-                            <th>ICMS ST</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${dadosMensal.map(it => {
-                            return `<tr>
-                                <td>${it.nota}</td>
-                                <td>${it.ncm}</td>
-                                <td>${it.produto.substring(0, 35)}</td>
-                                <td>R$${it.vUnit.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$${it.vTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$${it.freteIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>${(it.mva*100).toLocaleString('pt-BR',{minimumFractionDigits:2})}%</td>
-                                <td>${it.aliqEfetiva}</td>
-                                <td>17</td>
-                                <td>R$${it.credito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td>R$${it.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                            </tr>`;
-                        }).join('')}
-                    </tbody>
-                </table>
-
-                <div class="totals-container">
-                    <div class="total-box">
-                        <div class="total-title">Total de<br>Itens Processados</div>
-                        <div class="total-val">${dadosMensal.length}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Valor Total<br>Base-ST</div>
-                        <div class="total-val">R$${totalBcStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Valor Total<br>ICMS-ST Calculado</div>
-                        <div class="total-val">R$${totalStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                    </div>
-                </div>
-                <script>window.print();<\/script>
-            </body>
-            </html>
-        `;
+        const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Apuração Mensal do ICMS ST</title><style>
+            body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px 30px; color: #000; }
+            .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+            .logo { max-width: 150px; }
+            .header-title { font-size: 18px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 150px; }
+            .line-separator { border-top: 1px solid #000; margin-bottom: 15px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; page-break-inside: auto; }
+            thead { display: table-header-group; } tr { page-break-inside: avoid; page-break-after: auto; }
+            th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none; }
+            th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
+            td { padding: 5px 4px; text-align: right; border: 1px solid #000; }
+            td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
+            .totals-container { display: flex; justify-content: space-around; margin-top: 30px; text-align: center; page-break-inside: avoid; }
+            .total-box { display: flex; flex-direction: column; align-items: center; }
+            .total-title { font-size: 12px; margin-bottom: 8px; max-width: 120px; }
+            .total-val { font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%; }
+            @media print { @page { size: portrait; margin: 10mm; } body { padding: 0; } }
+        </style></head>
+        <body>
+            <div class="header-top">
+                <img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo">
+                <div class="header-title">Memória de Cálculo - ICMS ST (Lote Mensal)</div>
+            </div>
+            <div class="line-separator"></div>
+            <div style="margin-bottom: 20px; font-size: 12px;">
+                <strong>Impresso por:</strong> PAULO &nbsp;&nbsp;&nbsp; <strong>Data/Hora Emissão:</strong> ${dataImpressao} ${horaImpressao}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nota</th><th>Fornecedor/Operação</th><th style="text-align: center;">Qtd Itens</th>
+                        <th>Valor Total Op.</th><th>Base ST Calculada</th><th>ICMS ST Apurado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${arrayResumo.map(r => `<tr>
+                        <td>${r.nota}</td><td>${r.empresa}</td><td style="text-align: center;">${r.itens}</td>
+                        <td>R$${r.valOp.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                        <td>R$${r.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                        <td><strong>R$${r.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+            <div class="totals-container">
+                <div class="total-box"><div class="total-title">Total de Notas</div><div class="total-val">${arrayResumo.length}</div></div>
+                <div class="total-box"><div class="total-title">Total Base ST</div><div class="total-val">R$${totalBcGeral.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                <div class="total-box"><div class="total-title">Total ICMS-ST Apurado</div><div class="total-val">R$${totalIcmsGeral.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+            </div>
+            <script>window.print();<\/script>
+        </body></html>`;
         const janela = window.open('', '_blank');
         janela.document.write(htmlStr);
         janela.document.close();
+    }
+
+    function limparMensal() {
+        dadosMain = []; dbProd = {}; dbInfo = {}; arrayResumo = [];
+        document.getElementById('badge-main').className = 'badge-status'; document.getElementById('badge-main').innerText = '⏳ Principal (Pendente)';
+        document.getElementById('badge-prod').className = 'badge-status'; document.getElementById('badge-prod').innerText = '⏳ Produtos (Pendente)';
+        document.getElementById('badge-info').className = 'badge-status'; document.getElementById('badge-info').innerText = '⏳ Info Fiscais (Pendente)';
+        document.getElementById('mensal-result-card').style.display = 'none'; document.getElementById('excel-input-mensal').value = '';
     }
 
     // --- MÓDULO 2: CÁLCULO MANUAL ---
@@ -1268,59 +1062,43 @@
         if(!t) return 0;
         return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0;
     }
-
     function setAliq(v) {
         aliqAtivaManual = v;
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
     }
-
     function processarManual() {
         const ncm = document.getElementById('ncm').value.trim();
         const vProd = limparNum(document.getElementById('vlr').value);
         const vIpi = limparNum(document.getElementById('ipi').value);
         const vFrete = limparNum(document.getElementById('frete_manual').value);
         let vBC_icms = limparNum(document.getElementById('bc_icms_manual').value);
-        
         if (!ncm) return;
         if (vBC_icms === 0) vBC_icms = vProd + vFrete;
-
         const info = dbNcm[ncm] || { mva: 0, red: 0 };
         let baseST = 0, stFinal = 0, creditoICMS = 0, valorOperacao = 0;
         let fator = info.red === 0 ? 1 : info.red;
-
         if (info.mva > 0) {
             valorOperacao = vProd + vIpi + vFrete;
             baseST = Number((valorOperacao * (1 + info.mva) * fator).toFixed(2));
             creditoICMS = Number((vBC_icms * aliqAtivaManual * fator).toFixed(2));
             stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
         }
-
         historicoManual.push({ ncm, mva: info.mva, valorOperacao, vBC_icms, baseST, creditoICMS, stFinal, fator, aliqFixaUsada: aliqAtivaManual });
         atualizarTabelaManual();
-        
-        document.getElementById('ncm').value = '';
-        document.getElementById('vlr').value = '';
-        document.getElementById('ipi').value = '';
-        document.getElementById('frete_manual').value = '';
-        document.getElementById('bc_icms_manual').value = '';
+        document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
+        document.getElementById('frete_manual').value = ''; document.getElementById('bc_icms_manual').value = '';
     }
-
     function atualizarTabelaManual() {
-        let total = 0;
-        let html = '';
+        let total = 0; let html = '';
         historicoManual.forEach((it, idx) => {
-            total += it.stFinal;
-            const isZero = it.mva === 0;
+            total += it.stFinal; const isZero = it.mva === 0;
             html += `<tr>
-                <td>${it.ncm}</td>
-                <td class="${isZero ? 'isento-txt' : ''}">${(it.mva*100).toFixed(2)}%</td>
+                <td>${it.ncm}</td><td class="${isZero ? 'isento-txt' : ''}">${(it.mva*100).toFixed(2)}%</td>
                 <td>R$ ${it.valorOperacao.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td><div class="val-container"><span class="${isZero ? 'isento-txt' : ''}">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
-                    ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}</div></td>
+                <td><div class="val-container"><span class="${isZero ? 'isento-txt' : ''}">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}</div></td>
                 <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong> <span style="font-size: 10px; color: var(--text-sub)">(${(it.aliqFixaUsada*100).toFixed(0)}%)</span></td>
-                <td><div class="val-container"><span class="${!isZero ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
-                    ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}</div></td>
+                <td><div class="val-container"><span class="${!isZero ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}</div></td>
                 <td style="text-align:center;"><button class="icon-btn delete" onclick="removerLinhaManual(${idx})">${svgDel}</button></td>
             </tr>`;
         });
@@ -1328,16 +1106,13 @@
         document.getElementById('totalStManual').innerText = `Total ST: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
         document.getElementById('resManualCard').style.display = 'block';
     }
-
     function removerLinhaManual(idx) {
         historicoManual.splice(idx, 1);
         if (historicoManual.length === 0) document.getElementById('resManualCard').style.display = 'none';
         else atualizarTabelaManual();
     }
-
     function limparManual() {
-        historicoManual = [];
-        document.getElementById('resManualCard').style.display = 'none';
+        historicoManual = []; document.getElementById('resManualCard').style.display = 'none';
         document.getElementById('ncm').value = ''; document.getElementById('vlr').value = ''; document.getElementById('ipi').value = '';
         document.getElementById('frete_manual').value = ''; document.getElementById('bc_icms_manual').value = '';
     }
@@ -1347,7 +1122,6 @@
         const query = document.getElementById('search-ncm').value.trim();
         const resDiv = document.getElementById('ncm-result');
         if (!query) { resDiv.innerHTML = '<p>Digite um NCM.</p>'; return; }
-
         const info = dbNcm[query];
         if (info) {
             let mDemais = info.mvaDemais !== undefined ? info.mvaDemais : info.mva;
@@ -1355,92 +1129,49 @@
             const mvaOutStr = info.mvaOut > 0 ? (info.mvaOut * 100).toFixed(2) : '-';
             const mvaAtaStr = info.mvaAta > 0 ? (info.mvaAta * 100).toFixed(2) : '-';
             const mvaAtivaStr = (info.mva * 100).toFixed(2);
-            
-            const redBc = (info.red * 100).toFixed(2);
-            const isNT = info.red === 0;
-            const categoria = info.categoria || 'Não informada';
-            const fundamento = info.fundamento || 'Não informada';
-            const cest = info.cest || '---';
-            const tipo = info.tipo || 'Substituição Tributária';
-
+            const redBc = (info.red * 100).toFixed(2); const isNT = info.red === 0;
+            const categoria = info.categoria || 'Não informada'; const fundamento = info.fundamento || 'Não informada';
+            const cest = info.cest || '---'; const tipo = info.tipo || 'Substituição Tributária';
             let stBadgeStyle = tipo.includes('D/C') ? 'background: var(--accent-bg); color: var(--accent);' : '';
 
             resDiv.innerHTML = `
-                <div class="ncm-card-pro">
-                    <div class="ncm-header-pro">
-                        <h2>${query}</h2>
-                        <span class="uf-badge">MT</span>
-                    </div>
-                    <div class="ncm-cest-pro">CEST: ${cest}</div>
-                    
-                    <div class="ncm-tags">
-                        <div class="tag-row">
-                            <div class="st-tag-bg" style="${stBadgeStyle}">${svgScale} ${tipo}</div>
-                        </div>
+                <div class="ncm-card-pro"><div class="ncm-header-pro"><h2>${query}</h2><span class="uf-badge">MT</span></div><div class="ncm-cest-pro">CEST: ${cest}</div>
+                    <div class="ncm-tags"><div class="tag-row"><div class="st-tag-bg" style="${stBadgeStyle}">${svgScale} ${tipo}</div></div>
                         <div class="tag-row">${svgTag} <strong>Classificação:</strong> ${categoria}</div>
                         <div class="tag-row">${svgTag} <strong>Legislação:</strong> ${fundamento}</div>
                         <div class="tag-row">${svgPerc} <strong>% Redução BC:</strong> ${isNT ? 'NT (Não Tem)' : redBc + '%'}</div>
                     </div>
-
-                    <div>
-                        <div class="mva-section-title">MVA / CRÉDITO</div>
-                        <div class="mva-grid-pro">
+                    <div><div class="mva-section-title">MVA / CRÉDITO</div><div class="mva-grid-pro">
                             <div class="mva-box-pro"><span class="mva-box-label">Créd. Outorgado</span><span class="mva-box-val">${mvaOutStr !== '-' ? mvaOutStr + '%' : '-'}</span></div>
                             <div class="mva-box-pro"><span class="mva-box-label">Atacadista</span><span class="mva-box-val">${mvaAtaStr !== '-' ? mvaAtaStr + '%' : '-'}</span></div>
                             <div class="mva-box-pro"><span class="mva-box-label">Demais (Op. Inter)</span><span class="mva-box-val">${mvaDemaisStr !== '-' ? mvaDemaisStr + '%' : '-'}</span></div>
-                        </div>
-                    </div>
-                    
+                    </div></div>
                     <div style="margin-top: 15px; padding: 10px; background: var(--success-bg); border-radius: 8px; font-size: 13px; color: var(--success); font-weight: 500; display: flex; align-items: center; gap: 8px;">
                         ${svgCheck} MVA Oficial do Cálculo: ${mvaAtivaStr}% (Alinhado à regra de Redução)
                     </div>
-
-                    <div class="ncm-actions-pro">
-                        <button class="btn-secondary" onclick="abrirModalNCM('${query}', true)">Clonar</button>
-                        <button class="btn-main" onclick="abrirModalNCM('${query}', false)">Editar</button>
-                    </div>
-                </div>
-            `;
+                    <div class="ncm-actions-pro"><button class="btn-secondary" onclick="abrirModalNCM('${query}', true)">Clonar</button><button class="btn-main" onclick="abrirModalNCM('${query}', false)">Editar</button></div>
+                </div>`;
         } else {
             resDiv.innerHTML = `<p style="color: var(--danger); text-align:center;">NCM não encontrado. <br><br> <button class="btn-secondary" onclick="abrirModalNCM('${query}', false)">Adicionar Novo</button></p>`;
         }
     }
-
     function abrirModalNCM(ncmBase, isClone) {
-        document.getElementById('modal-overlay').classList.add('active');
-        document.getElementById('modal-ncm').style.display = 'block';
-        
+        document.getElementById('modal-overlay').classList.add('active'); document.getElementById('modal-ncm').style.display = 'block';
         if (ncmBase && dbNcm[ncmBase]) {
-            const inf = dbNcm[ncmBase];
-            let mDemais = inf.mvaDemais !== undefined ? inf.mvaDemais : inf.mva;
-            
-            document.getElementById('form-ncm').value = isClone ? '' : ncmBase;
-            document.getElementById('form-cest').value = inf.cest || '';
-            document.getElementById('form-cat').value = inf.categoria || '';
-            document.getElementById('form-fund').value = inf.fundamento || '';
-            document.getElementById('form-mva').value = (mDemais * 100).toFixed(2);
-            document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
-            document.getElementById('form-mva-ata').value = (inf.mvaAta * 100).toFixed(2);
-            document.getElementById('form-mva-out').value = (inf.mvaOut * 100).toFixed(2);
+            const inf = dbNcm[ncmBase]; let mDemais = inf.mvaDemais !== undefined ? inf.mvaDemais : inf.mva;
+            document.getElementById('form-ncm').value = isClone ? '' : ncmBase; document.getElementById('form-cest').value = inf.cest || '';
+            document.getElementById('form-cat').value = inf.categoria || ''; document.getElementById('form-fund').value = inf.fundamento || '';
+            document.getElementById('form-mva').value = (mDemais * 100).toFixed(2); document.getElementById('form-red').value = (inf.red * 100).toFixed(2);
+            document.getElementById('form-mva-ata').value = (inf.mvaAta * 100).toFixed(2); document.getElementById('form-mva-out').value = (inf.mvaOut * 100).toFixed(2);
             document.getElementById('modal-title').innerText = isClone ? `Clonando de ${ncmBase}` : `Editando ${ncmBase}`;
         } else {
-            document.getElementById('form-ncm').value = ncmBase || '';
-            document.getElementById('form-cest').value = '';
-            document.getElementById('form-cat').value = '';
-            document.getElementById('form-fund').value = '';
-            document.getElementById('form-mva').value = '';
-            document.getElementById('form-red').value = '';
-            document.getElementById('form-mva-ata').value = '';
-            document.getElementById('form-mva-out').value = '';
+            document.getElementById('form-ncm').value = ncmBase || ''; document.getElementById('form-cest').value = '';
+            document.getElementById('form-cat').value = ''; document.getElementById('form-fund').value = ''; document.getElementById('form-mva').value = '';
+            document.getElementById('form-red').value = ''; document.getElementById('form-mva-ata').value = ''; document.getElementById('form-mva-out').value = '';
             document.getElementById('modal-title').innerText = 'Adicionar Novo NCM';
         }
     }
-
-    function fecharModal() {
-        document.getElementById('modal-overlay').classList.remove('active');
-        document.getElementById('modal-ncm').style.display = 'none';
-    }
-
+    function fecharModal() { document.getElementById('modal-overlay').classList.remove('active'); document.getElementById('modal-ncm').style.display = 'none'; }
     function salvarNCM() {
         const ncm = document.getElementById('form-ncm').value.trim();
         const mvaDemais = parseFloat(document.getElementById('form-mva').value.replace(',','.')) / 100 || 0;
@@ -1452,41 +1183,20 @@
         const mvaOut = parseFloat(document.getElementById('form-mva-out').value.replace(',','.')) / 100 || 0;
 
         if (!ncm) { alert("Preencha o NCM!"); return; }
-
         const tipoOriginal = dbNcm[ncm] ? dbNcm[ncm].tipo : 'Substituição Tributária';
+        let isNT = red === 0; let mvaCalculo = isNT ? mvaOut : mvaDemais;
 
-        let isNT = red === 0;
-        let mvaCalculo = isNT ? mvaOut : mvaDemais;
-
-        const payload = { 
-            mva: mvaCalculo, 
-            mvaDemais: mvaDemais, 
-            red: red, 
-            cest: cest, 
-            categoria: categoria, 
-            fundamento: fundamento, 
-            mvaAta: mvaAta, 
-            mvaOut: mvaOut, 
-            tipo: tipoOriginal 
-        };
+        const payload = { mva: mvaCalculo, mvaDemais: mvaDemais, red: red, cest: cest, categoria: categoria, fundamento: fundamento, mvaAta: mvaAta, mvaOut: mvaOut, tipo: tipoOriginal };
         dbNcm[ncm] = payload;
-
-        const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}');
-        customDb[ncm] = payload;
+        const customDb = JSON.parse(localStorage.getItem('customDbNcm') || '{}'); customDb[ncm] = payload;
         localStorage.setItem('customDbNcm', JSON.stringify(customDb));
-
-        fecharModal();
-        document.getElementById('search-ncm').value = ncm;
-        buscarNCM();
+        fecharModal(); document.getElementById('search-ncm').value = ncm; buscarNCM();
     }
 
     // --- MÓDULO 4: EXTRATOR DE DIFAL ---
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     const POS = { dataX: 140, dataY: 617, colDescX: 175, colValorX: 405, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
-
-    const dropZoneDifal = document.getElementById('drop-zone-difal');
-    const pdfInputDifal = document.getElementById('pdf-input-difal');
-
+    const dropZoneDifal = document.getElementById('drop-zone-difal'); const pdfInputDifal = document.getElementById('pdf-input-difal');
     dropZoneDifal.onclick = () => pdfInputDifal.click();
     pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
     dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); };
@@ -1494,270 +1204,114 @@
     dropZoneDifal.ondrop = (e) => { e.preventDefault(); dropZoneDifal.classList.remove('dragover'); processarArquivosDIFAL(e.dataTransfer.files); };
 
     function mostrarLogDifal(mensagem) {
-        const logEl = document.getElementById('log-difal');
-        logEl.style.display = 'block';
-        logEl.innerText += mensagem + "\n";
-        logEl.scrollTop = logEl.scrollHeight;
+        const logEl = document.getElementById('log-difal'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
     }
-
     async function extractTextFromPDF(file) {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-        let fullText = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageText = textContent.items.map(item => item.str).join(" ");
-            fullText += pageText + " ";
-        }
+        const arrayBuffer = await file.arrayBuffer(); const pdf = await pdfjsLib.getDocument(arrayBuffer).promise; let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i); const textContent = await page.getTextContent(); fullText += textContent.items.map(item => item.str).join(" ") + " "; }
         return fullText;
     }
-
     async function processarArquivosDIFAL(files) {
         if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files;
         if (!files || files.length === 0) return;
-
-        const status = document.getElementById('status-difal');
-        const log = document.getElementById('log-difal');
-
-        status.innerText = "⏳ Lendo arquivos...";
-        log.innerText = "";
-        log.style.display = 'none';
-        document.getElementById('previewSectionDifal').style.display = 'none';
-        
+        const status = document.getElementById('status-difal'); const log = document.getElementById('log-difal');
+        status.innerText = "⏳ Lendo arquivos..."; log.innerText = ""; log.style.display = 'none'; document.getElementById('previewSectionDifal').style.display = 'none';
         let dadosExtraidos = [];
-
         for (const file of files) {
             try {
                 const text = await extractTextFromPDF(file);
-                const matchNf = text.match(/N\.\s*([\d\.]+)/);
-                const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/);
-                const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
-                
-                const matchMulta = text.match(/Multa[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-                const matchJuros = text.match(/Juros[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-
+                const matchNf = text.match(/N\.\s*([\d\.]+)/); const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/); const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
+                const matchMulta = text.match(/Multa[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i); const matchJuros = text.match(/Juros[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
                 let numeroNf = matchNf ? matchNf[1] : "N/A";
                 let valorDifal = matchDifal ? parseFloat(matchDifal[1].replace('.', '').replace(',', '.')) : 0;
                 let valorFcp = matchFcp ? parseFloat(matchFcp[1].replace('.', '').replace(',', '.')) : 0;
                 let valorMulta = matchMulta ? parseFloat(matchMulta[1].replace('.', '').replace(',', '.')) : 0;
                 let valorJuros = matchJuros ? parseFloat(matchJuros[1].replace('.', '').replace(',', '.')) : 0;
-
                 let valorTotal = valorDifal + valorFcp + valorMulta + valorJuros;
-
-                if (numeroNf !== "N/A") {
-                    dadosExtraidos.push({ nf: numeroNf, valor: valorTotal });
-                    mostrarLogDifal(`✅ NF ${numeroNf} lida: Difal+FCP + Multa (R$ ${valorMulta}) + Juros (R$ ${valorJuros})`);
-                } else {
-                    mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`);
-                }
-            } catch (error) {
-                mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`);
-            }
+                if (numeroNf !== "N/A") { dadosExtraidos.push({ nf: numeroNf, valor: valorTotal }); mostrarLogDifal(`✅ NF ${numeroNf} lida: Difal+FCP + Multa (R$ ${valorMulta}) + Juros (R$ ${valorJuros})`); } else { mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`); }
+            } catch (error) { mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); }
         }
-
         document.getElementById('pdf-input-difal').value = '';
-
-        if (dadosExtraidos.length === 0) {
-            status.innerText = "Nenhum dado encontrado nas notas selecionadas.";
-            return;
-        }
-
-        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote.";
-        renderizarTabelaDifal(dadosExtraidos);
+        if (dadosExtraidos.length === 0) { status.innerText = "Nenhum dado encontrado nas notas selecionadas."; return; }
+        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; renderizarTabelaDifal(dadosExtraidos);
     }
-
     function renderizarTabelaDifal(dados) {
-        const tbody = document.querySelector('#tabelaPreviewDifal tbody');
-        tbody.innerHTML = '';
-        
+        const tbody = document.querySelector('#tabelaPreviewDifal tbody'); tbody.innerHTML = '';
         dados.forEach((dado, index) => {
             const tr = document.createElement('tr');
-            
-            const tdDesc = document.createElement('td');
-            const inputDesc = document.createElement('input');
-            inputDesc.type = "text";
-            inputDesc.value = `NF ${dado.nf}`;
-            tdDesc.appendChild(inputDesc);
-
-            const tdVal = document.createElement('td');
-            const inputVal = document.createElement('input');
-            inputVal.type = "text";
-            inputVal.value = dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            tdVal.appendChild(inputVal);
-
-            const tdAcao = document.createElement('td');
-            tdAcao.style.textAlign = "center";
-            const btnDel = document.createElement('button');
-            btnDel.className = "icon-btn delete";
-            btnDel.innerHTML = svgDel;
-            btnDel.onclick = function() { tr.remove(); };
-            tdAcao.appendChild(btnDel);
-
-            tr.appendChild(tdDesc);
-            tr.appendChild(tdVal);
-            tr.appendChild(tdAcao);
-            tbody.appendChild(tr);
+            const tdDesc = document.createElement('td'); const inputDesc = document.createElement('input'); inputDesc.type = "text"; inputDesc.value = `NF ${dado.nf}`; tdDesc.appendChild(inputDesc);
+            const tdVal = document.createElement('td'); const inputVal = document.createElement('input'); inputVal.type = "text"; inputVal.value = dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); tdVal.appendChild(inputVal);
+            const tdAcao = document.createElement('td'); tdAcao.style.textAlign = "center"; const btnDel = document.createElement('button'); btnDel.className = "icon-btn delete"; btnDel.innerHTML = svgDel; btnDel.onclick = function() { tr.remove(); }; tdAcao.appendChild(btnDel);
+            tr.appendChild(tdDesc); tr.appendChild(tdVal); tr.appendChild(tdAcao); tbody.appendChild(tr);
         });
-
         document.getElementById('previewSectionDifal').style.display = 'block';
     }
-
     async function gerarPDFFinal() {
-        const btnGerar = document.getElementById('btnGerarPDFDifal');
-        const status = document.getElementById('status-difal');
-        
-        const originalText = btnGerar.innerText;
-        btnGerar.disabled = true;
-        btnGerar.innerText = "⏳ Gerando Paginação Automática...";
-        
+        const btnGerar = document.getElementById('btnGerarPDFDifal'); const status = document.getElementById('status-difal');
+        const originalText = btnGerar.innerText; btnGerar.disabled = true; btnGerar.innerText = "⏳ Gerando Paginação Automática...";
         try {
-            const response = await fetch('./modelo.pdf'); 
-            if (!response.ok) throw new Error("O arquivo 'modelo.pdf' não foi encontrado.");
-            
-            const existingPdfBytes = await response.arrayBuffer();
-            const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-            
-            const pdfDoc = await PDFLib.PDFDocument.create();
-            const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-            const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-
-            const dataHoje = new Date().toLocaleDateString('pt-BR');
-            const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
-            
+            const response = await fetch('./modelo.pdf'); if (!response.ok) throw new Error("O arquivo 'modelo.pdf' não foi encontrado.");
+            const existingPdfBytes = await response.arrayBuffer(); const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+            const pdfDoc = await PDFLib.PDFDocument.create(); const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold); const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            const dataHoje = new Date().toLocaleDateString('pt-BR'); const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
             const chunks = [];
-            for (let i = 0; i < linhas.length; i += 18) {
-                chunks.push(Array.from(linhas).slice(i, i + 18));
-            }
-
+            for (let i = 0; i < linhas.length; i += 18) { chunks.push(Array.from(linhas).slice(i, i + 18)); }
             for (const chunk of chunks) {
-                const [page] = await pdfDoc.copyPages(templateDoc, [0]);
-                pdfDoc.addPage(page);
-                
+                const [page] = await pdfDoc.copyPages(templateDoc, [0]); pdfDoc.addPage(page);
                 page.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
-
                 chunk.forEach((tr, index) => {
-                    const descTexto = tr.querySelector('td:nth-child(1) input').value;
-                    const valTexto = tr.querySelector('td:nth-child(2) input').value;
-                    const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
-
-                    page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold });
-                    page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
+                    const descTexto = tr.querySelector('td:nth-child(1) input').value; const valTexto = tr.querySelector('td:nth-child(2) input').value; const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
+                    page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold }); page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
                 });
             }
-
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: "application/pdf" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Protocolo_DIFAL_${dataHoje.replace(/\//g, '-')}.pdf`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-
-            status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`;
-            status.style.color = "var(--success)";
-        } catch (error) {
-            status.innerText = `Erro ao gerar PDF: ${error.message}`;
-            status.style.color = "var(--danger)";
-        }
-        
-        btnGerar.disabled = false;
-        btnGerar.innerText = originalText;
+            const pdfBytes = await pdfDoc.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `Protocolo_DIFAL_${dataHoje.replace(/\//g, '-')}.pdf`; a.click(); window.URL.revokeObjectURL(url);
+            status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`; status.style.color = "var(--success)";
+        } catch (error) { status.innerText = `Erro ao gerar PDF: ${error.message}`; status.style.color = "var(--danger)"; }
+        btnGerar.disabled = false; btnGerar.innerText = originalText;
     }
 
     // --- MÓDULO 5: AGRUPADOR DE PDFS ---
-    const dropZoneAgrupador = document.getElementById('drop-zone-agrupador');
-    const pdfInputAgrupador = document.getElementById('pdf-input-agrupador');
-
-    dropZoneAgrupador.onclick = () => pdfInputAgrupador.click();
-    pdfInputAgrupador.onchange = (e) => lidarArquivosMescla(e.target.files);
+    const dropZoneAgrupador = document.getElementById('drop-zone-agrupador'); const pdfInputAgrupador = document.getElementById('pdf-input-agrupador');
+    dropZoneAgrupador.onclick = () => pdfInputAgrupador.click(); pdfInputAgrupador.onchange = (e) => lidarArquivosMescla(e.target.files);
     dropZoneAgrupador.ondragover = (e) => { e.preventDefault(); dropZoneAgrupador.classList.add('dragover'); };
     dropZoneAgrupador.ondragleave = () => { dropZoneAgrupador.classList.remove('dragover'); };
     dropZoneAgrupador.ondrop = (e) => { e.preventDefault(); dropZoneAgrupador.classList.remove('dragover'); lidarArquivosMescla(e.dataTransfer.files); };
 
     let arquivosParaMesclar = [];
-
     function mostrarLogMesclar(mensagem) {
-        const logEl = document.getElementById('log-agrupador');
-        logEl.style.display = 'block';
-        logEl.innerText += mensagem + "\n";
-        logEl.scrollTop = logEl.scrollHeight;
+        const logEl = document.getElementById('log-agrupador'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
     }
-
     function lidarArquivosMescla(files) {
         if (!files || files.length === 0) return;
-        
         arquivosParaMesclar = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
-        
-        const status = document.getElementById('status-agrupador');
-        status.innerText = `${arquivosParaMesclar.length} arquivos selecionados. Clique no botão abaixo para unir.`;
-        document.getElementById('log-agrupador').innerHTML = '';
-        document.getElementById('btnMesclarPDF').style.display = 'inline-flex';
+        const status = document.getElementById('status-agrupador'); status.innerText = `${arquivosParaMesclar.length} arquivos selecionados. Clique no botão abaixo para unir.`;
+        document.getElementById('log-agrupador').innerHTML = ''; document.getElementById('btnMesclarPDF').style.display = 'inline-flex';
     }
-
     async function mesclarArquivos() {
-        const btn = document.getElementById('btnMesclarPDF');
-        const status = document.getElementById('status-agrupador');
-        btn.disabled = true;
-        btn.innerText = "⏳ Processando...";
-        
-        mostrarLogMesclar("Analisando e ordenando arquivos...");
-
+        const btn = document.getElementById('btnMesclarPDF'); const status = document.getElementById('status-agrupador');
+        btn.disabled = true; btn.innerText = "⏳ Processando..."; mostrarLogMesclar("Analisando e ordenando arquivos...");
         arquivosParaMesclar.sort((a, b) => {
-            const numA = parseInt(a.name.match(/\d+/)?.[0] || 0);
-            const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
-            
+            const numA = parseInt(a.name.match(/\d+/)?.[0] || 0); const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
             if (numA !== numB) return numA - numB; 
-            
-            const isNfA = a.name.toLowerCase().includes('nf');
-            const isNfB = b.name.toLowerCase().includes('nf');
-            
-            if (isNfA && !isNfB) return 1; 
-            if (!isNfA && isNfB) return -1;
-            return 0;
+            const isNfA = a.name.toLowerCase().includes('nf'); const isNfB = b.name.toLowerCase().includes('nf');
+            if (isNfA && !isNfB) return 1; if (!isNfA && isNfB) return -1; return 0;
         });
-
-        mostrarLogMesclar("Ordem estabelecida:");
         arquivosParaMesclar.forEach(f => mostrarLogMesclar(`- ${f.name}`));
-
         try {
             const pdfFinal = await PDFLib.PDFDocument.create();
-            
             for (let i = 0; i < arquivosParaMesclar.length; i++) {
-                const file = arquivosParaMesclar[i];
-                mostrarLogMesclar(`Mesclando: ${file.name}...`);
-                
-                const arrayBuffer = await file.arrayBuffer();
-                const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
+                const file = arquivosParaMesclar[i]; mostrarLogMesclar(`Mesclando: ${file.name}...`);
+                const arrayBuffer = await file.arrayBuffer(); const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
                 const paginasCopiadas = await pdfFinal.copyPages(pdfAtual, pdfAtual.getPageIndices());
-                
-                paginasCopiadas.forEach((page) => {
-                    pdfFinal.addPage(page);
-                });
+                paginasCopiadas.forEach((page) => { pdfFinal.addPage(page); });
             }
-
             mostrarLogMesclar("✅ Todos os PDFs foram unidos! Gerando arquivo final...");
-            
-            const pdfBytes = await pdfFinal.save();
-            const blob = new Blob([pdfBytes], { type: "application/pdf" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Documentos_Agrupados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-            
-            status.innerText = "✅ PDF Único gerado com sucesso!";
-            status.style.color = "var(--success)";
-        } catch (error) {
-            mostrarLogMesclar(`❌ Erro ao mesclar: ${error.message}`);
-            status.innerText = "Erro ao gerar PDF.";
-            status.style.color = "var(--danger)";
-        }
-
-        btn.disabled = false;
-        btn.innerText = "📥 Gerar e Baixar PDF Único";
+            const pdfBytes = await pdfFinal.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `Documentos_Agrupados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`; a.click(); window.URL.revokeObjectURL(url);
+            status.innerText = "✅ PDF Único gerado com sucesso!"; status.style.color = "var(--success)";
+        } catch (error) { mostrarLogMesclar(`❌ Erro ao mesclar: ${error.message}`); status.innerText = "Erro ao gerar PDF."; status.style.color = "var(--danger)"; }
+        btn.disabled = false; btn.innerText = "📥 Gerar e Baixar PDF Único";
     }
 </script>
 </body>
