@@ -6,9 +6,10 @@
     <title>Calculadora ICMS-ST Smart Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Bibliotecas de PDF -->
+    <!-- Bibliotecas de PDF e Planilhas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -164,6 +165,10 @@
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                 Importar XML
             </div>
+            <div class="tab-item" onclick="switchModule('mensal')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                ST Mensal (Lote)
+            </div>
             <div class="tab-item" onclick="switchModule('manual')">
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H7v-2h4v2zm0-4H7v-2h4v2zm0-4H7V7h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z"/></svg>
                 Cálculo Manual
@@ -203,6 +208,39 @@
         <div id="notas-container"></div>
     </main>
 
+    <!-- MÓDULO 6: ST MENSAL -->
+    <main class="module" id="module-mensal">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Cálculo ICMS ST - Apuração Mensal</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Arraste a planilha de relatório (KADRI/ERP) (.xls ou .xlsx) para calcular todas as notas do mês em lote automaticamente.</p>
+            
+            <div id="drop-zone-mensal" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste a Planilha Mensal aqui</h3>
+                    <p>Formatos suportados: .xls, .xlsx, .csv</p>
+                </div>
+                <input type="file" id="excel-input-mensal" accept=".xls,.xlsx,.csv" style="display: none;">
+            </div>
+        </div>
+        
+        <div id="mensal-result-card" class="card" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin: 0; font-weight: 500;">Resumo da Apuração Mensal (Visualização)</h3>
+                <button class="btn-main" onclick="imprimirRelatorioMensal()">🖨️ Imprimir Relatório Mensal consolidado</button>
+            </div>
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr><th>Nota</th><th>NCM</th><th>Produto</th><th>V.Total (Operação)</th><th>MVA Calc.</th><th>Crédito</th><th>Base ST</th><th>ICMS ST</th></tr>
+                    </thead>
+                    <tbody id="corpo-tabela-mensal"></tbody>
+                </table>
+            </div>
+            <div class="total-box-manual" id="total-st-mensal">Total ST Mensal: R$ 0,00</div>
+        </div>
+    </main>
+
     <!-- MÓDULO 2: CÁLCULO MANUAL -->
     <main class="module" id="module-manual">
         <div class="card">
@@ -216,7 +254,7 @@
             </div>
 
             <div class="field" style="margin-bottom: 15px;">
-                <label>Alíquota Interestadual (Não recalcula linhas antigas)</label>
+                <label>Alíquota Interestadual (Não altera cálculos antigos)</label>
                 <div class="btn-group" style="margin-top: 5px;">
                     <button class="btn-aliq active" id="a4" onclick="setAliq(0.04)">4%</button>
                     <button class="btn-aliq" id="a7" onclick="setAliq(0.07)">7%</button>
@@ -260,12 +298,12 @@
     <main class="module" id="module-difal">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faz a extração inteligente e gera páginas ilimitadas.</p>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faz extração inteligente de Difal/FCP (e agora Multa/Juros) gerando páginas ilimitadas automaticamente.</p>
             
             <div id="drop-zone-difal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
-                    <h3>Arraste PDFs da Nota/Guia aqui</h3>
+                    <h3>Arraste PDFs das Notas/Guias aqui</h3>
                     <p>Ou clique para selecionar</p>
                 </div>
                 <input type="file" id="pdf-input-difal" accept=".pdf" multiple style="display: none;">
@@ -1000,6 +1038,231 @@
         janela.document.close();
     }
 
+    // --- MÓDULO 6: ST MENSAL EM LOTE ---
+    const dropZoneMensal = document.getElementById('drop-zone-mensal');
+    const excelInputMensal = document.getElementById('excel-input-mensal');
+
+    dropZoneMensal.onclick = () => excelInputMensal.click();
+    excelInputMensal.onchange = (e) => processarExcelMensal(e.target.files[0]);
+    dropZoneMensal.ondragover = (e) => { e.preventDefault(); dropZoneMensal.classList.add('dragover'); };
+    dropZoneMensal.ondragleave = () => { dropZoneMensal.classList.remove('dragover'); };
+    dropZoneMensal.ondrop = (e) => { e.preventDefault(); dropZoneMensal.classList.remove('dragover'); processarExcelMensal(e.dataTransfer.files[0]); };
+
+    let dadosMensal = [];
+    let totalStMensal = 0;
+    let totalBcStMensal = 0;
+
+    function processarExcelMensal(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+            
+            dadosMensal = [];
+            totalStMensal = 0;
+            totalBcStMensal = 0;
+            let totalProdutos = 0;
+
+            json.forEach(row => {
+                let notaRaw = row['Nro. nota'] || row['Nota'] || row['NF'] || '';
+                let ncmRaw = row['Cód. NCM'] || row['NCM'] || '';
+                if(!notaRaw || !ncmRaw) return;
+
+                let notaNum = parseFloat(notaRaw);
+                let notaStr = isNaN(notaNum) ? String(notaRaw).trim() : String(notaNum.toFixed(0));
+
+                // Processamento seguro do NCM garantindo que não perca os Zeros a esquerda se virar float
+                let ncmStr = isNaN(parseFloat(ncmRaw)) ? String(ncmRaw).trim() : parseFloat(ncmRaw).toFixed(0).padStart(8, '0');
+                
+                let produto = row['Descrição'] || row['Produto'] || row['Nome'] || '';
+                let vUnit = parseFloat(row['VLRUNIT']) || 0;
+                let vTotal = parseFloat(row['Vlr. total']) || 0;
+                let vFrete = parseFloat(row['Vlr. Frete NF']) || 0;
+                let vIPI = parseFloat(row['Vlr. IPI']) || 0;
+                let vCTE = parseFloat(row['Vlr. CTE']) || 0;
+                let bcIcms = parseFloat(row['Base ICMS']) || vTotal;
+                
+                let aliqEfetiva = parseFloat(row['ALIQUOTA EFETIVA']) || parseFloat(row['ALIQICMS']) || 7;
+                
+                let info = dbNcm[ncmStr];
+                let mva = 0;
+                let fator = 1;
+
+                if (info) {
+                    mva = info.mva; 
+                    fator = info.red === 0 ? 1 : info.red;
+                } else {
+                    let bitStr = String(row['BIT'] || 'NT').toUpperCase();
+                    let redSheet = (bitStr === 'NT' || bitStr === '-' || bitStr === '') ? 0 : (parseFloat(bitStr) / 100 || 0);
+                    mva = (parseFloat(row['MVA do Produto']) || 0) / 100;
+                    fator = redSheet === 0 ? 1 : redSheet;
+                }
+
+                let valorOperacao = vTotal + vFrete + vIPI + vCTE;
+                let baseST = Number((valorOperacao * (1 + mva) * fator).toFixed(2));
+                let creditoICMS = Number((bcIcms * (aliqEfetiva / 100) * fator).toFixed(2));
+                let stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
+                
+                dadosMensal.push({
+                    nota: notaStr, ncm: ncmStr, produto, vUnit, vTotal,
+                    freteIpi: vFrete + vIPI + vCTE, bcIcms,
+                    mva, aliqEfetiva, fator, credito: creditoICMS,
+                    baseST, icmsST: stFinal
+                });
+
+                totalStMensal += stFinal;
+                totalBcStMensal += baseST;
+                totalProdutos++;
+            });
+
+            renderizarTabelaMensal();
+        };
+        reader.readAsArrayBuffer(file);
+        excelInputMensal.value = '';
+    }
+
+    function renderizarTabelaMensal() {
+        const tbody = document.getElementById('corpo-tabela-mensal');
+        let html = '';
+        
+        // Renderiza limitados na View Web para performance (imprime todos)
+        let limite = Math.min(dadosMensal.length, 100);
+        
+        for(let i=0; i<limite; i++) {
+            let it = dadosMensal[i];
+            html += `<tr>
+                <td>${it.nota}</td>
+                <td>${it.ncm}</td>
+                <td title="${it.produto}">${it.produto.length > 25 ? it.produto.substring(0,25) + '...' : it.produto}</td>
+                <td>R$ ${it.vTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>${(it.mva*100).toLocaleString('pt-BR',{minimumFractionDigits:2})}%</td>
+                <td><strong style="color:var(--warning);">R$ ${it.credito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                <td>R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><strong style="color:var(--success);">R$ ${it.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+            </tr>`;
+        }
+        
+        if (dadosMensal.length > 100) {
+            html += `<tr><td colspan="8" style="text-align:center; color:var(--text-sub); padding: 15px;">... e mais ${dadosMensal.length - 100} itens ocultos na prévia (visíveis apenas na impressão).</td></tr>`;
+        }
+
+        tbody.innerHTML = html;
+        document.getElementById('total-st-mensal').innerText = `Total ST Mensal: R$ ${totalStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('mensal-result-card').style.display = 'block';
+    }
+
+    function imprimirRelatorioMensal() {
+        const dataAtual = new Date();
+        const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
+        const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+        const htmlStr = `
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <title>Apuração Mensal do ICMS ST</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; padding: 20px 30px; color: #000; }
+                    .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+                    .logo { max-width: 150px; }
+                    .header-title { font-size: 18px; font-weight: normal; text-align: center; flex-grow: 1; }
+                    .line-separator { border-top: 1px solid #000; margin-bottom: 15px; }
+                    
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9px; page-break-inside: auto; }
+                    thead { display: table-header-group; }
+                    tr { page-break-inside: avoid; page-break-after: auto; }
+                    th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 5px 4px; border: none; }
+                    th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
+                    td { padding: 4px; text-align: right; border: 1px solid #000; }
+                    td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
+                    
+                    .totals-container { display: flex; justify-content: space-around; margin-top: 30px; text-align: center; page-break-inside: avoid; }
+                    .total-box { display: flex; flex-direction: column; align-items: center; }
+                    .total-title { font-size: 11px; margin-bottom: 8px; max-width: 100px; }
+                    .total-val { font-size: 13px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%; }
+                    
+                    @media print {
+                        @page { size: landscape; margin: 10mm; }
+                        body { padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header-top">
+                    <img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo">
+                    <div class="header-title">Memória de Cálculo do ICMS ST - Apuração Mensal</div>
+                </div>
+                <div class="line-separator"></div>
+                
+                <div style="margin-bottom: 15px;">
+                    <strong>Impresso por:</strong> Usuário Local &nbsp;&nbsp;&nbsp; <strong>Data/Hora Emissão:</strong> ${dataImpressao} ${horaImpressao}
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nota</th>
+                            <th>NCM</th>
+                            <th>Produto</th>
+                            <th>Valor Un.</th>
+                            <th>Valor Total</th>
+                            <th>Despesas (Frete/IPI/CTE)</th>
+                            <th>MVA Aplicado</th>
+                            <th>Aliq.<br>Créd.</th>
+                            <th>Aliq.<br>ICMS</th>
+                            <th>Valor Crédito</th>
+                            <th>Base ST</th>
+                            <th>ICMS ST</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dadosMensal.map(it => {
+                            return `<tr>
+                                <td>${it.nota}</td>
+                                <td>${it.ncm}</td>
+                                <td>${it.produto.substring(0, 35)}</td>
+                                <td>R$${it.vUnit.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$${it.vTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$${it.freteIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>${(it.mva*100).toLocaleString('pt-BR',{minimumFractionDigits:2})}%</td>
+                                <td>${it.aliqEfetiva}</td>
+                                <td>17</td>
+                                <td>R$${it.credito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td>R$${it.icmsST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+
+                <div class="totals-container">
+                    <div class="total-box">
+                        <div class="total-title">Total de<br>Itens Processados</div>
+                        <div class="total-val">${dadosMensal.length}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor Total<br>Base-ST</div>
+                        <div class="total-val">R$${totalBcStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor Total<br>ICMS-ST Calculado</div>
+                        <div class="total-val">R$${totalStMensal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                </div>
+                <script>window.print();<\/script>
+            </body>
+            </html>
+        `;
+        const janela = window.open('', '_blank');
+        janela.document.write(htmlStr);
+        janela.document.close();
+    }
+
     // --- MÓDULO 2: CÁLCULO MANUAL ---
     function limparNum(t) {
         if(!t) return 0;
@@ -1010,7 +1273,6 @@
         aliqAtivaManual = v;
         document.getElementById('a4').classList.toggle('active', v === 0.04);
         document.getElementById('a7').classList.toggle('active', v === 0.07);
-        // O histórico NÃO é mais recalculado ao clicar na alíquota
     }
 
     function processarManual() {
@@ -1034,7 +1296,7 @@
             stFinal = Number(((baseST * 0.17) - creditoICMS).toFixed(2));
         }
 
-        historicoManual.push({ ncm, mva: info.mva, valorOperacao, vBC_icms, baseST, creditoICMS, stFinal, fator });
+        historicoManual.push({ ncm, mva: info.mva, valorOperacao, vBC_icms, baseST, creditoICMS, stFinal, fator, aliqFixaUsada: aliqAtivaManual });
         atualizarTabelaManual();
         
         document.getElementById('ncm').value = '';
@@ -1056,7 +1318,7 @@
                 <td>R$ ${it.valorOperacao.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                 <td><div class="val-container"><span class="${isZero ? 'isento-txt' : ''}">R$ ${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
                     ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.baseST}, this)">${svgCopy}</button>` : ''}</div></td>
-                <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                <td><strong style="color:var(--warning);">R$ ${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong> <span style="font-size: 10px; color: var(--text-sub)">(${(it.aliqFixaUsada*100).toFixed(0)}%)</span></td>
                 <td><div class="val-container"><span class="${!isZero ? 'st-badge' : 'isento-txt'}">R$ ${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
                     ${!isZero ? `<button class="icon-btn" onclick="copiarParaArea(${it.stFinal}, this)">${svgCopy}</button>` : ''}</div></td>
                 <td style="text-align:center;"><button class="icon-btn delete" onclick="removerLinhaManual(${idx})">${svgDel}</button></td>
@@ -1272,7 +1534,6 @@
                 const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/);
                 const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
                 
-                // Extração inteligente de Multa e Juros (mesmo que não tenha 'R$')
                 const matchMulta = text.match(/Multa[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
                 const matchJuros = text.match(/Juros[^\d]*?(\d{1,3}(?:\.\d{3})*,\d{2})/i);
 
@@ -1364,7 +1625,6 @@
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
             
-            // Paginação Infinita: Separa tudo de 18 em 18 linhas
             const chunks = [];
             for (let i = 0; i < linhas.length; i += 18) {
                 chunks.push(Array.from(linhas).slice(i, i + 18));
