@@ -171,7 +171,11 @@
             </div>
             <div class="tab-item" onclick="switchModule('agrupador-st')">
                 <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM10 9h8v2h-8zm0 3h4v2h-4zm0-6h8v2h-8z"/></svg>
-                Agrupador ST (Planilha)
+                Agrupador ST
+            </div>
+            <div class="tab-item" onclick="switchModule('registrador')">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                Registrador de Guias
             </div>
         </div>
     </div>
@@ -339,7 +343,7 @@
         </div>
     </main>
 
-    <!-- MÓDULO 7: AGRUPADOR ST (NOVO) -->
+    <!-- MÓDULO 7: AGRUPADOR ST -->
     <main class="module" id="module-agrupador-st">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador ST (Ordenação por Planilha)</h2>
@@ -357,6 +361,77 @@
             <button class="btn-main" id="btnMesclarPDF-st" onclick="mesclarArquivosST()" style="margin-top: 20px; display: none; width: 100%; justify-content: center;">
                 📥 Identificar, Unir e Baixar Lote ST
             </button>
+        </div>
+    </main>
+
+    <!-- MÓDULO 8: REGISTRADOR DE GUIAS (NOVO) -->
+    <main class="module" id="module-registrador">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Registrador de Entregas & Guias</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Seu histórico de guias armazenado exclusivamente no seu navegador de forma segura.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                <button class="btn-aliq active" id="btn-sub-st" onclick="switchSubRegistrador('st')">Guias de ST</button>
+                <button class="btn-aliq" id="btn-sub-geral" onclick="switchSubRegistrador('geral')">Guias no Geral</button>
+            </div>
+
+            <!-- Sub-Aba: Guias ST -->
+            <div id="sub-mod-st">
+                <div class="drop-zone" id="drop-registrador-st" onclick="document.getElementById('file-reg-st').click()">
+                    <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <div class="drop-zone-text">
+                        <h3>Anexar Planilha Diária (Guias ST)</h3>
+                        <p>O sistema puxará as informações (ex: responsável, horário) e fixará os cabeçalhos listando as NFs abaixo.</p>
+                    </div>
+                    <input type="file" id="file-reg-st" accept=".xls,.xlsx" style="display: none;" onchange="processarPlanilhaST(this.files)">
+                </div>
+                
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid var(--border); border-radius: 8px;">
+                    <table id="table-registrador-st" style="margin-top: 0;">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
+                            <!-- Cabeçalhos injetados dinamicamente -->
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-main" onclick="exportExcel('st')">📥 Exportar para Excel</button>
+                    <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="limparRegistrador('st')">Limpar Histórico</button>
+                </div>
+            </div>
+
+            <!-- Sub-Aba: Guias no Geral -->
+            <div id="sub-mod-geral" style="display: none;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="reg-desc" placeholder="Descrição (Ex: NF 12345)">
+                    <input type="text" id="reg-val" placeholder="Valor (R$)">
+                    <button class="btn-main" onclick="addGuiaGeralManual()">+ Inserir</button>
+                </div>
+                
+                <div class="drop-zone" id="drop-registrador-geral" onclick="document.getElementById('file-reg-geral').click()">
+                    <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <div class="drop-zone-text">
+                        <h3>Importar Protocolos DIFAL Gerados (.pdf)</h3>
+                        <p>O sistema lerá os PDFs e adicionará as descrições e valores automaticamente à lista.</p>
+                    </div>
+                    <input type="file" id="file-reg-geral" accept=".pdf" multiple style="display: none;" onchange="processarPDFGeral(this.files)">
+                </div>
+                
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid var(--border); border-radius: 8px;">
+                    <table id="table-registrador-geral" style="margin-top: 0;">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
+                            <tr><th>Data Registro</th><th>Descrição</th><th>Valor (R$)</th><th style="text-align: center;">Ação</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-main" onclick="exportExcel('geral')">📥 Exportar para Excel</button>
+                    <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="limparRegistrador('geral')">Limpar Histórico</button>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -488,6 +563,10 @@
                 el.onpaste = function(e) { distribuirValores(e.clipboardData.getData('text')); e.preventDefault(); };
             }
         });
+
+        // Carrega as tabelas do registrador
+        renderTableST();
+        renderTableGeral();
     };
 
     function distribuirValores(text) {
@@ -679,7 +758,6 @@
             else if (diff > 0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
         }
 
-        // Espaçador para empurrar conteúdo pra baixo caso seja Retrato
         const spacer = orientation === 'portrait' ? '<div style="height: 135mm;"></div>' : '';
 
         const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória de Cálculo - NF ${nota.nNF}</title>
@@ -1037,18 +1115,15 @@
     dropZoneAgrupadorBasico.ondrop = (e) => { e.preventDefault(); dropZoneAgrupadorBasico.classList.remove('dragover'); lidarArquivosMesclaBasico(e.dataTransfer.files); };
 
     let arquivosParaMesclarBasico = [];
-
     function mostrarLogMesclarBasico(mensagem) {
         const logEl = document.getElementById('log-agrupador-basico'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
     }
-
     function lidarArquivosMesclaBasico(files) {
         if (!files || files.length === 0) return;
         arquivosParaMesclarBasico = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
         const status = document.getElementById('status-agrupador-basico'); status.innerText = `${arquivosParaMesclarBasico.length} arquivos selecionados. Clique no botão abaixo para unir.`;
         document.getElementById('log-agrupador-basico').innerHTML = ''; document.getElementById('btnMesclarPDF-basico').style.display = 'inline-flex';
     }
-
     async function mesclarArquivosBasico() {
         const btn = document.getElementById('btnMesclarPDF-basico'); const status = document.getElementById('status-agrupador-basico');
         btn.disabled = true; btn.innerText = "⏳ Processando..."; mostrarLogMesclarBasico("Analisando e ordenando arquivos pelo nome...");
@@ -1078,7 +1153,7 @@
         btn.disabled = false; btn.innerText = "📥 Unir e Baixar Lote";
     }
 
-    // --- MÓDULO 7: AGRUPADOR ST (NOVO COM PLANILHA E TEXTO) ---
+    // --- MÓDULO 7: AGRUPADOR ST ---
     const dropZoneAgrupadorST = document.getElementById('drop-zone-agrupador-st');
     const pdfInputAgrupadorST = document.getElementById('pdf-input-agrupador-st');
     dropZoneAgrupadorST.onclick = () => pdfInputAgrupadorST.click();
@@ -1087,60 +1162,42 @@
     dropZoneAgrupadorST.ondragleave = () => { dropZoneAgrupadorST.classList.remove('dragover'); };
     dropZoneAgrupadorST.ondrop = (e) => { e.preventDefault(); dropZoneAgrupadorST.classList.remove('dragover'); lidarArquivosMesclaST(e.dataTransfer.files); };
 
-    let planilhasAgrupadorST = [];
-    let arquivosParaMesclarST = [];
-
+    let planilhasAgrupadorST = []; let arquivosParaMesclarST = [];
     function mostrarLogMesclarST(mensagem) {
         const logEl = document.getElementById('log-agrupador-st'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
     }
-
     function lidarArquivosMesclaST(files) {
         if (!files || files.length === 0) return;
-        
         let allFiles = Array.from(files);
         let newXls = allFiles.filter(f => f.name.toLowerCase().match(/\.(xls|xlsx|csv)$/));
         let newPdfs = allFiles.filter(f => f.name.toLowerCase().endsWith('.pdf'));
-        
         if (newXls.length > 0) planilhasAgrupadorST = newXls;
         if (newPdfs.length > 0) arquivosParaMesclarST = newPdfs; 
-        
         const status = document.getElementById('status-agrupador-st');
         status.innerText = `${arquivosParaMesclarST.length} PDFs selecionados e ${planilhasAgrupadorST.length} planilha(s). Clique abaixo para iniciar.`;
         document.getElementById('log-agrupador-st').innerHTML = '';
         document.getElementById('btnMesclarPDF-st').style.display = 'inline-flex';
     }
-
     async function mesclarArquivosST() {
-        const btn = document.getElementById('btnMesclarPDF-st');
-        const status = document.getElementById('status-agrupador-st');
-        btn.disabled = true;
-        btn.innerText = "⏳ Lendo Arquivos e Planilha...";
-        mostrarLogMesclarST("Iniciando processo de ordenação inteligente ST...");
+        const btn = document.getElementById('btnMesclarPDF-st'); const status = document.getElementById('status-agrupador-st');
+        btn.disabled = true; btn.innerText = "⏳ Lendo Arquivos e Planilha..."; mostrarLogMesclarST("Iniciando processo de ordenação inteligente ST...");
         
         let ordemNFs = [];
         if (planilhasAgrupadorST.length > 0) {
             mostrarLogMesclarST("Planilha de ordenação encontrada! Lendo coluna Nº NF...");
             try {
-                const data = await planilhasAgrupadorST[0].arrayBuffer();
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                
+                const data = await planilhasAgrupadorST[0].arrayBuffer(); const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]]; const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
                 let colIndex = -1;
                 for(let i=0; i<Math.min(json.length, 10); i++) {
                     let row = json[i];
                     for(let j=0; j<row.length; j++) {
                         let cellVal = String(row[j] || '').toUpperCase();
-                        if (cellVal.includes('Nº NF') || cellVal === 'NF' || cellVal === 'NOTA FISCAL') {
-                            colIndex = j; break;
-                        }
+                        if (cellVal.includes('Nº NF') || cellVal === 'NF' || cellVal === 'NOTA FISCAL') { colIndex = j; break; }
                     }
                     if (colIndex !== -1) break;
                 }
-                
-                // Força a leitura da coluna D (índice 3) se a busca por nome falhar
                 if (colIndex === -1) colIndex = 3; 
-                
                 for(let i=0; i<json.length; i++) {
                     let val = json[i][colIndex];
                     if (val) {
@@ -1151,90 +1208,58 @@
                 mostrarLogMesclarST(`✅ Planilha processada: ${ordemNFs.length} NFs listadas na ordem correta.`);
             } catch(e) {
                 mostrarLogMesclarST("⚠️ Erro ao ler planilha. Não foi possível mapear a ordem.");
-                btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
-                return;
+                btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST"; return;
             }
         } else {
             mostrarLogMesclarST("❌ ERRO: Nenhuma planilha foi enviada. Este módulo precisa da planilha para saber a ordem.");
-            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
-            return;
+            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST"; return;
         }
 
         let pdfsComMetadados = [];
         for (let file of arquivosParaMesclarST) {
             mostrarLogMesclarST(`Analisando: ${file.name}`);
-            let text = await extractTextFromPDF(file);
-            let nf = null;
-            let type = 'guia'; // Default
-            
-            // Tenta achar via texto (Conforme imagens enviadas)
+            let text = await extractTextFromPDF(file); let nf = null; let type = 'guia'; 
             let matchMem = text.match(/Nota\s*fiscal:\s*0*(\d+)/i);
-            if (matchMem) {
-                nf = matchMem[1]; type = 'memoria';
-            } else {
+            if (matchMem) { nf = matchMem[1]; type = 'memoria'; } 
+            else {
                 let matchGuia = text.match(/NFE\s*ou\s*CTE:\s*0*(\d+)/i);
-                if (matchGuia) {
-                    nf = matchGuia[1]; type = 'guia';
-                }
+                if (matchGuia) { nf = matchGuia[1]; type = 'guia'; }
             }
-            
-            // Plano B: Se o texto falhar (ex: PDF é imagem), busca o número no nome do arquivo
             if (!nf) {
-                let matchName = file.name.match(/\d{5,}/); // Busca sequência de 5+ números (ex: 2208280)
-                if (matchName) {
-                    nf = matchName[0];
-                    if (file.name.toLowerCase().includes('mem')) type = 'memoria';
-                }
+                let matchName = file.name.match(/\d{5,}/); 
+                if (matchName) { nf = matchName[0]; if (file.name.toLowerCase().includes('mem')) type = 'memoria'; }
             }
-            
             if(nf) mostrarLogMesclarST(`--> Identificado como ${type.toUpperCase()} da NF ${nf}`);
             else mostrarLogMesclarST(`--> Nenhuma NF identificada, será ignorado.`);
-            
             pdfsComMetadados.push({ file, nf, type, name: file.name });
         }
         
-        mostrarLogMesclarST("---------------------------------");
-        mostrarLogMesclarST("Emparelhando arquivos conforme Planilha...");
-        
+        mostrarLogMesclarST("---------------------------------"); mostrarLogMesclarST("Emparelhando arquivos conforme Planilha...");
         let orderedFilesToMerge = [];
         
-        // Loop pela ordem exata da planilha
         for (let nf of ordemNFs) {
             let memoria = pdfsComMetadados.find(p => p.nf === nf && p.type === 'memoria');
             let guia = pdfsComMetadados.find(p => p.nf === nf && p.type === 'guia');
-            
-            if (memoria) {
-                orderedFilesToMerge.push(memoria);
-                mostrarLogMesclarST(`[+] Adicionado: Memória NF ${nf}`);
-            } else {
-                mostrarLogMesclarST(`[!] Faltando: Memória da NF ${nf}`);
-            }
-            
-            if (guia) {
-                orderedFilesToMerge.push(guia);
-                mostrarLogMesclarST(`[+] Adicionado: Guia NF ${nf}`);
-            } else {
-                mostrarLogMesclarST(`[!] Faltando: Guia da NF ${nf}`);
-            }
+            if (memoria) { orderedFilesToMerge.push(memoria); mostrarLogMesclarST(`[+] Adicionado: Memória NF ${nf}`); } 
+            else { mostrarLogMesclarST(`[!] Faltando: Memória da NF ${nf}`); }
+            if (guia) { orderedFilesToMerge.push(guia); mostrarLogMesclarST(`[+] Adicionado: Guia NF ${nf}`); } 
+            else { mostrarLogMesclarST(`[!] Faltando: Guia da NF ${nf}`); }
         }
         
         if (orderedFilesToMerge.length === 0) {
             mostrarLogMesclarST("❌ Nenhum PDF pôde ser correlacionado com as NFs da planilha.");
             status.innerText = "Falha no agrupamento."; status.style.color = "var(--danger)"; 
-            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
-            return;
+            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST"; return;
         }
 
         try {
             const pdfFinal = await PDFLib.PDFDocument.create();
             for (let item of orderedFilesToMerge) {
-                const arrayBuffer = await item.file.arrayBuffer(); 
-                const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
+                const arrayBuffer = await item.file.arrayBuffer(); const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
                 const paginasCopiadas = await pdfFinal.copyPages(pdfAtual, pdfAtual.getPageIndices());
                 paginasCopiadas.forEach((page) => { pdfFinal.addPage(page); });
             }
             mostrarLogMesclarST("✅ Arquivos unidos e ordenados com sucesso!");
-            
             const pdfBytes = await pdfFinal.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); 
             const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
             a.download = `Lote_ST_Agrupado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`; 
@@ -1244,8 +1269,186 @@
             mostrarLogMesclarST(`❌ Erro crítico ao juntar PDFs: ${error.message}`); 
             status.innerText = "Erro ao gerar PDF."; status.style.color = "var(--danger)"; 
         }
-        
         btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
+    }
+
+    // --- MÓDULO 8: REGISTRADOR DE GUIAS (NOVO) ---
+    function switchSubRegistrador(tab) {
+        document.getElementById('btn-sub-st').classList.toggle('active', tab === 'st');
+        document.getElementById('btn-sub-geral').classList.toggle('active', tab === 'geral');
+        document.getElementById('sub-mod-st').style.display = tab === 'st' ? 'block' : 'none';
+        document.getElementById('sub-mod-geral').style.display = tab === 'geral' ? 'block' : 'none';
+    }
+
+    function processarPlanilhaST(files) {
+        if (!files || files.length === 0) return;
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ""});
+            
+            let hdrIdx = -1;
+            for(let i=0; i<Math.min(json.length, 10); i++) {
+                if(json[i].some(cell => String(cell).toUpperCase().includes('FORNECEDOR') || String(cell).toUpperCase().includes('Nº NF'))) {
+                    hdrIdx = i; break;
+                }
+            }
+            if(hdrIdx === -1) hdrIdx = 2; // Padrão: linha 3 (index 2)
+            
+            let headers = json[hdrIdx].map(h => String(h).trim());
+            let rows = json.slice(hdrIdx + 1).filter(r => r.some(c => c !== "")); 
+            
+            let historicoST = JSON.parse(localStorage.getItem('histGuiasST')) || { headers: [], rows: [] };
+            if(historicoST.headers.length === 0) historicoST.headers = headers;
+            
+            let topInfo = [];
+            for(let i=0; i<hdrIdx; i++) {
+                json[i].forEach(cell => {
+                    if(String(cell).trim() !== "" && isNaN(cell)) { topInfo.push(String(cell).trim()); }
+                });
+            }
+            
+            let loteInfo = topInfo.find(t => t.toLowerCase().includes('entrega') || t.toLowerCase().includes('retirar')) || new Date().toLocaleDateString('pt-BR');
+            
+            rows.forEach(r => { historicoST.rows.push({ lote: loteInfo, data: r }); });
+            
+            localStorage.setItem('histGuiasST', JSON.stringify(historicoST));
+            renderTableST();
+        };
+        reader.readAsArrayBuffer(file);
+        document.getElementById('file-reg-st').value = '';
+    }
+
+    function formatDataCell(val) {
+        if(typeof val === 'number' && val > 40000 && val < 50000) { 
+            let d = new Date((val - 25569) * 86400 * 1000);
+            return d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+        }
+        if(typeof val === 'number') {
+            if(val % 1 !== 0) return `R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            return val;
+        }
+        return val;
+    }
+
+    function renderTableST() {
+        let historicoST = JSON.parse(localStorage.getItem('histGuiasST')) || { headers: [], rows: [] };
+        const thead = document.querySelector('#table-registrador-st thead');
+        const tbody = document.querySelector('#table-registrador-st tbody');
+        
+        if(historicoST.headers.length > 0) {
+            thead.innerHTML = `<tr><th>Info do Lote (Resp./Data)</th>${historicoST.headers.map(h => `<th>${h}</th>`).join('')}<th style="text-align:center;">Ação</th></tr>`;
+        } else {
+            thead.innerHTML = '';
+        }
+        
+        tbody.innerHTML = historicoST.rows.map((rowObj, idx) => {
+            let cols = historicoST.headers.map((_, i) => `<td>${formatDataCell(rowObj.data[i] || '')}</td>`).join('');
+            return `<tr><td style="color: var(--accent); font-weight: 500;">${rowObj.lote}</td>${cols}<td style="text-align:center;"><button class="icon-btn delete" onclick="deleteRowST(${idx})">${svgDel}</button></td></tr>`;
+        }).join('');
+    }
+
+    function deleteRowST(idx) {
+        let hist = JSON.parse(localStorage.getItem('histGuiasST'));
+        hist.rows.splice(idx, 1);
+        if(hist.rows.length === 0) hist.headers = [];
+        localStorage.setItem('histGuiasST', JSON.stringify(hist));
+        renderTableST();
+    }
+
+    function addGuiaGeralManual() {
+        let desc = document.getElementById('reg-desc').value.trim();
+        let valStr = document.getElementById('reg-val').value.trim();
+        let valNum = parseFloat(valStr.replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+        if(!desc || isNaN(valNum)) return;
+        
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        hist.push({ id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
+        localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+        renderTableGeral();
+        document.getElementById('reg-desc').value = ''; document.getElementById('reg-val').value = '';
+    }
+
+    async function processarPDFGeral(files) {
+        if (!files || files.length === 0) return;
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        let count = 0;
+        
+        for (let file of files) {
+            let text = await extractTextFromPDF(file);
+            let regex = /(NF\s+[\d\w-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                let desc = match[1];
+                let valStr = match[2];
+                let valNum = parseFloat(valStr.replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(valNum)) {
+                    hist.push({ id: Date.now() + Math.random(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
+                    count++;
+                }
+            }
+        }
+        
+        if(count > 0) {
+            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+            renderTableGeral();
+            alert(`Sucesso! ${count} guias foram registradas automaticamente.`);
+        } else {
+            alert('Nenhuma guia encontrada nesses PDFs. Tem certeza que são os Protocolos DIFAL gerados pelo sistema?');
+        }
+        document.getElementById('file-reg-geral').value = '';
+    }
+
+    function renderTableGeral() {
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        const tbody = document.querySelector('#table-registrador-geral tbody');
+        let total = 0;
+        tbody.innerHTML = hist.map((h, idx) => {
+            total += h.valor;
+            return `<tr><td>${h.data}</td><td>${h.desc}</td><td>R$ ${h.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:center;"><button class="icon-btn delete" onclick="deleteRowGeral(${idx})">${svgDel}</button></td></tr>`;
+        }).join('');
+        
+        if(hist.length > 0) {
+            tbody.innerHTML += `<tr style="background: var(--input-bg); font-weight: bold;"><td colspan="2" style="text-align: right;">TOTAL GERAL:</td><td colspan="2">R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+        }
+    }
+
+    function deleteRowGeral(idx) {
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral'));
+        hist.splice(idx, 1);
+        localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+        renderTableGeral();
+    }
+
+    function limparRegistrador(type) {
+        if(confirm('Tem certeza que deseja apagar todo o histórico desta aba? Essa ação não pode ser desfeita.')) {
+            if(type === 'st') {
+                localStorage.removeItem('histGuiasST'); renderTableST();
+            } else {
+                localStorage.removeItem('histGuiasGeral'); renderTableGeral();
+            }
+        }
+    }
+
+    function exportExcel(type) {
+        let ws; let filename = '';
+        if(type === 'st') {
+            let hist = JSON.parse(localStorage.getItem('histGuiasST')) || { headers: [], rows: [] };
+            if(hist.rows.length === 0) return;
+            let data = [ ['Info Lote', ...hist.headers] ];
+            hist.rows.forEach(r => { data.push([r.lote, ...r.data.map(formatDataCell)]); });
+            ws = XLSX.utils.aoa_to_sheet(data); filename = 'Historico_Guias_ST.xlsx';
+        } else {
+            let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+            if(hist.length === 0) return;
+            let data = [ ['Data Registro', 'Descrição', 'Valor (R$)'] ];
+            hist.forEach(h => { data.push([h.data, h.desc, h.valor]); });
+            ws = XLSX.utils.aoa_to_sheet(data); filename = 'Historico_Guias_Geral.xlsx';
+        }
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Historico"); XLSX.writeFile(wb, filename);
     }
 </script>
 </body>
