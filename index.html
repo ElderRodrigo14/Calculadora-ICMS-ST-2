@@ -167,7 +167,11 @@
             </div>
             <div class="tab-item" onclick="switchModule('agrupador')">
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                Agrupador de PDFs
+                Agrupador Básico
+            </div>
+            <div class="tab-item" onclick="switchModule('agrupador-st')">
+                <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM10 9h8v2h-8zm0 3h4v2h-4zm0-6h8v2h-8z"/></svg>
+                Agrupador ST (Planilha)
             </div>
         </div>
     </div>
@@ -204,7 +208,6 @@
                 2) O motor cruzará os dados automaticamente filtrando as operações (200, 237 e 230) e relacionando Cód. Produto -> NCM -> Regra Fiscal (MVA).<br>
                 3) O relatório final sai de forma agrupada por Nota, condensando o resultado em poucas páginas prontas para impressão.
             </p>
-            
             <div id="drop-zone-mensal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
@@ -213,16 +216,13 @@
                 </div>
                 <input type="file" id="excel-input-mensal" accept=".xls,.xlsx" multiple style="display: none;">
             </div>
-            
             <div id="mensal-status" style="margin-top: 15px; font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <span id="badge-main" class="badge-status">⏳ Principal (Pendente)</span>
                 <span id="badge-prod" class="badge-status">⏳ Produtos (Pendente)</span>
                 <span id="badge-info" class="badge-status">⏳ Info Fiscais (Pendente)</span>
             </div>
-        
             <button class="btn-main" style="margin-top: 20px; width: 100%; justify-content: center; font-size: 15px;" onclick="gerarCalculoMensal()">🚀 Processar Lote e Gerar Resumo</button>
         </div>
-        
         <div id="mensal-result-card" class="card" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                 <h3 style="margin: 0; font-weight: 500;">Resumo da Apuração Mensal (Agrupado por NF)</h3>
@@ -231,14 +231,7 @@
             <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
                 <table style="width: 100%; margin-top: 0;">
                     <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
-                        <tr>
-                            <th>Nro Nota</th>
-                            <th>Fornecedor / Operação</th>
-                            <th style="text-align:center;">Qtd Itens</th>
-                            <th>Valor Total (Operação)</th>
-                            <th>Base ST Total</th>
-                            <th>ICMS ST Total</th>
-                        </tr>
+                        <tr><th>Nro Nota</th><th>Fornecedor / Operação</th><th style="text-align:center;">Qtd Itens</th><th>Valor Total (Operação)</th><th>Base ST Total</th><th>ICMS ST Total</th></tr>
                     </thead>
                     <tbody id="corpo-tabela-mensal"></tbody>
                 </table>
@@ -269,13 +262,10 @@
                 <button class="btn-secondary" style="flex: 1;" onclick="limparManual()">Limpar Tabela</button>
             </div>
         </div>
-
         <div id="resManualCard" class="card" style="display:none;">
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr><th>NCM</th><th>MVA Aplicado</th><th>V. OPERAÇÃO</th><th>BASE ST</th><th>CRÉDITO</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr>
-                    </thead>
+                    <thead><tr><th>NCM</th><th>MVA Aplicado</th><th>V. OPERAÇÃO</th><th>BASE ST</th><th>CRÉDITO</th><th>ICMS ST</th><th style="text-align:center;">AÇÃO</th></tr></thead>
                     <tbody id="corpoTabelaManual"></tbody>
                 </table>
             </div>
@@ -328,23 +318,44 @@
         </div>
     </main>
 
-    <!-- MÓDULO 5: AGRUPADOR DE PDFS -->
+    <!-- MÓDULO 5: AGRUPADOR DE PDFS BÁSICO (REVERTIDO) -->
     <main class="module" id="module-agrupador">
         <div class="card">
-            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador de Guias e Notas (Ordenação Inteligente)</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Envie os PDFs e a Planilha Diária. O sistema agrupa a Memória com a Guia pela numeração da NF e as ordena perfeitamente conforme a sua planilha.</p>
-            <div id="drop-zone-agrupador" class="drop-zone">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador de Guias e Notas (Básico)</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Envie os PDFs. Eles serão ordenados pelo número no nome do arquivo (ideal para DIFAL normal).</p>
+            <div id="drop-zone-agrupador-basico" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste todos os PDFs aqui</h3>
+                    <p>Selecione dezenas de arquivos de uma vez</p>
+                </div>
+                <input type="file" id="pdf-input-agrupador-basico" accept=".pdf" multiple style="display: none;">
+            </div>
+            <div id="status-agrupador-basico" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
+            <div id="log-agrupador-basico" style="margin-top: 12px; font-size: 13px; color: var(--text-main); white-space: pre-wrap; max-height: 250px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
+            <button class="btn-main" id="btnMesclarPDF-basico" onclick="mesclarArquivosBasico()" style="margin-top: 20px; display: none; width: 100%; justify-content: center;">
+                📥 Unir e Baixar Lote
+            </button>
+        </div>
+    </main>
+
+    <!-- MÓDULO 7: AGRUPADOR ST (NOVO) -->
+    <main class="module" id="module-agrupador-st">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador ST (Ordenação por Planilha)</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Adicione a <strong>Planilha Diária</strong> e os <strong>PDFs (Memória e Guia)</strong>. O sistema lerá a coluna de Nº NF da planilha e juntará as memórias com as guias na exata ordem.</p>
+            <div id="drop-zone-agrupador-st" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
                     <h3>Arraste PDFs e a Planilha de Ordem aqui</h3>
                     <p>Formatos suportados: PDFs, .xls, .xlsx</p>
                 </div>
-                <input type="file" id="pdf-input-agrupador" accept=".pdf,.xls,.xlsx,.csv" multiple style="display: none;">
+                <input type="file" id="pdf-input-agrupador-st" accept=".pdf,.xls,.xlsx,.csv" multiple style="display: none;">
             </div>
-            <div id="status-agrupador" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
-            <div id="log-agrupador" style="margin-top: 12px; font-size: 13px; color: var(--text-main); white-space: pre-wrap; max-height: 250px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
-            <button class="btn-main" id="btnMesclarPDF" onclick="mesclarArquivos()" style="margin-top: 20px; display: none; width: 100%; justify-content: center;">
-                📥 Identificar, Unir e Baixar Lote
+            <div id="status-agrupador-st" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
+            <div id="log-agrupador-st" style="margin-top: 12px; font-size: 13px; color: var(--text-main); white-space: pre-wrap; max-height: 250px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
+            <button class="btn-main" id="btnMesclarPDF-st" onclick="mesclarArquivosST()" style="margin-top: 20px; display: none; width: 100%; justify-content: center;">
+                📥 Identificar, Unir e Baixar Lote ST
             </button>
         </div>
     </main>
@@ -1016,47 +1027,101 @@
         btnGerar.disabled = false; btnGerar.innerText = originalText;
     }
 
-    // --- MÓDULO 5: AGRUPADOR DE PDFS ---
-    const dropZoneAgrupador = document.getElementById('drop-zone-agrupador'); const pdfInputAgrupador = document.getElementById('pdf-input-agrupador');
-    dropZoneAgrupador.onclick = () => pdfInputAgrupador.click(); pdfInputAgrupador.onchange = (e) => lidarArquivosMescla(e.target.files);
-    dropZoneAgrupador.ondragover = (e) => { e.preventDefault(); dropZoneAgrupador.classList.add('dragover'); }; dropZoneAgrupador.ondragleave = () => { dropZoneAgrupador.classList.remove('dragover'); };
-    dropZoneAgrupador.ondrop = (e) => { e.preventDefault(); dropZoneAgrupador.classList.remove('dragover'); lidarArquivosMescla(e.dataTransfer.files); };
+    // --- MÓDULO 5: AGRUPADOR DE PDFS (BÁSICO / ANTIGO) ---
+    const dropZoneAgrupadorBasico = document.getElementById('drop-zone-agrupador-basico');
+    const pdfInputAgrupadorBasico = document.getElementById('pdf-input-agrupador-basico');
+    dropZoneAgrupadorBasico.onclick = () => pdfInputAgrupadorBasico.click();
+    pdfInputAgrupadorBasico.onchange = (e) => lidarArquivosMesclaBasico(e.target.files);
+    dropZoneAgrupadorBasico.ondragover = (e) => { e.preventDefault(); dropZoneAgrupadorBasico.classList.add('dragover'); };
+    dropZoneAgrupadorBasico.ondragleave = () => { dropZoneAgrupadorBasico.classList.remove('dragover'); };
+    dropZoneAgrupadorBasico.ondrop = (e) => { e.preventDefault(); dropZoneAgrupadorBasico.classList.remove('dragover'); lidarArquivosMesclaBasico(e.dataTransfer.files); };
 
-    let planilhasAgrupador = [];
-    let arquivosParaMesclar = [];
+    let arquivosParaMesclarBasico = [];
 
-    function mostrarLogMesclar(mensagem) {
-        const logEl = document.getElementById('log-agrupador'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
+    function mostrarLogMesclarBasico(mensagem) {
+        const logEl = document.getElementById('log-agrupador-basico'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function lidarArquivosMescla(files) {
+    function lidarArquivosMesclaBasico(files) {
+        if (!files || files.length === 0) return;
+        arquivosParaMesclarBasico = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+        const status = document.getElementById('status-agrupador-basico'); status.innerText = `${arquivosParaMesclarBasico.length} arquivos selecionados. Clique no botão abaixo para unir.`;
+        document.getElementById('log-agrupador-basico').innerHTML = ''; document.getElementById('btnMesclarPDF-basico').style.display = 'inline-flex';
+    }
+
+    async function mesclarArquivosBasico() {
+        const btn = document.getElementById('btnMesclarPDF-basico'); const status = document.getElementById('status-agrupador-basico');
+        btn.disabled = true; btn.innerText = "⏳ Processando..."; mostrarLogMesclarBasico("Analisando e ordenando arquivos pelo nome...");
+        
+        arquivosParaMesclarBasico.sort((a, b) => {
+            const numA = parseInt(a.name.match(/\d+/)?.[0] || 0); const numB = parseInt(b.name.match(/\d+/)?.[0] || 0);
+            if (numA !== numB) return numA - numB; 
+            const isNfA = a.name.toLowerCase().includes('nf'); const isNfB = b.name.toLowerCase().includes('nf');
+            if (isNfA && !isNfB) return 1; if (!isNfA && isNfB) return -1; return 0;
+        });
+        
+        arquivosParaMesclarBasico.forEach(f => mostrarLogMesclarBasico(`- ${f.name}`));
+        
+        try {
+            const pdfFinal = await PDFLib.PDFDocument.create();
+            for (let i = 0; i < arquivosParaMesclarBasico.length; i++) {
+                const file = arquivosParaMesclarBasico[i]; mostrarLogMesclarBasico(`Mesclando: ${file.name}...`);
+                const arrayBuffer = await file.arrayBuffer(); const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
+                const paginasCopiadas = await pdfFinal.copyPages(pdfAtual, pdfAtual.getPageIndices());
+                paginasCopiadas.forEach((page) => { pdfFinal.addPage(page); });
+            }
+            mostrarLogMesclarBasico("✅ Todos os PDFs foram unidos! Gerando arquivo final...");
+            const pdfBytes = await pdfFinal.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `DIFAL_Agrupado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`; a.click(); window.URL.revokeObjectURL(url);
+            status.innerText = "✅ PDF Único gerado com sucesso!"; status.style.color = "var(--success)";
+        } catch (error) { mostrarLogMesclarBasico(`❌ Erro ao mesclar: ${error.message}`); status.innerText = "Erro ao gerar PDF."; status.style.color = "var(--danger)"; }
+        btn.disabled = false; btn.innerText = "📥 Unir e Baixar Lote";
+    }
+
+    // --- MÓDULO 7: AGRUPADOR ST (NOVO COM PLANILHA E TEXTO) ---
+    const dropZoneAgrupadorST = document.getElementById('drop-zone-agrupador-st');
+    const pdfInputAgrupadorST = document.getElementById('pdf-input-agrupador-st');
+    dropZoneAgrupadorST.onclick = () => pdfInputAgrupadorST.click();
+    pdfInputAgrupadorST.onchange = (e) => lidarArquivosMesclaST(e.target.files);
+    dropZoneAgrupadorST.ondragover = (e) => { e.preventDefault(); dropZoneAgrupadorST.classList.add('dragover'); };
+    dropZoneAgrupadorST.ondragleave = () => { dropZoneAgrupadorST.classList.remove('dragover'); };
+    dropZoneAgrupadorST.ondrop = (e) => { e.preventDefault(); dropZoneAgrupadorST.classList.remove('dragover'); lidarArquivosMesclaST(e.dataTransfer.files); };
+
+    let planilhasAgrupadorST = [];
+    let arquivosParaMesclarST = [];
+
+    function mostrarLogMesclarST(mensagem) {
+        const logEl = document.getElementById('log-agrupador-st'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function lidarArquivosMesclaST(files) {
         if (!files || files.length === 0) return;
         
         let allFiles = Array.from(files);
         let newXls = allFiles.filter(f => f.name.toLowerCase().match(/\.(xls|xlsx|csv)$/));
         let newPdfs = allFiles.filter(f => f.name.toLowerCase().endsWith('.pdf'));
         
-        if (newXls.length > 0) planilhasAgrupador = newXls;
-        if (newPdfs.length > 0) arquivosParaMesclar = newPdfs; 
+        if (newXls.length > 0) planilhasAgrupadorST = newXls;
+        if (newPdfs.length > 0) arquivosParaMesclarST = newPdfs; 
         
-        const status = document.getElementById('status-agrupador');
-        status.innerText = `${arquivosParaMesclar.length} PDFs selecionados e ${planilhasAgrupador.length} planilha(s). Clique abaixo para iniciar.`;
-        document.getElementById('log-agrupador').innerHTML = '';
-        document.getElementById('btnMesclarPDF').style.display = 'inline-flex';
+        const status = document.getElementById('status-agrupador-st');
+        status.innerText = `${arquivosParaMesclarST.length} PDFs selecionados e ${planilhasAgrupadorST.length} planilha(s). Clique abaixo para iniciar.`;
+        document.getElementById('log-agrupador-st').innerHTML = '';
+        document.getElementById('btnMesclarPDF-st').style.display = 'inline-flex';
     }
 
-    async function mesclarArquivos() {
-        const btn = document.getElementById('btnMesclarPDF');
-        const status = document.getElementById('status-agrupador');
+    async function mesclarArquivosST() {
+        const btn = document.getElementById('btnMesclarPDF-st');
+        const status = document.getElementById('status-agrupador-st');
         btn.disabled = true;
         btn.innerText = "⏳ Lendo Arquivos e Planilha...";
-        mostrarLogMesclar("Iniciando processo de ordenação inteligente...");
+        mostrarLogMesclarST("Iniciando processo de ordenação inteligente ST...");
         
         let ordemNFs = [];
-        if (planilhasAgrupador.length > 0) {
-            mostrarLogMesclar("Planilha de ordenação encontrada! Lendo ordem das NFs...");
+        if (planilhasAgrupadorST.length > 0) {
+            mostrarLogMesclarST("Planilha de ordenação encontrada! Lendo coluna Nº NF...");
             try {
-                const data = await planilhasAgrupador[0].arrayBuffer();
+                const data = await planilhasAgrupadorST[0].arrayBuffer();
                 const workbook = XLSX.read(data, {type: 'array'});
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
@@ -1072,6 +1137,8 @@
                     }
                     if (colIndex !== -1) break;
                 }
+                
+                // Força a leitura da coluna D (índice 3) se a busca por nome falhar
                 if (colIndex === -1) colIndex = 3; 
                 
                 for(let i=0; i<json.length; i++) {
@@ -1081,21 +1148,26 @@
                         if (!isNaN(parsed) && parsed > 0) ordemNFs.push(String(parsed));
                     }
                 }
-                mostrarLogMesclar(`✅ Planilha processada: ${ordemNFs.length} NFs listadas.`);
+                mostrarLogMesclarST(`✅ Planilha processada: ${ordemNFs.length} NFs listadas na ordem correta.`);
             } catch(e) {
-                mostrarLogMesclar("⚠️ Erro ao ler planilha. Prosseguindo sem ordenação fixa.");
+                mostrarLogMesclarST("⚠️ Erro ao ler planilha. Não foi possível mapear a ordem.");
+                btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
+                return;
             }
         } else {
-            mostrarLogMesclar("ℹ️ Nenhuma planilha enviada. Ordenando apenas pelos números encontrados.");
+            mostrarLogMesclarST("❌ ERRO: Nenhuma planilha foi enviada. Este módulo precisa da planilha para saber a ordem.");
+            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
+            return;
         }
 
         let pdfsComMetadados = [];
-        for (let file of arquivosParaMesclar) {
-            mostrarLogMesclar(`Analisando texto de: ${file.name}`);
+        for (let file of arquivosParaMesclarST) {
+            mostrarLogMesclarST(`Analisando: ${file.name}`);
             let text = await extractTextFromPDF(file);
             let nf = null;
-            let type = 'outro';
+            let type = 'guia'; // Default
             
+            // Tenta achar via texto (Conforme imagens enviadas)
             let matchMem = text.match(/Nota\s*fiscal:\s*0*(\d+)/i);
             if (matchMem) {
                 nf = matchMem[1]; type = 'memoria';
@@ -1106,47 +1178,74 @@
                 }
             }
             
-            if(nf) mostrarLogMesclar(`--> Identificado como ${type.toUpperCase()} da NF ${nf}`);
-            else mostrarLogMesclar(`--> Nenhuma NF identificada (manterá nome).`);
+            // Plano B: Se o texto falhar (ex: PDF é imagem), busca o número no nome do arquivo
+            if (!nf) {
+                let matchName = file.name.match(/\d{5,}/); // Busca sequência de 5+ números (ex: 2208280)
+                if (matchName) {
+                    nf = matchName[0];
+                    if (file.name.toLowerCase().includes('mem')) type = 'memoria';
+                }
+            }
+            
+            if(nf) mostrarLogMesclarST(`--> Identificado como ${type.toUpperCase()} da NF ${nf}`);
+            else mostrarLogMesclarST(`--> Nenhuma NF identificada, será ignorado.`);
             
             pdfsComMetadados.push({ file, nf, type, name: file.name });
         }
         
-        mostrarLogMesclar("Emparelhando e Ordenando arquivos...");
-        pdfsComMetadados.sort((a, b) => {
-            let indexA = ordemNFs.indexOf(a.nf); let indexB = ordemNFs.indexOf(b.nf);
-            if (indexA !== -1 && indexB !== -1) { if (indexA !== indexB) return indexA - indexB; } 
-            else if (indexA !== -1) return -1; else if (indexB !== -1) return 1;
-            if (a.nf && b.nf && a.nf !== b.nf) return a.nf.localeCompare(b.nf);
-            
-            if (a.type === 'memoria' && b.type !== 'memoria') return -1;
-            if (a.type !== 'memoria' && b.type === 'memoria') return 1;
-            
-            return (a.name || '').localeCompare(b.name || '');
-        });
+        mostrarLogMesclarST("---------------------------------");
+        mostrarLogMesclarST("Emparelhando arquivos conforme Planilha...");
         
+        let orderedFilesToMerge = [];
+        
+        // Loop pela ordem exata da planilha
+        for (let nf of ordemNFs) {
+            let memoria = pdfsComMetadados.find(p => p.nf === nf && p.type === 'memoria');
+            let guia = pdfsComMetadados.find(p => p.nf === nf && p.type === 'guia');
+            
+            if (memoria) {
+                orderedFilesToMerge.push(memoria);
+                mostrarLogMesclarST(`[+] Adicionado: Memória NF ${nf}`);
+            } else {
+                mostrarLogMesclarST(`[!] Faltando: Memória da NF ${nf}`);
+            }
+            
+            if (guia) {
+                orderedFilesToMerge.push(guia);
+                mostrarLogMesclarST(`[+] Adicionado: Guia NF ${nf}`);
+            } else {
+                mostrarLogMesclarST(`[!] Faltando: Guia da NF ${nf}`);
+            }
+        }
+        
+        if (orderedFilesToMerge.length === 0) {
+            mostrarLogMesclarST("❌ Nenhum PDF pôde ser correlacionado com as NFs da planilha.");
+            status.innerText = "Falha no agrupamento."; status.style.color = "var(--danger)"; 
+            btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
+            return;
+        }
+
         try {
             const pdfFinal = await PDFLib.PDFDocument.create();
-            for (let item of pdfsComMetadados) {
-                mostrarLogMesclar(`+ Juntando: ${item.name} ${item.nf ? '(NF '+item.nf+')' : ''}`);
+            for (let item of orderedFilesToMerge) {
                 const arrayBuffer = await item.file.arrayBuffer(); 
                 const pdfAtual = await PDFLib.PDFDocument.load(arrayBuffer);
                 const paginasCopiadas = await pdfFinal.copyPages(pdfAtual, pdfAtual.getPageIndices());
                 paginasCopiadas.forEach((page) => { pdfFinal.addPage(page); });
             }
-            mostrarLogMesclar("✅ Todos os PDFs foram unidos com sucesso!");
+            mostrarLogMesclarST("✅ Arquivos unidos e ordenados com sucesso!");
             
             const pdfBytes = await pdfFinal.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); 
             const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
-            a.download = `Lote_Agrupado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`; 
+            a.download = `Lote_ST_Agrupado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`; 
             a.click(); window.URL.revokeObjectURL(url);
-            status.innerText = "✅ Lote agrupado e baixado com sucesso!"; status.style.color = "var(--success)";
+            status.innerText = "✅ Lote ST agrupado e baixado com sucesso!"; status.style.color = "var(--success)";
         } catch (error) { 
-            mostrarLogMesclar(`❌ Erro crítico ao juntar PDFs: ${error.message}`); 
+            mostrarLogMesclarST(`❌ Erro crítico ao juntar PDFs: ${error.message}`); 
             status.innerText = "Erro ao gerar PDF."; status.style.color = "var(--danger)"; 
         }
         
-        btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote";
+        btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
     }
 </script>
 </body>
