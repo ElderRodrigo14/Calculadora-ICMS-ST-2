@@ -208,17 +208,17 @@
                 <button class="btn-secondary" onclick="limparMensal()" style="padding: 4px 10px; font-size: 12px; color: var(--danger); border-color: var(--danger);">Limpar Arquivos</button>
             </div>
             <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
-                1) Arraste a planilha principal e a planilha de produtos/info fiscais na área abaixo. Pode arrastar todas de uma vez.<br>
-                2) O motor cruzará os dados automaticamente filtrando as operações (200, 237 e 230) e relacionando Cód. Produto -> NCM -> Regra Fiscal (MVA).<br>
-                3) O relatório final sai de forma agrupada por Nota, condensando o resultado em poucas páginas prontas para impressão.
+                1) Arraste a planilha única (contendo as abas Principal, Produtos e Info Fiscais) na área abaixo.<br>
+                2) O motor lerá as 3 abas automaticamente, filtrando as operações (200, 237 e 230) e relacionando Cód. Produto -> NCM -> Regra Fiscal.<br>
+                3) O relatório final sai de forma agrupada por Nota, condensando o resultado para impressão.
             </p>
             <div id="drop-zone-mensal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
-                    <h3>Arraste as Planilhas (Principal, Produtos, Info) aqui</h3>
+                    <h3>Arraste a Planilha Única (com as 3 abas) aqui</h3>
                     <p>Formatos suportados: .xls, .xlsx</p>
                 </div>
-                <input type="file" id="excel-input-mensal" accept=".xls,.xlsx" multiple style="display: none;">
+                <input type="file" id="excel-input-mensal" accept=".xls,.xlsx" style="display: none;">
             </div>
             <div id="mensal-status" style="margin-top: 15px; font-size: 13px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <span id="badge-main" class="badge-status">⏳ Principal (Pendente)</span>
@@ -322,7 +322,7 @@
         </div>
     </main>
 
-    <!-- MÓDULO 5: AGRUPADOR DE PDFS BÁSICO (REVERTIDO) -->
+    <!-- MÓDULO 5: AGRUPADOR DE PDFS BÁSICO -->
     <main class="module" id="module-agrupador">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Agrupador de Guias e Notas (Básico)</h2>
@@ -364,7 +364,7 @@
         </div>
     </main>
 
-    <!-- MÓDULO 8: REGISTRADOR DE GUIAS (NOVO) -->
+    <!-- MÓDULO 8: REGISTRADOR DE GUIAS -->
     <main class="module" id="module-registrador">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Registrador de Entregas & Guias</h2>
@@ -375,13 +375,12 @@
                 <button class="btn-aliq" id="btn-sub-geral" onclick="switchSubRegistrador('geral')">Guias no Geral</button>
             </div>
 
-            <!-- Sub-Aba: Guias ST -->
             <div id="sub-mod-st">
                 <div class="drop-zone" id="drop-registrador-st" onclick="document.getElementById('file-reg-st').click()">
                     <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     <div class="drop-zone-text">
                         <h3>Anexar Planilha Diária (Guias ST)</h3>
-                        <p>O sistema puxará as informações (ex: responsável, horário) e fixará os cabeçalhos listando as NFs abaixo.</p>
+                        <p>O sistema puxará as informações e fixará os cabeçalhos listando as NFs abaixo.</p>
                     </div>
                     <input type="file" id="file-reg-st" accept=".xls,.xlsx" style="display: none;" onchange="processarPlanilhaST(this.files)">
                 </div>
@@ -389,7 +388,6 @@
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid var(--border); border-radius: 8px;">
                     <table id="table-registrador-st" style="margin-top: 0;">
                         <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
-                            <!-- Cabeçalhos injetados dinamicamente -->
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -401,7 +399,6 @@
                 </div>
             </div>
 
-            <!-- Sub-Aba: Guias no Geral -->
             <div id="sub-mod-geral" style="display: none;">
                 <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; margin-bottom: 15px;">
                     <input type="text" id="reg-desc" placeholder="Descrição (Ex: NF 12345)">
@@ -936,7 +933,12 @@
 
             let valOp = extrairFloat(row['Vlr. total']) + extrairFloat(row['Vlr. Frete NF']) + extrairFloat(row['Vlr. IPI']) + extrairFloat(row['Vlr. CTE']);
             let baseST = (valOp * (1 + mva)) * fator;
-            let creditoICMS = (extrairFloat(row['Base ICMS']) || extrairFloat(row['Vlr. total'])) * ((extrairFloat(row['ALIQUOTA EFETIVA']) || extrairFloat(row['ALIQICMS']) || 7) / 100) * fator;
+            
+            // CORREÇÃO: Usando 'Vlr. total' para espelhar a fórmula do Excel ao invés de buscar primeiro pela 'Base ICMS'
+            let baseCredito = extrairFloat(row['Vlr. total']);
+            let aliqCred = extrairFloat(row['ALIQUOTA EFETIVA']) || extrairFloat(row['ALIQICMS']) || 7;
+            let creditoICMS = baseCredito * (aliqCred / 100) * fator;
+            
             let icmsST = (baseST * 0.17) - creditoICMS; if (icmsST < 0) icmsST = 0; 
 
             let key = nroNota + '-' + empresa;
@@ -1105,7 +1107,7 @@
         btnGerar.disabled = false; btnGerar.innerText = originalText;
     }
 
-    // --- MÓDULO 5: AGRUPADOR DE PDFS (BÁSICO / ANTIGO) ---
+    // --- MÓDULO 5: AGRUPADOR DE PDFS BÁSICO ---
     const dropZoneAgrupadorBasico = document.getElementById('drop-zone-agrupador-basico');
     const pdfInputAgrupadorBasico = document.getElementById('pdf-input-agrupador-basico');
     dropZoneAgrupadorBasico.onclick = () => pdfInputAgrupadorBasico.click();
@@ -1272,7 +1274,7 @@
         btn.disabled = false; btn.innerText = "📥 Identificar, Unir e Baixar Lote ST";
     }
 
-    // --- MÓDULO 8: REGISTRADOR DE GUIAS (NOVO) ---
+    // --- MÓDULO 8: REGISTRADOR DE GUIAS ---
     function switchSubRegistrador(tab) {
         document.getElementById('btn-sub-st').classList.toggle('active', tab === 'st');
         document.getElementById('btn-sub-geral').classList.toggle('active', tab === 'geral');
@@ -1296,7 +1298,7 @@
                     hdrIdx = i; break;
                 }
             }
-            if(hdrIdx === -1) hdrIdx = 2; // Padrão: linha 3 (index 2)
+            if(hdrIdx === -1) hdrIdx = 2;
             
             let headers = json[hdrIdx].map(h => String(h).trim());
             let rows = json.slice(hdrIdx + 1).filter(r => r.some(c => c !== "")); 
