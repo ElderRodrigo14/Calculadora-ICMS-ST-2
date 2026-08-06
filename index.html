@@ -210,7 +210,7 @@
             <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 20px;">
                 1) Arraste a planilha única (contendo as abas Principal, Produtos e Info Fiscais) na área abaixo.<br>
                 2) O motor lerá as 3 abas automaticamente, filtrando as operações (200, 237 e 230) e relacionando Cód. Produto -> NCM -> Regra Fiscal.<br>
-                3) O relatório final sai de forma agrupada por Nota, condensando o resultado para impressão.
+                3) O sistema fará o <strong>abatimento automático</strong> da coluna de Antecipado para CSTs 10, 60 e 70.
             </p>
             <div id="drop-zone-mensal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
@@ -235,7 +235,7 @@
             <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
                 <table style="width: 100%; margin-top: 0;">
                     <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
-                        <tr><th>Nro Nota</th><th>Fornecedor / Operação</th><th style="text-align:center;">Qtd Itens</th><th>Valor Total (Operação)</th><th>Base ST Total</th><th>ICMS ST Total</th></tr>
+                        <tr><th>Nro Nota</th><th>Fornecedor / Operação</th><th style="text-align:center;">Qtd Itens</th><th>Valor Total (Operação)</th><th>Base ST Total</th><th>ICMS ST a Recolher</th></tr>
                     </thead>
                     <tbody id="corpo-tabela-mensal"></tbody>
                 </table>
@@ -934,12 +934,20 @@
             let valOp = extrairFloat(row['Vlr. total']) + extrairFloat(row['Vlr. Frete NF']) + extrairFloat(row['Vlr. IPI']) + extrairFloat(row['Vlr. CTE']);
             let baseST = (valOp * (1 + mva)) * fator;
             
-            // CORREÇÃO: Usando 'Vlr. total' para espelhar a fórmula do Excel ao invés de buscar primeiro pela 'Base ICMS'
+            // Usando 'Vlr. total' para espelhar a fórmula da base de crédito do Excel
             let baseCredito = extrairFloat(row['Vlr. total']);
             let aliqCred = extrairFloat(row['ALIQUOTA EFETIVA']) || extrairFloat(row['ALIQICMS']) || 7;
             let creditoICMS = baseCredito * (aliqCred / 100) * fator;
             
-            let icmsST = (baseST * 0.17) - creditoICMS; if (icmsST < 0) icmsST = 0; 
+            let icmsST = (baseST * 0.17) - creditoICMS; 
+            if (icmsST < 0) icmsST = 0; 
+            
+            // NOVO: Abatimento de ICMS ST já destacado na nota origem (CST 10, 60 ou 70)
+            let codTrib = extrairFloat(row['CODTRIB']);
+            if (codTrib === 10 || codTrib === 70 || codTrib === 60) {
+                let stAntecipado = extrairFloat(row['Vlr. ICMS Antecipado']);
+                icmsST = icmsST - stAntecipado;
+            }
 
             let key = nroNota + '-' + empresa;
             if (!relatorioResumo[key]) relatorioResumo[key] = { nota: nroNota, empresa, valOp: 0, baseST: 0, icmsST: 0, itens: 0 };
