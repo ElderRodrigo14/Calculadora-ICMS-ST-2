@@ -435,7 +435,64 @@
             </div>
         </div>
     </main>
-</div>
+
+    <!-- MÓDULO 9: GERADOR DE LOTE GNRE -->
+    <main class="module" id="module-gnre">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Lote para Portal GNRE</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">
+                Arraste as Notas Fiscais (XML) que possuem DIFAL/ST. O sistema vai extrair os valores e criar um arquivo de lote para você importar no Portal Nacional da GNRE, gerando todas as guias de uma vez.
+            </p>
+            
+            <div class="grid-manual" style="margin-bottom: 20px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+                <div class="field">
+                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Data de Vencimento e Pagamento</label>
+                    <input type="date" id="gnre-vencimento" style="background: var(--card-bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px; width: 100%; color: var(--text-main);">
+                </div>
+                <div class="field">
+                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Código Receita (Principal)</label>
+                    <select id="gnre-receita" style="background: var(--card-bg); border: 1px solid var(--border); padding: 10px; border-radius: 6px; width: 100%; color: var(--text-main);">
+                        <option value="100102">100102 - ICMS Consumidor Final (DIFAL)</option>
+                        <option value="100099">100099 - ICMS Substituição Tributária</option>
+                    </select>
+                </div>
+                <div class="field" style="display: flex; align-items: center; padding-top: 20px;">
+                    <label style="font-size: 13px; color: var(--text-main); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="gnre-sep-fcp" checked style="width: 18px; height: 18px;">
+                        Gerar guia separada para FCP (Cód. 100129)
+                    </label>
+                </div>
+            </div>
+
+            <div id="drop-zone-gnre" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste os XMLs das Notas Fiscais aqui</h3>
+                    <p>Leia dezenas de XMLs simultaneamente</p>
+                </div>
+                <input type="file" id="xml-input-gnre" accept=".xml" multiple style="display: none;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 20px;">
+                <h3 style="margin: 0; font-weight: 500; font-size: 16px;">Notas Processadas (<span id="gnre-count">0</span>)</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" onclick="limparGNRE()" style="color: var(--danger); border-color: var(--danger);">Limpar Fila</button>
+                    <button class="btn-main" onclick="baixarLoteGNRE()">📥 Gerar Arquivo de Lote (XML)</button>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 15px; max-height: 350px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                <table style="margin-top: 0;">
+                    <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1;">
+                        <tr><th>Nº Nota</th><th>UF Dest.</th><th>Valor Principal</th><th>Valor FCP</th><th>Total da NF</th><th style="text-align: center;">Ação</th></tr>
+                    </thead>
+                    <tbody id="tabela-gnre-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</div> <!-- FIM DA DIV MAIN-CONTENT -->
 
 <!-- Modal NCM -->
 <div class="overlay" id="modal-overlay"></div>
@@ -1464,6 +1521,7 @@
         }
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Historico"); XLSX.writeFile(wb, filename);
     }
+    
     // --- MÓDULO 9: GERADOR DE LOTE GNRE ---
     const dropZoneGnre = document.getElementById('drop-zone-gnre');
     const xmlInputGnre = document.getElementById('xml-input-gnre');
