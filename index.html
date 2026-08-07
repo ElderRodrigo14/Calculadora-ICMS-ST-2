@@ -1555,20 +1555,25 @@
         const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "S/N";
         const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
         
-        // --- INÍCIO DA ATUALIZAÇÃO 1: Captura completa de Emitente, Destinatário e Data ---
         const emit = xmlDoc.getElementsByTagName('emit')[0];
         const cnpjEmit = emit?.getElementsByTagName('CNPJ')[0]?.textContent || "";
         const razaoEmit = emit?.getElementsByTagName('xNome')[0]?.textContent || "N/I";
         const endEmitNodes = emit?.getElementsByTagName('enderEmit')[0];
         const endEmit = endEmitNodes ? (endEmitNodes.getElementsByTagName('xLgr')[0]?.textContent + ', ' + endEmitNodes.getElementsByTagName('nro')[0]?.textContent) : "N/I";
         const ufEmit = endEmitNodes?.getElementsByTagName('UF')[0]?.textContent || "";
-        const munEmit = endEmitNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
+        
+        // CORREÇÃO: Pega apenas os 5 últimos dígitos do código IBGE do Emitente
+        const cMunEmitRaw = endEmitNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
+        const munEmit = cMunEmitRaw.length > 5 ? cMunEmitRaw.slice(-5) : cMunEmitRaw;
 
         const dest = xmlDoc.getElementsByTagName('dest')[0];
         const endDestNodes = dest?.getElementsByTagName('enderDest')[0];
         const cUF = endDestNodes?.getElementsByTagName('UF')[0]?.textContent || "";
         const razaoDest = dest?.getElementsByTagName('xNome')[0]?.textContent || "N/I";
-        const munDest = endDestNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
+        
+        // CORREÇÃO: Pega apenas os 5 últimos dígitos do código IBGE do Destinatário
+        const cMunDestRaw = endDestNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
+        const munDest = cMunDestRaw.length > 5 ? cMunDestRaw.slice(-5) : cMunDestRaw;
 
         let docDest = '';
         let tipoDocDest = '';
@@ -1584,7 +1589,6 @@
         const dhEmi = dhEmiFull.split('T')[0];
         const anoEmi = dhEmi.split('-')[0];
         const mesEmi = dhEmi.split('-')[1];
-        // --- FIM DA ATUALIZAÇÃO 1 ---
 
         // Pega valores do final da nota (Totalizadores)
         const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
@@ -1607,15 +1611,14 @@
                 valorPrincipal,
                 valorFCP: vFCPUFDest,
                 total: valorPrincipal + vFCPUFDest,
-                // Inserindo os novos campos capturados no objeto final
                 razaoEmit,
                 endEmit,
                 ufEmit,
-                munEmit,
+                munEmit, // Agora vai estritamente com 5 dígitos
                 docDest,
                 tipoDocDest,
                 razaoDest,
-                munDest,
+                munDest, // Agora vai estritamente com 5 dígitos
                 dhEmi,
                 mesEmi,
                 anoEmi
@@ -1623,7 +1626,6 @@
             atualizarTabelaGNRE();
         }
     }
-
     function atualizarTabelaGNRE() {
         const tbody = document.getElementById('tabela-gnre-body');
         document.getElementById('gnre-count').innerText = filaGNRE.length;
