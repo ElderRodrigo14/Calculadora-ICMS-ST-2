@@ -1621,53 +1621,68 @@
 
         if (!dataSelecionada) { alert("Informe a data de vencimento!"); return; }
 
-        const ano = dataSelecionada.split('-')[0];
-        const mes = dataSelecionada.split('-')[1];
-
-        // Construindo a estrutura padrão do Lote XML GNRE v2.0
-        let xmlOutput = `<?xml version="1.0" encoding="UTF-8"?>\n<TLote_GNRE xmlns="http://www.gnre.pe.gov.br">\n  <guias>\n`;
+        // Cabeçalho raiz exigido na Versão 2.00
+        let xmlOutput = `<?xml version="1.0" encoding="UTF-8"?>\n<TLote_GNRE xmlns="http://www.gnre.pe.gov.br" versao="2.00">\n  <guias>\n`;
 
         filaGNRE.forEach(guia => {
-            // Guia Principal (DIFAL ou ST)
-            if (guia.valorPrincipal > 0) {
-                xmlOutput += construirNodeGNRE(guia.cUF, codReceitaBase, guia.chNFe, mes, ano, dataSelecionada, guia.cnpjEmit, guia.valorPrincipal);
+            let valorGuiaPrincipal = guia.valorPrincipal;
+            
+            // Se o usuário desmarcou a separação, junta o FCP no valor da guia principal
+            if (guia.valorFCP > 0 && !separaFCP) {
+                valorGuiaPrincipal += guia.valorFCP;
+            }
+
+            // Gera o bloco da Guia Principal (DIFAL ou ST)
+            if (valorGuiaPrincipal > 0) {
+                xmlOutput += construirNodeGNRE(guia.cUF, codReceitaBase, guia.chNFe, dataSelecionada, guia.cnpjEmit, valorGuiaPrincipal);
             }
             
-            // Guia FCP (Se exigido separado)
-            if (guia.valorFCP > 0) {
-                if (separaFCP) {
-                    xmlOutput += construirNodeGNRE(guia.cUF, "100129", guia.chNFe, mes, ano, dataSelecionada, guia.cnpjEmit, guia.valorFCP);
-                } else {
-                    // Se não separar, embute como campo extra (não muito comum, maioria prefere 2 guias)
-                    // Aqui mantemos a integridade gerando separado se for > 0, pois o Portal trava.
-                }
+            // Gera o bloco avulso da Guia de FCP (Cód 100129) se houver valor e a opção estiver marcada
+            if (guia.valorFCP > 0 && separaFCP) {
+                xmlOutput += construirNodeGNRE(guia.cUF, "100129", guia.chNFe, dataSelecionada, guia.cnpjEmit, guia.valorFCP);
             }
         });
 
         xmlOutput += `  </guias>\n</TLote_GNRE>`;
 
-        // Dispara o Download
-        const blob = new Blob([xmlOutput], { type: "text/xml" });
+        // Mime-Type ajustado para application/xml para garantir aceitação em todos os navegadores
+        const blob = new Blob([xmlOutput], { type: "application/xml;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Lote_GNRE_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '')}.xml`;
+        
+        // Formata a data atual para compor o nome do arquivo limpo (ex: Lote_GNRE_07082026.xml)
+        const dataHoje = new Date();
+        const stringData = dataHoje.toLocaleDateString('pt-BR').replace(/\//g, '');
+        a.download = `Lote_GNRE_${stringData}.xml`;
+        
         a.click();
         URL.revokeObjectURL(url);
     }
 
-    function construirNodeGNRE(uf, receita, chave, mes, ano, data, cnpj, valor) {
-        let node = `    <TDadosGNRE>\n`;
-        node += `      <cUF>${uf}</cUF>\n`;
-        node += `      <cReceita>${receita}</cReceita>\n`;
-        node += `      <documentoOrigem tipo="10">${chave}</documentoOrigem>\n`;
-        node += `      <tipoDocOrigem>10</tipoDocOrigem>\n`;
-        node += `      <referencia>\n        <periodo>0</periodo>\n        <mes>${mes}</mes>\n        <ano>${ano}</ano>\n      </referencia>\n`;
-        node += `      <dataVencimento>${data}</dataVencimento>\n`;
+    function construirNodeGNRE(uf, receita, chave, data, cnpj, valor) {
+        // Estrutura engessada e hierárquica oficial do XSD da GNRE v2.00
+        let node = `    <TDadosGNRE versao="2.00">\n`;
+        node += `      <ufFavorecida>${uf}</ufFavorecida>\n`;
+        node += `      <tipoGnre>0</tipoGnre>\n`;
+        node += `      <contribuinteEmitente>\n`;
+        node += `        <identificacao>\n`;
+        node += `          <CNPJ>${cnpj.replace(/\D/g, '')}</CNPJ>\n`; // Tag maiúscula crucial
+        node += `        </identificacao>\n`;
+        node += `      </contribuinteEmitente>\n`;
+        node += `      <itensGNRE>\n`;
+        node += `        <item>\n`;
+        node += `          <receita>${receita}</receita>\n`;
+        node += `          <documentoOrigem tipo="10">${chave}</documentoOrigem>\n`;
+        node += `          <dataVencimento>${data}</dataVencimento>\n`;
+        node += `          <valor tipo="11">${valor.toFixed(2)}</valor>\n`;
+        node += `          <convenio>1</convenio>\n`;
+        node += `        </item>\n`;
+        node += `      </itensGNRE>\n`;
+        node += `      <valorGNRE>${valor.toFixed(2)}</valorGNRE>\n`;
         node += `      <dataPagamento>${data}</dataPagamento>\n`;
-        node += `      <cnpjEmitente>${cnpj}</cnpjEmitente>\n`;
-        node += `      <valor tipo="11">${valor.toFixed(2)}</valor>\n`; // tipo="11" significa Valor Principal
         node += `    </TDadosGNRE>\n`;
+        
         return node;
     }
 </script>
