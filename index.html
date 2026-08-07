@@ -145,6 +145,10 @@
     
     <div class="tab-bar-wrapper">
         <div class="tab-bar">
+            <div class="tab-item" onclick="switchModule('gnre')">
+                <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2zM7 11V9h4V7H7V5h2v2h4V5h2v2h-2v2h2v2H7zm4 10H7v-2h4v2z"/></svg>
+                Gerador Lote GNRE
+            </div>
             <div class="tab-item active" onclick="switchModule('xml')">
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                 Importar XML
@@ -1459,6 +1463,154 @@
             ws = XLSX.utils.aoa_to_sheet(data); filename = 'Historico_Guias_Geral.xlsx';
         }
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Historico"); XLSX.writeFile(wb, filename);
+    }
+    // --- MÓDULO 9: GERADOR DE LOTE GNRE ---
+    const dropZoneGnre = document.getElementById('drop-zone-gnre');
+    const xmlInputGnre = document.getElementById('xml-input-gnre');
+    let filaGNRE = [];
+
+    // Define a data de hoje como padrão no input
+    document.getElementById('gnre-vencimento').value = new Date().toISOString().split('T')[0];
+
+    dropZoneGnre.onclick = () => xmlInputGnre.click();
+    xmlInputGnre.onchange = (e) => lerXMLsGNRE(e.target.files);
+    dropZoneGnre.ondragover = (e) => { e.preventDefault(); dropZoneGnre.classList.add('dragover'); };
+    dropZoneGnre.ondragleave = () => dropZoneGnre.classList.remove('dragover');
+    dropZoneGnre.ondrop = (e) => { e.preventDefault(); dropZoneGnre.classList.remove('dragover'); lerXMLsGNRE(e.dataTransfer.files); };
+
+    function lerXMLsGNRE(files) {
+        if (!files || files.length === 0) return;
+        Array.from(files).forEach(file => {
+            if (file.type === "text/xml" || file.name.toLowerCase().endsWith('.xml')) {
+                const reader = new FileReader();
+                reader.onload = function(e) { processarXMLParaGNRE(e.target.result); };
+                reader.readAsText(file);
+            }
+        });
+        xmlInputGnre.value = '';
+    }
+
+    function processarXMLParaGNRE(xmlStr) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlStr, "text/xml");
+        
+        const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "S/N";
+        const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
+        const cUF = xmlDoc.getElementsByTagName("dest")[0]?.getElementsByTagName("UF")[0]?.textContent || "";
+        const cnpjEmit = xmlDoc.getElementsByTagName("emit")[0]?.getElementsByTagName("CNPJ")[0]?.textContent || "";
+
+        // Pega valores do final da nota (Totalizadores)
+        const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
+        if (!totais) return;
+
+        let vICMSUFDest = parseFloat(totais.getElementsByTagName("vICMSUFDest")[0]?.textContent || 0);
+        let vFCPUFDest = parseFloat(totais.getElementsByTagName("vFCPUFDest")[0]?.textContent || 0);
+        let vST = parseFloat(totais.getElementsByTagName("vST")[0]?.textContent || 0);
+
+        // Define o valor base (se for DIFAL usa o ICMS Destino, se não usa ST)
+        let valorPrincipal = vICMSUFDest > 0 ? vICMSUFDest : vST;
+
+        if (valorPrincipal > 0 || vFCPUFDest > 0) {
+            filaGNRE.push({
+                id: Date.now() + Math.random(),
+                nNF,
+                chNFe,
+                cUF,
+                cnpjEmit,
+                valorPrincipal,
+                valorFCP: vFCPUFDest,
+                total: valorPrincipal + vFCPUFDest
+            });
+            atualizarTabelaGNRE();
+        }
+    }
+
+    function atualizarTabelaGNRE() {
+        const tbody = document.getElementById('tabela-gnre-body');
+        document.getElementById('gnre-count').innerText = filaGNRE.length;
+        
+        tbody.innerHTML = filaGNRE.map((guia, idx) => `
+            <tr>
+                <td><strong>${guia.nNF}</strong></td>
+                <td><span class="uf-badge">${guia.cUF}</span></td>
+                <td>R$ ${guia.valorPrincipal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td>R$ ${guia.valorFCP.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><strong>R$ ${guia.total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                <td style="text-align: center;"><button class="icon-btn delete" onclick="removerGuiaGNRE(${idx})">${svgDel}</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function removerGuiaGNRE(idx) {
+        filaGNRE.splice(idx, 1);
+        atualizarTabelaGNRE();
+    }
+
+    function limparGNRE() {
+        filaGNRE = [];
+        atualizarTabelaGNRE();
+    }
+
+    function baixarLoteGNRE() {
+        if (filaGNRE.length === 0) {
+            alert("Não há notas na fila para gerar o lote.");
+            return;
+        }
+
+        const dataSelecionada = document.getElementById('gnre-vencimento').value;
+        const codReceitaBase = document.getElementById('gnre-receita').value;
+        const separaFCP = document.getElementById('gnre-sep-fcp').checked;
+
+        if (!dataSelecionada) { alert("Informe a data de vencimento!"); return; }
+
+        const ano = dataSelecionada.split('-')[0];
+        const mes = dataSelecionada.split('-')[1];
+
+        // Construindo a estrutura padrão do Lote XML GNRE v2.0
+        let xmlOutput = `<?xml version="1.0" encoding="UTF-8"?>\n<TLote_GNRE xmlns="http://www.gnre.pe.gov.br">\n  <guias>\n`;
+
+        filaGNRE.forEach(guia => {
+            // Guia Principal (DIFAL ou ST)
+            if (guia.valorPrincipal > 0) {
+                xmlOutput += construirNodeGNRE(guia.cUF, codReceitaBase, guia.chNFe, mes, ano, dataSelecionada, guia.cnpjEmit, guia.valorPrincipal);
+            }
+            
+            // Guia FCP (Se exigido separado)
+            if (guia.valorFCP > 0) {
+                if (separaFCP) {
+                    xmlOutput += construirNodeGNRE(guia.cUF, "100129", guia.chNFe, mes, ano, dataSelecionada, guia.cnpjEmit, guia.valorFCP);
+                } else {
+                    // Se não separar, embute como campo extra (não muito comum, maioria prefere 2 guias)
+                    // Aqui mantemos a integridade gerando separado se for > 0, pois o Portal trava.
+                }
+            }
+        });
+
+        xmlOutput += `  </guias>\n</TLote_GNRE>`;
+
+        // Dispara o Download
+        const blob = new Blob([xmlOutput], { type: "text/xml" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Lote_GNRE_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '')}.xml`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function construirNodeGNRE(uf, receita, chave, mes, ano, data, cnpj, valor) {
+        let node = `    <TDadosGNRE>\n`;
+        node += `      <cUF>${uf}</cUF>\n`;
+        node += `      <cReceita>${receita}</cReceita>\n`;
+        node += `      <documentoOrigem tipo="10">${chave}</documentoOrigem>\n`;
+        node += `      <tipoDocOrigem>10</tipoDocOrigem>\n`;
+        node += `      <referencia>\n        <periodo>0</periodo>\n        <mes>${mes}</mes>\n        <ano>${ano}</ano>\n      </referencia>\n`;
+        node += `      <dataVencimento>${data}</dataVencimento>\n`;
+        node += `      <dataPagamento>${data}</dataPagamento>\n`;
+        node += `      <cnpjEmitente>${cnpj}</cnpjEmitente>\n`;
+        node += `      <valor tipo="11">${valor.toFixed(2)}</valor>\n`; // tipo="11" significa Valor Principal
+        node += `    </TDadosGNRE>\n`;
+        return node;
     }
 </script>
 </body>
