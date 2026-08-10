@@ -818,25 +818,27 @@
             else if (diff > 0.01) creditoBanner = `<div style="margin-top: 15px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
         }
 
-        const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória de Cálculo - NF ${nota.nNF}</title>
+        const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória - NF ${nota.nNF}</title>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
             <style>
                 body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #000; background: #525659; }
                 #print-wrapper {
                     background: #fff; 
                     width: ${orientation === 'portrait' ? '210mm' : '297mm'};
-                    height: ${orientation === 'portrait' ? '297mm' : '210mm'};
-                    max-height: ${orientation === 'portrait' ? '297mm' : '210mm'};
+                    height: ${orientation === 'portrait' ? '296mm' : '209mm'}; /* 1mm a menos garante que NUNCA vai vazar para a pag 2 */
+                    position: relative; /* FUNDAMENTAL: Permite posicionar a tabela de forma absoluta */
                     margin: 20px auto; 
-                    padding: 0; 
                     box-sizing: border-box; 
                     box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    overflow: hidden; /* CORTA QUALQUER EXCESSO INVISÍVEL */
+                    overflow: hidden;
                 }
                 #print-content-inner { 
-                    padding: 15px 25px; /* Reduzido levemente para ganhar espaço */
+                    position: absolute; /* DESCOLA do fluxo da página. A 2ª página deixa de existir aqui. */
+                    top: ${orientation === 'portrait' ? '125mm' : '10mm'}; /* Joga exatamente para baixo da metade */
+                    left: 0;
+                    width: 100%;
+                    padding: 0 25px; 
                     color: #000; 
-                    margin-top: ${orientation === 'portrait' ? '105mm' : '0'}; /* Ajuste matemático seguro */
                     box-sizing: border-box;
                 }
                 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -859,19 +861,18 @@
                 .total-title { font-size: 11px; margin-bottom: 6px; max-width: 90px; }
                 .total-val { font-size: 13px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 6px; width: 100%; }
                 
-                .no-print { display: block; }
-                @media print { 
-                    .no-print { display: none !important; } 
-                    body { background: #fff; }
-                    #print-wrapper { margin: 0; box-shadow: none; width: 100%; height: 100%; overflow: hidden; }
-                    @page { size: ${orientation}; margin: 0; } 
-                }
                 .btn-download {
                     position: fixed; top: 20px; right: 20px; background: #34a853; color: white; border: none;
                     padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold;
                     cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; transition: 0.2s;
                 }
-                .btn-download:hover { background: #2b8c44; }
+                .no-print { display: block; }
+                @media print { 
+                    .no-print { display: none !important; } 
+                    body { background: #fff; }
+                    #print-wrapper { margin: 0; box-shadow: none; }
+                    @page { size: ${orientation}; margin: 0; } 
+                }
             </style></head>
             <body>
                 <button id="dl-btn" class="no-print btn-download" onclick="downloadPDF()">📥 Baixar PDF</button>
