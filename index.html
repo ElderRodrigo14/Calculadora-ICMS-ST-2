@@ -814,8 +814,8 @@
         let diff = nota.vStTotalCalculado - nota.vSTNota;
         let creditoBanner = '';
         if (nota.vSTNota > 0) {
-            if (diff < -0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - VALOR: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
-            else if (diff > 0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+            if (diff < -0.01) creditoBanner = `<div style="margin-top: 15px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+            else if (diff > 0.01) creditoBanner = `<div style="margin-top: 15px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
         }
 
         const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória de Cálculo - NF ${nota.nNF}</title>
@@ -825,45 +825,45 @@
                 #print-wrapper {
                     background: #fff; 
                     width: ${orientation === 'portrait' ? '210mm' : '297mm'};
-                    height: ${orientation === 'portrait' ? '297mm' : '210mm'}; /* ALTURA FIXA: Impede criação da 2ª página */
+                    height: ${orientation === 'portrait' ? '297mm' : '210mm'};
+                    max-height: ${orientation === 'portrait' ? '297mm' : '210mm'};
                     margin: 20px auto; 
                     padding: 0; 
                     box-sizing: border-box; 
                     box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    overflow: hidden; /* CORTA O EXCESSO: Impede criação da 2ª página */
-                    position: relative;
+                    overflow: hidden; /* CORTA QUALQUER EXCESSO INVISÍVEL */
                 }
                 #print-content-inner { 
-                    padding: 20px 30px; 
+                    padding: 15px 25px; /* Reduzido levemente para ganhar espaço */
                     color: #000; 
-                    margin-top: ${orientation === 'portrait' ? '135mm' : '0'}; 
+                    margin-top: ${orientation === 'portrait' ? '105mm' : '0'}; /* Ajuste matemático seguro */
                     box-sizing: border-box;
                 }
-                .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-                .logo { max-width: 150px; }
-                .header-title { font-size: 20px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 150px; }
-                .line-separator { border-top: 1px solid #000; margin-bottom: 10px; }
-                .info-grid { display: grid; grid-template-columns: 100px 1fr 100px; row-gap: 4px; margin-bottom: 20px; }
+                .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+                .logo { max-width: 140px; }
+                .header-title { font-size: 18px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 140px; }
+                .line-separator { border-top: 1px solid #000; margin-bottom: 8px; }
+                .info-grid { display: grid; grid-template-columns: 90px 1fr 90px; row-gap: 4px; margin-bottom: 15px; font-size: 10px; }
                 .info-grid span { white-space: nowrap; } .pg-number { text-align: right; }
-                .calc-info { display: flex; border-left: 2px solid #000; padding-left: 10px; margin-left: 200px; }
-                .calc-col { display: flex; flex-direction: column; margin-right: 40px; gap: 4px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px; }
-                th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none; }
+                .calc-info { display: flex; border-left: 2px solid #000; padding-left: 10px; margin-left: 180px; }
+                .calc-col { display: flex; flex-direction: column; margin-right: 30px; gap: 4px; font-size: 10px;}
+                table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 9px; }
+                th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 5px 3px; border: none; }
                 th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
-                td { padding: 6px 4px; text-align: right; border: 1px solid #000; }
+                td { padding: 5px 3px; text-align: right; border: 1px solid #000; }
                 td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
                 .row-conv { background-color: #555555; color: #fff; font-weight: normal; }
-                .row-conv td { padding: 4px; text-align: left; border: 1px solid #000; }
-                .totals-container { display: flex; justify-content: space-around; margin-top: 40px; text-align: center; }
+                .row-conv td { padding: 3px; text-align: left; border: 1px solid #000; }
+                .totals-container { display: flex; justify-content: space-around; margin-top: 25px; text-align: center; }
                 .total-box { display: flex; flex-direction: column; align-items: center; }
-                .total-title { font-size: 12px; margin-bottom: 8px; max-width: 100px; }
-                .total-val { font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%; }
+                .total-title { font-size: 11px; margin-bottom: 6px; max-width: 90px; }
+                .total-val { font-size: 13px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 6px; width: 100%; }
                 
                 .no-print { display: block; }
                 @media print { 
                     .no-print { display: none !important; } 
                     body { background: #fff; }
-                    #print-wrapper { margin: 0; box-shadow: none; width: 100%; height: 100%; }
+                    #print-wrapper { margin: 0; box-shadow: none; width: 100%; height: 100%; overflow: hidden; }
                     @page { size: ${orientation}; margin: 0; } 
                 }
                 .btn-download {
@@ -882,11 +882,11 @@
                         <div class="info-grid">
                             <span>Empresa:</span><span>LN COMERCIO DE ELETRONICOS LTDA</span><span class="pg-number">Página 1 de 1</span>
                             <span>CNPJ:</span><span>01030685002397</span><span></span>
-                            <span style="margin-top: 10px;">Fornecedor:</span><span style="margin-top: 10px;">${nota.xNome}</span><span></span>
+                            <span style="margin-top: 8px;">Fornecedor:</span><span style="margin-top: 8px;">${nota.xNome}</span><span></span>
                             <span>Nota fiscal:</span><span>${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span><span></span>
                         </div>
-                        <div style="display:flex; margin-bottom: 20px;">
-                            <div class="calc-col" style="width: 250px;"><div>Calculado por: &nbsp;&nbsp; PAULO</div><div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div>
+                        <div style="display:flex; margin-bottom: 15px;">
+                            <div class="calc-col" style="width: 200px;"><div>Calculado por: &nbsp;&nbsp; PAULO</div><div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div>
                             <div class="calc-info"><div class="calc-col"><div>Impresso por: &nbsp;&nbsp; PAULO</div><div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div></div>
                         </div>
                         <table>
@@ -901,8 +901,8 @@
                         </table>
                         <div class="totals-container">
                             <div class="total-box"><div class="total-title">Total de<br>Produtos</div><div class="total-val">${nota.itens.length}</div></div>
-                            <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido<br>Antecipado</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
-                            <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido<br>Antecipado</div><div class="total-val">R$0,00</div></div>
+                            <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                            <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido</div><div class="total-val">R$0,00</div></div>
                             <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                             <div class="total-box"><div class="total-title">Valor Total<br>FECEP-ST</div><div class="total-val">R$0,00</div></div>
                             <div class="total-box"><div class="total-title">Valor Total<br>Base-ST</div><div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
@@ -914,7 +914,7 @@
                 <script>
                     function downloadPDF() {
                         const btn = document.getElementById('dl-btn');
-                        btn.innerText = "⏳ Gerando PDF..."; btn.style.opacity = '0.7';
+                        btn.innerText = "⏳ Gerando..."; btn.style.opacity = '0.7';
                         
                         const wrapper = document.getElementById('print-wrapper');
                         wrapper.style.margin = '0';
@@ -923,10 +923,9 @@
                         const opt = {
                             margin: 0,
                             filename: 'Memoria_Calculo_NF_${nota.nNF}.pdf',
-                            image: { type: 'jpeg', quality: 0.98 },
-                            html2canvas: { scale: 2, useCORS: true },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: '${orientation}' },
-                            pagebreak: { mode: 'avoid-all' }
+                            image: { type: 'jpeg', quality: 1 },
+                            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: '${orientation}' }
                         };
                         
                         html2pdf().set(opt).from(wrapper).save().then(() => {
