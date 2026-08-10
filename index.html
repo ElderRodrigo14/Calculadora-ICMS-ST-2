@@ -773,8 +773,9 @@
                 <div class="header-nota">
                     <div><h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3><p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}</p></div>
                     <div style="display:flex; gap: 8px;">
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Imprimir Vertical">${svgPrint} Retrato</button>
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Imprimir Horizontal">${svgPrint} Paisagem</button>
+                        <button class="btn-main" style="padding: 4px 10px; font-size: 12px; background: var(--sankhya-green); color: white; border: none;" onclick="baixarPDFDireto(${nota.id}, 'portrait', this)" title="Baixar PDF sem abrir tela">📥 Baixar PDF</button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Visualizar Vertical">${svgPrint} Retrato</button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Visualizar Horizontal">${svgPrint} Paisagem</button>
                         <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
                     </div>
                 </div>
