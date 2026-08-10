@@ -773,7 +773,6 @@
                 <div class="header-nota">
                     <div><h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3><p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}</p></div>
                     <div style="display:flex; gap: 8px;">
-                        <button class="btn-main" style="padding: 4px 10px; font-size: 12px; background: var(--sankhya-green); color: white; border: none;" onclick="baixarPDFDireto(${nota.id}, 'portrait', this)" title="Baixar PDF sem abrir tela">📥 Baixar PDF</button>
                         <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Visualizar Vertical">${svgPrint} Retrato</button>
                         <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Visualizar Horizontal">${svgPrint} Paisagem</button>
                         <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
@@ -824,16 +823,21 @@
             <style>
                 body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #000; background: #525659; }
                 #print-wrapper {
-                    background: #fff; width: ${orientation === 'portrait' ? '210mm' : '297mm'};
-                    min-height: ${orientation === 'portrait' ? '297mm' : '210mm'};
-                    margin: 20px auto; padding: 0; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    overflow: hidden;
+                    background: #fff; 
+                    width: ${orientation === 'portrait' ? '210mm' : '297mm'};
+                    height: ${orientation === 'portrait' ? '297mm' : '210mm'}; /* ALTURA FIXA: Impede criação da 2ª página */
+                    margin: 20px auto; 
+                    padding: 0; 
+                    box-sizing: border-box; 
+                    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                    overflow: hidden; /* CORTA O EXCESSO: Impede criação da 2ª página */
+                    position: relative;
                 }
-                /* AQUI: O margin-top empurra o conteúdo para baixo da metade apenas no modo Retrato */
                 #print-content-inner { 
                     padding: 20px 30px; 
                     color: #000; 
                     margin-top: ${orientation === 'portrait' ? '135mm' : '0'}; 
+                    box-sizing: border-box;
                 }
                 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
                 .logo { max-width: 150px; }
@@ -859,7 +863,7 @@
                 @media print { 
                     .no-print { display: none !important; } 
                     body { background: #fff; }
-                    #print-wrapper { margin: 0; box-shadow: none; width: 100%; min-height: auto; }
+                    #print-wrapper { margin: 0; box-shadow: none; width: 100%; height: 100%; }
                     @page { size: ${orientation}; margin: 0; } 
                 }
                 .btn-download {
@@ -870,7 +874,7 @@
                 .btn-download:hover { background: #2b8c44; }
             </style></head>
             <body>
-                <button id="dl-btn" class="no-print btn-download" onclick="downloadPDF()">📥 Baixar PDF Rápido</button>
+                <button id="dl-btn" class="no-print btn-download" onclick="downloadPDF()">📥 Baixar PDF</button>
                 <div id="print-wrapper">
                     <div id="print-content-inner">
                         <div class="header-top"><img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo"><div class="header-title">Memória de Cálculo do ICMS ST</div></div>
@@ -913,22 +917,20 @@
                         btn.innerText = "⏳ Gerando PDF..."; btn.style.opacity = '0.7';
                         
                         const wrapper = document.getElementById('print-wrapper');
-                        
-                        // Retira temporariamente a margem centralizada e a sombra para a foto sair limpa
                         wrapper.style.margin = '0';
                         wrapper.style.boxShadow = 'none';
 
                         const opt = {
-                            margin: 0, // IMPORTANTÍSSIMO: Margem 0. O espaçamento agora é feito 100% pelo CSS do #print-wrapper
+                            margin: 0,
                             filename: 'Memoria_Calculo_NF_${nota.nNF}.pdf',
                             image: { type: 'jpeg', quality: 0.98 },
                             html2canvas: { scale: 2, useCORS: true },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: '${orientation}' }
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: '${orientation}' },
+                            pagebreak: { mode: 'avoid-all' }
                         };
                         
                         html2pdf().set(opt).from(wrapper).save().then(() => {
-                            btn.innerText = "📥 Baixar PDF Rápido"; btn.style.opacity = '1';
-                            // Restaura as propriedades visuais da tela
+                            btn.innerText = "📥 Baixar PDF"; btn.style.opacity = '1';
                             wrapper.style.margin = '20px auto';
                             wrapper.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
                         });
