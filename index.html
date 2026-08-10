@@ -819,8 +819,6 @@
             else if (diff > 0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
         }
 
-        const spacer = orientation === 'portrait' ? '<div style="height: 135mm;"></div>' : '';
-
         const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória de Cálculo - NF ${nota.nNF}</title>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
             <style>
@@ -869,7 +867,6 @@
                 <button id="dl-btn" class="no-print btn-download" onclick="downloadPDF()">📥 Baixar PDF Rápido</button>
                 <div id="print-wrapper">
                     <div id="print-content-inner">
-                        ${spacer}
                         <div class="header-top"><img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo"><div class="header-title">Memória de Cálculo do ICMS ST</div></div>
                         <div class="line-separator"></div>
                         <div class="info-grid">
