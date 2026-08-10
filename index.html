@@ -920,6 +920,119 @@
         const janela = window.open('', '_blank'); janela.document.write(htmlStr); janela.document.close();
     }
 
+    function baixarPDFDireto(id, orientation, btnElem) {
+        const nota = notasFiscais.find(n => n.id === id);
+        if(!nota) return;
+        
+        const originalText = btnElem.innerHTML;
+        btnElem.innerHTML = "⏳ Gerando PDF...";
+        btnElem.disabled = true;
+
+        const dataAtual = new Date();
+        const dataImpressao = dataAtual.toLocaleDateString('pt-BR');
+        const horaImpressao = dataAtual.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+        let diff = nota.vStTotalCalculado - nota.vSTNota;
+        let creditoBanner = '';
+        if (nota.vSTNota > 0) {
+            if (diff < -0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - VALOR: R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+            else if (diff > 0.01) creditoBanner = `<div style="margin-top: 25px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - VALOR: R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+        }
+
+        const element = document.createElement('div');
+        element.innerHTML = `
+            <div style="font-family: Arial, sans-serif; font-size: 11px; color: #000; background: #fff; padding: 20px 30px; width: ${orientation === 'portrait' ? '210mm' : '297mm'}; box-sizing: border-box;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <img src="logo_horizontal_azul.png" style="max-width: 150px;" alt="Logo">
+                    <div style="font-size: 20px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 150px;">Memória de Cálculo do ICMS ST</div>
+                </div>
+                <div style="border-top: 1px solid #000; margin-bottom: 10px;"></div>
+                <div style="display: grid; grid-template-columns: 100px 1fr 100px; row-gap: 4px; margin-bottom: 20px;">
+                    <span style="white-space: nowrap;">Empresa:</span><span style="white-space: nowrap;">LN COMERCIO DE ELETRONICOS LTDA</span><span style="text-align: right; white-space: nowrap;">Página 1 de 1</span>
+                    <span style="white-space: nowrap;">CNPJ:</span><span style="white-space: nowrap;">01030685002397</span><span></span>
+                    <span style="margin-top: 10px; white-space: nowrap;">Fornecedor:</span><span style="margin-top: 10px; white-space: nowrap;">${nota.xNome}</span><span></span>
+                    <span style="white-space: nowrap;">Nota fiscal:</span><span style="white-space: nowrap;">${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span><span></span>
+                </div>
+                <div style="display:flex; margin-bottom: 20px;">
+                    <div style="display: flex; flex-direction: column; margin-right: 40px; gap: 4px; width: 250px;">
+                        <div>Calculado por: &nbsp;&nbsp; PAULO</div>
+                        <div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
+                    </div>
+                    <div style="display: flex; border-left: 2px solid #000; padding-left: 10px; margin-left: 150px;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div>Impresso por: &nbsp;&nbsp; PAULO</div>
+                            <div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div>
+                        </div>
+                    </div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: left; padding: 6px 4px; border: none;">Nota</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: left; padding: 6px 4px; border: none;">NCM</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: left; padding: 6px 4px; border: none;">Produto</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Valor Un.</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Valor Total</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">IPI</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">MVA</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Aliq.<br>Créd.</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Aliq.<br>ICMS</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Valor Débito</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Valor Crédito</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">Base ST</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">ICMS ST</th>
+                            <th style="background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 6px 4px; border: none;">FECEP ST</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background-color: #555555; color: #fff; font-weight: normal;"><td colspan="14" style="padding: 4px; text-align: left; border: 1px solid #000;">Convênio 52/91</td></tr>
+                        ${nota.itens.map(it => {
+                            let valorDebito = (it.baseST * 0.17); 
+                            return \`<tr>
+                                <td style="padding: 6px 4px; text-align: left; border: 1px solid #000;">\${nota.nNF}</td>
+                                <td style="padding: 6px 4px; text-align: left; border: 1px solid #000;">\${it.ncm}</td>
+                                <td style="padding: 6px 4px; text-align: left; border: 1px solid #000;">\${it.xProd.substring(0, 30)}...</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">\${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">\${Number(it.aliqIcms).toLocaleString('pt-BR')}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">17</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$\${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td style="padding: 6px 4px; text-align: right; border: 1px solid #000;">R\$0,00</td>
+                            </tr>\`;
+                        }).join('')}
+                    </tbody>
+                </table>
+                <div style="display: flex; justify-content: space-around; margin-top: 40px; text-align: center;">
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">Total de<br>Produtos</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">${nota.itens.length}</div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">ICMS-ST<br>Recolhido<br>Antecipado</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">FECEP-ST<br>Recolhido<br>Antecipado</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">R$0,00</div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">Valor Total<br>ICMS-ST</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">Valor Total<br>FECEP-ST</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">R$0,00</div></div>
+                    <div style="display: flex; flex-direction: column; align-items: center;"><div style="font-size: 12px; margin-bottom: 8px; max-width: 100px;">Valor Total<br>Base-ST</div><div style="font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 8px; width: 100%;">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                </div>
+                ${creditoBanner}
+            </div>
+        `;
+
+        const opt = {
+            margin: [10, 0, 10, 0],
+            filename: `Memoria_Calculo_NF_${nota.nNF}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: orientation }
+        };
+
+        html2pdf().set(opt).from(element.innerHTML).save().then(() => {
+            btnElem.innerHTML = originalText;
+            btnElem.disabled = false;
+        });
+    }
+                                         
     // --- MÓDULO 6: ST MENSAL EM LOTE ---
     const dropZoneMensal = document.getElementById('drop-zone-mensal'); const excelInputMensal = document.getElementById('excel-input-mensal');
     dropZoneMensal.onclick = () => excelInputMensal.click(); excelInputMensal.onchange = (e) => processarArquivosMensal(e.target.files);
