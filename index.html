@@ -10,8 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- NOVO: Biblioteca para Download Direto -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -697,6 +695,12 @@
         const nNF = xmlDoc.getElementsByTagName("nNF")[0]?.textContent || "S/N";
         const xNome = xmlDoc.getElementsByTagName("xNome")[0]?.textContent || "Desconhecido";
         const cnpj = xmlDoc.getElementsByTagName("CNPJ")[0]?.textContent || "00.000.000/0000-00";
+        
+        // NOVO: Puxando dados do Destinatário
+        const destTag = xmlDoc.getElementsByTagName("dest")[0];
+        const destNome = destTag ? destTag.getElementsByTagName("xNome")[0]?.textContent : "N/I";
+        const destCnpj = destTag ? (destTag.getElementsByTagName("CNPJ")[0]?.textContent || destTag.getElementsByTagName("CPF")[0]?.textContent) : "N/I";
+
         const chNFe = xmlDoc.getElementsByTagName("chNFe")[0]?.textContent || "";
         let dhEmi = xmlDoc.getElementsByTagName("dhEmi")[0]?.textContent || "";
         let dataEmissaoFormatada = ""; if(dhEmi) dataEmissaoFormatada = new Date(dhEmi).toLocaleDateString('pt-BR');
@@ -746,7 +750,7 @@
             itensCalc.push({ item: i+1, xProd, ncm, cest, qCom, vUnCom, vProd, vBC_icms, creditoICMS, vIpi, pIPI, aliqIcms: aliqIcms * 100, mva: info.mva * 100, baseST, stFinal });
         }
 
-        notasFiscais.push({ id: Date.now() + Math.floor(Math.random()*1000), nNF, xNome, cnpj, chNFe, dataEmissaoFormatada, vBC_tot, vICMS_tot, vIPI_tot, vSTNota, bcStTotalCalculado, vStTotalCalculado, itens: itensCalc });
+        notasFiscais.push({ id: Date.now() + Math.floor(Math.random()*1000), nNF, xNome, cnpj, destNome, destCnpj, chNFe, dataEmissaoFormatada, vBC_tot, vICMS_tot, vIPI_tot, vSTNota, bcStTotalCalculado, vStTotalCalculado, itens: itensCalc });
         renderizarNotas();
     }
 
@@ -773,8 +777,7 @@
                 <div class="header-nota">
                     <div><h3 style="margin:0; font-weight: 500; font-size: 18px;">Nota: ${nota.nNF}</h3><p style="margin:4px 0 0 0; font-size:12px; color:var(--text-sub);">${nota.xNome} | CNPJ: ${nota.cnpj} | Chave: ${nota.chNFe}</p></div>
                     <div style="display:flex; gap: 8px;">
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'portrait')" title="Visualizar Vertical">${svgPrint} Retrato</button>
-                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="imprimirNota(${nota.id}, 'landscape')" title="Visualizar Horizontal">${svgPrint} Paisagem</button>
+                        <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px; background: var(--sankhya-green); color: white; border: none;" onclick="imprimirNota(${nota.id})" title="Imprimir Nota (Ctrl+P)">🖨️ Imprimir</button>
                         <button class="accordion-btn" id="acc-btn-${nota.id}" onclick="toggleAccordion(${nota.id})" title="Ver Itens">${svgChevron}</button>
                     </div>
                 </div>
@@ -804,7 +807,7 @@
 
     function limparNotas() { notasFiscais = []; renderizarNotas(); }
 
-    function imprimirNota(id, orientation) {
+    function imprimirNota(id) {
         const nota = notasFiscais.find(n => n.id === id);
         if(!nota) return;
         const dataAtual = new Date();
@@ -814,130 +817,129 @@
         let diff = nota.vStTotalCalculado - nota.vSTNota;
         let creditoBanner = '';
         if (nota.vSTNota > 0) {
-            if (diff < -0.01) creditoBanner = `<div style="margin-top: 15px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR NA NOTA FISCAL (CRÉDITO) - R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
-            else if (diff > 0.01) creditoBanner = `<div style="margin-top: 15px; border: 2px solid #000; padding: 10px; background-color: #f2f2f2; font-weight: bold; font-size: 14px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR NA NOTA FISCAL (A RECOLHER) - R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+            if (diff < -0.01) creditoBanner = `<div style="margin-top: 10px; border: 1px solid #000; padding: 8px; background-color: #f2f2f2; font-weight: bold; font-size: 11px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MAIOR (CRÉDITO): R$ ${Math.abs(diff).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
+            else if (diff > 0.01) creditoBanner = `<div style="margin-top: 10px; border: 1px solid #000; padding: 8px; background-color: #f2f2f2; font-weight: bold; font-size: 11px; text-align: center;"><span style="color: #d93025;">ATENÇÃO:</span> IMPOSTO RECOLHIDO A MENOR (A RECOLHER): R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>`;
         }
 
-        const htmlStr = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8"><title>Memória - NF ${nota.nNF}</title>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>
+        const empresaNome = nota.destNome || 'NOME DA EMPRESA NÃO LIDO NO XML';
+        const empresaCnpj = nota.destCnpj || 'CNPJ NÃO LIDO NO XML';
+        const fornecedorNome = nota.xNome || 'NOME DO FORNECEDOR';
+
+        const htmlStr = `<!DOCTYPE html>
+        <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>Memória de Cálculo - NF ${nota.nNF}</title>
             <style>
-                body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 0; color: #000; background: #525659; }
-                #print-wrapper {
-                    background: #fff; 
-                    width: ${orientation === 'portrait' ? '210mm' : '297mm'};
-                    height: ${orientation === 'portrait' ? '296mm' : '209mm'}; /* 1mm a menos garante que NUNCA vai vazar para a pag 2 */
-                    position: relative; /* FUNDAMENTAL: Permite posicionar a tabela de forma absoluta */
-                    margin: 20px auto; 
-                    box-sizing: border-box; 
-                    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    overflow: hidden;
+                body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; padding: 20px; background: #525659; display: flex; justify-content: center; }
+                
+                .btn-imprimir {
+                    position: fixed; top: 20px; right: 20px; background: #0056b3; color: white; border: none;
+                    padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: bold;
+                    cursor: pointer; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
                 }
-                #print-content-inner { 
-                    position: absolute; /* DESCOLA do fluxo da página. A 2ª página deixa de existir aqui. */
-                    top: ${orientation === 'portrait' ? '125mm' : '10mm'}; /* Joga exatamente para baixo da metade */
+                .btn-imprimir:hover { background: #004494; }
+
+                #folha-a4 {
+                    background: #fff;
+                    width: 210mm;
+                    height: 297mm;
+                    box-sizing: border-box;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                    position: relative;
+                }
+
+                #conteudo-nota {
+                    position: absolute;
+                    top: 148mm;
                     left: 0;
                     width: 100%;
-                    padding: 0 25px; 
-                    color: #000; 
+                    padding: 0 20px;
                     box-sizing: border-box;
                 }
-                .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-                .logo { max-width: 140px; }
-                .header-title { font-size: 18px; font-weight: normal; text-align: center; flex-grow: 1; margin-right: 140px; }
-                .line-separator { border-top: 1px solid #000; margin-bottom: 8px; }
-                .info-grid { display: grid; grid-template-columns: 90px 1fr 90px; row-gap: 4px; margin-bottom: 15px; font-size: 10px; }
+
+                .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+                .logo { max-width: 130px; }
+                .header-title { font-size: 16px; text-align: center; flex-grow: 1; margin-right: 130px; }
+                .line-separator { border-top: 1px solid #000; margin-bottom: 6px; }
+                .info-grid { display: grid; grid-template-columns: 80px 1fr 80px; row-gap: 4px; margin-bottom: 10px; font-size: 9px; }
                 .info-grid span { white-space: nowrap; } .pg-number { text-align: right; }
-                .calc-info { display: flex; border-left: 2px solid #000; padding-left: 10px; margin-left: 180px; }
-                .calc-col { display: flex; flex-direction: column; margin-right: 30px; gap: 4px; font-size: 10px;}
-                table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 9px; }
-                th { background-color: #333333; color: #fff; font-weight: normal; text-align: right; padding: 5px 3px; border: none; }
+                .calc-info { display: flex; border-left: 2px solid #000; padding-left: 8px; margin-left: 150px; }
+                .calc-col { display: flex; flex-direction: column; margin-right: 20px; gap: 2px; font-size: 9px;}
+                table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 8px; }
+                th { background-color: #333; color: #fff; text-align: right; padding: 4px 2px; border: none; }
                 th:nth-child(1), th:nth-child(2), th:nth-child(3) { text-align: left; }
-                td { padding: 5px 3px; text-align: right; border: 1px solid #000; }
+                td { padding: 4px 2px; text-align: right; border: 1px solid #000; }
                 td:nth-child(1), td:nth-child(2), td:nth-child(3) { text-align: left; }
-                .row-conv { background-color: #555555; color: #fff; font-weight: normal; }
+                .row-conv { background-color: #555; color: #fff; }
                 .row-conv td { padding: 3px; text-align: left; border: 1px solid #000; }
-                .totals-container { display: flex; justify-content: space-around; margin-top: 25px; text-align: center; }
+                .totals-container { display: flex; justify-content: space-around; margin-top: 12px; text-align: center; }
                 .total-box { display: flex; flex-direction: column; align-items: center; }
-                .total-title { font-size: 11px; margin-bottom: 6px; max-width: 90px; }
-                .total-val { font-size: 13px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 6px; width: 100%; }
-                
-                .btn-download {
-                    position: fixed; top: 20px; right: 20px; background: #34a853; color: white; border: none;
-                    padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: bold;
-                    cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; transition: 0.2s;
-                }
-                .no-print { display: block; }
+                .total-title { font-size: 9.5px; margin-bottom: 3px; max-width: 80px; }
+                .total-val { font-size: 10.5px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 3px; width: 100%; }
+
                 @media print { 
-                    .no-print { display: none !important; } 
-                    body { background: #fff; }
-                    #print-wrapper { margin: 0; box-shadow: none; }
-                    @page { size: ${orientation}; margin: 0; } 
+                    @page { size: A4 portrait; margin: 0; }
+                    body { background: none; padding: 0; }
+                    .btn-imprimir { display: none !important; }
+                    #folha-a4 { box-shadow: none; margin: 0; }
                 }
-            </style></head>
-            <body>
-                <button id="dl-btn" class="no-print btn-download" onclick="downloadPDF()">📥 Baixar PDF</button>
-                <div id="print-wrapper">
-                    <div id="print-content-inner">
-                        <div class="header-top"><img src="logo_horizontal_azul.png" class="logo" alt="FormPrice Logo"><div class="header-title">Memória de Cálculo do ICMS ST</div></div>
-                        <div class="line-separator"></div>
-                        <div class="info-grid">
-                            <span>Empresa:</span><span>LN COMERCIO DE ELETRONICOS LTDA</span><span class="pg-number">Página 1 de 1</span>
-                            <span>CNPJ:</span><span>01030685002397</span><span></span>
-                            <span style="margin-top: 8px;">Fornecedor:</span><span style="margin-top: 8px;">${nota.xNome}</span><span></span>
-                            <span>Nota fiscal:</span><span>${nota.nNF} &nbsp;&nbsp;&nbsp;&nbsp; Data Emissão: &nbsp;&nbsp; ${nota.dataEmissaoFormatada || dataImpressao}</span><span></span>
-                        </div>
-                        <div style="display:flex; margin-bottom: 15px;">
-                            <div class="calc-col" style="width: 200px;"><div>Calculado por: &nbsp;&nbsp; PAULO</div><div>Calculado em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div>
-                            <div class="calc-info"><div class="calc-col"><div>Impresso por: &nbsp;&nbsp; PAULO</div><div>Impresso em: &nbsp;&nbsp; ${dataImpressao} ${horaImpressao}</div></div></div>
-                        </div>
-                        <table>
-                            <thead><tr><th>Nota</th><th>NCM</th><th>Produto</th><th>Valor Un.</th><th>Valor Total</th><th>IPI</th><th>MVA</th><th>Aliq.<br>Créd.</th><th>Aliq.<br>ICMS</th><th>Valor Débito</th><th>Valor Crédito</th><th>Base ST</th><th>ICMS ST</th><th>FECEP ST</th></tr></thead>
-                            <tbody>
-                                <tr class="row-conv"><td colspan="14">Convênio 52/91</td></tr>
-                                ${nota.itens.map(it => {
-                                    let valorDebito = (it.baseST * 0.17); 
-                                    return `<tr><td>${nota.nNF}</td><td>${it.ncm}</td><td>${it.xProd.substring(0, 30)}...</td><td>R$${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${Number(it.aliqIcms).toLocaleString('pt-BR')}</td><td>17</td><td>R$${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$0,00</td></tr>`;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                        <div class="totals-container">
-                            <div class="total-box"><div class="total-title">Total de<br>Produtos</div><div class="total-val">${nota.itens.length}</div></div>
-                            <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
-                            <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido</div><div class="total-val">R$0,00</div></div>
-                            <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
-                            <div class="total-box"><div class="total-title">Valor Total<br>FECEP-ST</div><div class="total-val">R$0,00</div></div>
-                            <div class="total-box"><div class="total-title">Valor Total<br>Base-ST</div><div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
-                        </div>
-                        ${creditoBanner}
+            </style>
+        </head>
+        <body>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir (Ctrl+P)</button>
+            
+            <div id="folha-a4">
+                <div id="conteudo-nota">
+                    <div class="header-top">
+                        <img src="logo_horizontal_azul.png" class="logo" alt="Logo">
+                        <div class="header-title">Memória de Cálculo do ICMS ST</div>
                     </div>
+                    <div class="line-separator"></div>
+                    <div class="info-grid">
+                        <span>Empresa:</span><span>${empresaNome}</span><span class="pg-number">Página 1 de 1</span>
+                        <span>CNPJ:</span><span>${empresaCnpj}</span><span></span>
+                        <span>Fornecedor:</span><span>${fornecedorNome}</span><span></span>
+                        <span>Nota fiscal:</span><span>${nota.nNF} &nbsp;&nbsp; Data Emissão: ${nota.dataEmissaoFormatada || dataImpressao}</span><span></span>
+                    </div>
+                    <div style="display:flex; margin-bottom: 8px;">
+                        <div class="calc-col" style="width: 180px;"><div>Calculado por: PAULO</div><div>Calculado em: ${dataImpressao} ${horaImpressao}</div></div>
+                        <div class="calc-info"><div class="calc-col"><div>Impresso por: PAULO</div><div>Impresso em: ${dataImpressao} ${horaImpressao}</div></div></div>
+                    </div>
+                    <table>
+                        <thead><tr><th>Nota</th><th>NCM</th><th>Produto</th><th>V. Un.</th><th>V. Total</th><th>IPI</th><th>MVA</th><th>Al. Cr.</th><th>Al. ICMS</th><th>V. Déb.</th><th>V. Créd.</th><th>Base ST</th><th>ICMS ST</th><th>FECEP</th></tr></thead>
+                        <tbody>
+                            <tr class="row-conv"><td colspan="14">Convênio 52/91</td></tr>
+                            ${nota.itens.map(it => {
+                                let valorDebito = (it.baseST * 0.17); 
+                                return `<tr><td>${nota.nNF}</td><td>${it.ncm}</td><td>${it.xProd.substring(0, 25)}...</td><td>R$${it.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vProd.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.vIpi.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>${it.mva.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${Number(it.aliqIcms).toLocaleString('pt-BR')}</td><td>17</td><td>R$${valorDebito.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.creditoICMS.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.baseST.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$${it.stFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>R$0,00</td></tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="totals-container">
+                        <div class="total-box"><div class="total-title">Total de<br>Produtos</div><div class="total-val">${nota.itens.length}</div></div>
+                        <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                        <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido</div><div class="total-val">R$0,00</div></div>
+                        <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                        <div class="total-box"><div class="total-title">Valor Total<br>FECEP-ST</div><div class="total-val">R$0,00</div></div>
+                        <div class="total-box"><div class="total-title">Valor Total<br>Base-ST</div><div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                    </div>
+                    ${creditoBanner}
                 </div>
+            </div>
 
-                <script>
-                    function downloadPDF() {
-                        const btn = document.getElementById('dl-btn');
-                        btn.innerText = "⏳ Gerando..."; btn.style.opacity = '0.7';
-                        
-                        const wrapper = document.getElementById('print-wrapper');
-                        wrapper.style.margin = '0';
-                        wrapper.style.boxShadow = 'none';
+            <script>
+                // Opcional: Chama o Ctrl+P sozinho logo após a janela carregar
+                window.onload = function() {
+                    setTimeout(function() { window.print(); }, 400);
+                };
+            <\/script>
+        </body>
+        </html>`;
 
-                        const opt = {
-                            margin: 0,
-                            filename: 'Memoria_Calculo_NF_${nota.nNF}.pdf',
-                            image: { type: 'jpeg', quality: 1 },
-                            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: '${orientation}' }
-                        };
-                        
-                        html2pdf().set(opt).from(wrapper).save().then(() => {
-                            btn.innerText = "📥 Baixar PDF"; btn.style.opacity = '1';
-                            wrapper.style.margin = '20px auto';
-                            wrapper.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-                        });
-                    }
-                <\/script>
-            </body></html>`;
-        const janela = window.open('', '_blank'); janela.document.write(htmlStr); janela.document.close();
+        const janela = window.open('', '_blank'); 
+        janela.document.write(htmlStr); 
+        janela.document.close();
     }
                                          
     // --- MÓDULO 6: ST MENSAL EM LOTE ---
