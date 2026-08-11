@@ -1153,20 +1153,30 @@
         for (const file of files) {
             try {
                 const text = await extractTextFromPDF(file);
+                // NORMALIZAÇÃO: Remove quebras de linha e excessos de espaço que atrapalham a regex
+                const cleanText = text.replace(/\s+/g, ' '); 
+                
                 let valorTotal = 0;
                 let encontrouValor = false;
                 
-                // Tenta ler DARE-SP ("08 - Valor Total")
-                let matchDare = text.match(/08\s*-\s*Valor Total[\s\S]{0,60}?R\$\s*([\d\.,]+)/i);
+                // 1. Tenta ler DARE-SP ("08 - Valor Total")
+                let matchDare = cleanText.match(/08\s*-\s*Valor\s*Total.{0,60}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
                 if (matchDare) {
                     valorTotal = parseFloat(matchDare[1].replace(/\./g, '').replace(',', '.'));
                     encontrouValor = true;
                 } else {
-                    // Tenta ler GNRE ("Total a Recolher")
-                    let matchGnre = text.match(/Total a Recolher[\s\S]{0,60}?R\$\s*([\d\.,]+)/i);
+                    // 2. Tenta ler GNRE ("Total a Recolher")
+                    let matchGnre = cleanText.match(/Total\s*a\s*Recolher.{0,80}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
                     if (matchGnre) {
                         valorTotal = parseFloat(matchGnre[1].replace(/\./g, '').replace(',', '.'));
                         encontrouValor = true;
+                    } else {
+                        // 3. Fallback: Tenta ler GNRE ("Valor Principal") caso a guia não tenha os adicionais
+                        let matchGnrePrinc = cleanText.match(/Valor\s*Principal.{0,80}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+                        if (matchGnrePrinc) {
+                            valorTotal = parseFloat(matchGnrePrinc[1].replace(/\./g, '').replace(',', '.'));
+                            encontrouValor = true;
+                        }
                     }
                 }
                 
