@@ -299,7 +299,7 @@
     <main class="module" id="module-difal">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faz extração inteligente de Difal/FCP (e agora Multa/Juros) gerando páginas ilimitadas automaticamente.</p>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Lê PDFs de Guias (GNRE "Total a Recolher" ou DARE-SP "08 - Valor Total") e usa o número no nome do arquivo para montar o protocolo automaticamente.</p>
             <div id="drop-zone-difal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
@@ -1149,27 +1149,62 @@
         const status = document.getElementById('status-difal'); const log = document.getElementById('log-difal');
         status.innerText = "⏳ Lendo arquivos..."; log.innerText = ""; log.style.display = 'none'; document.getElementById('previewSectionDifal').style.display = 'none';
         let dadosExtraidos = [];
+        
         for (const file of files) {
             try {
                 const text = await extractTextFromPDF(file);
-                const matchNf = text.match(/N\.\s*([\d\.]+)/); const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/); const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
-                const matchMulta = text.match(/Multa[\s\S]{0,30}?R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i); const matchJuros = text.match(/Juros[\s\S]{0,30}?R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-                let numeroNf = matchNf ? matchNf[1] : "N/A";
-                let valorDifal = matchDifal ? parseFloat(matchDifal[1].replace(/\./g, '').replace(',', '.')) : 0; let valorFcp = matchFcp ? parseFloat(matchFcp[1].replace(/\./g, '').replace(',', '.')) : 0;
-                let valorMulta = matchMulta ? parseFloat(matchMulta[1].replace(/\./g, '').replace(',', '.')) : 0; let valorJuros = matchJuros ? parseFloat(matchJuros[1].replace(/\./g, '').replace(',', '.')) : 0;
-                let valorTotal = valorDifal + valorFcp + valorMulta + valorJuros;
-                if (numeroNf !== "N/A") { dadosExtraidos.push({ nf: numeroNf, valor: valorTotal }); mostrarLogDifal(`✅ NF ${numeroNf} lida: Difal/FCP + Multa (R$ ${valorMulta.toFixed(2).replace('.',',')}) + Juros (R$ ${valorJuros.toFixed(2).replace('.',',')})`); } else { mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`); }
-            } catch (error) { mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); }
+                let valorTotal = 0;
+                let encontrouValor = false;
+                
+                // Tenta ler DARE-SP ("08 - Valor Total")
+                let matchDare = text.match(/08\s*-\s*Valor Total[\s\S]{0,60}?R\$\s*([\d\.,]+)/i);
+                if (matchDare) {
+                    valorTotal = parseFloat(matchDare[1].replace(/\./g, '').replace(',', '.'));
+                    encontrouValor = true;
+                } else {
+                    // Tenta ler GNRE ("Total a Recolher")
+                    let matchGnre = text.match(/Total a Recolher[\s\S]{0,60}?R\$\s*([\d\.,]+)/i);
+                    if (matchGnre) {
+                        valorTotal = parseFloat(matchGnre[1].replace(/\./g, '').replace(',', '.'));
+                        encontrouValor = true;
+                    }
+                }
+                
+                // Extrai o número da NF pelo nome do arquivo
+                const matchNum = file.name.match(/\d+/);
+                let numeroFormatado = "";
+                let descFinal = "";
+                
+                if (matchNum) {
+                    let numInt = parseInt(matchNum[0], 10);
+                    numeroFormatado = numInt.toLocaleString('pt-BR');
+                    descFinal = `DIFAL NF ${numeroFormatado}`;
+                } else {
+                    descFinal = `DIFAL NF S/N (${file.name})`;
+                }
+
+                if (encontrouValor) { 
+                    dadosExtraidos.push({ desc: descFinal, valor: valorTotal }); 
+                    mostrarLogDifal(`✅ Lido: ${descFinal} | Valor: R$ ${valorTotal.toFixed(2).replace('.',',')}`); 
+                } else { 
+                    mostrarLogDifal(`⚠️ Erro ao encontrar o valor (GNRE/DARE) no arquivo: ${file.name}`); 
+                }
+            } catch (error) { 
+                mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); 
+            }
         }
+        
         document.getElementById('pdf-input-difal').value = '';
         if (dadosExtraidos.length === 0) { status.innerText = "Nenhum dado encontrado nas notas selecionadas."; return; }
-        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; renderizarTabelaDifal(dadosExtraidos);
+        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; 
+        renderizarTabelaDifal(dadosExtraidos);
     }
+    
     function renderizarTabelaDifal(dados) {
         const tbody = document.querySelector('#tabelaPreviewDifal tbody'); tbody.innerHTML = '';
         dados.forEach((dado, index) => {
             const tr = document.createElement('tr');
-            const tdDesc = document.createElement('td'); const inputDesc = document.createElement('input'); inputDesc.type = "text"; inputDesc.value = `NF ${dado.nf}`; tdDesc.appendChild(inputDesc);
+            const tdDesc = document.createElement('td'); const inputDesc = document.createElement('input'); inputDesc.type = "text"; inputDesc.value = dado.desc; tdDesc.appendChild(inputDesc);
             const tdVal = document.createElement('td'); const inputVal = document.createElement('input'); inputVal.type = "text"; inputVal.value = dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); tdVal.appendChild(inputVal);
             const tdAcao = document.createElement('td'); tdAcao.style.textAlign = "center"; const btnDel = document.createElement('button'); btnDel.className = "icon-btn delete"; btnDel.innerHTML = svgDel; btnDel.onclick = function() { tr.remove(); }; tdAcao.appendChild(btnDel);
             tr.appendChild(tdDesc); tr.appendChild(tdVal); tr.appendChild(tdAcao); tbody.appendChild(tr);
@@ -1472,7 +1507,7 @@
         
         for (let file of files) {
             let text = await extractTextFromPDF(file);
-            let regex = /(NF\s+[\d\w-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
+            let regex = /(NF\s+[\d\w\.-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
             let match;
             while ((match = regex.exec(text)) !== null) {
                 let desc = match[1];
