@@ -920,7 +920,7 @@
                         <div class="total-box"><div class="total-title">Total de<br>Produtos</div><div class="total-val">${nota.itens.length}</div></div>
                         <div class="total-box"><div class="total-title">ICMS-ST<br>Recolhido</div><div class="total-val">R$${nota.vSTNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                         <div class="total-box"><div class="total-title">FECEP-ST<br>Recolhido</div><div class="total-val">R$0,00</div></div>
-                        <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$${nota.vStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                        <div class="total-box"><div class="total-title">Valor Total<br>ICMS-ST</div><div class="total-val">R$ ${diff.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                         <div class="total-box"><div class="total-title">Valor Total<br>FECEP-ST</div><div class="total-val">R$0,00</div></div>
                         <div class="total-box"><div class="total-title">Valor Total<br>Base-ST</div><div class="total-val">R$${nota.bcStTotalCalculado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                     </div>
