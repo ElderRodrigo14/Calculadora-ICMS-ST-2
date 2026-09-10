@@ -167,7 +167,7 @@
             </div>
             <div class="tab-item" onclick="switchModule('difal')">
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-                Extrator DIFAL
+                Gerador de Protocolo
             </div>
             <div class="tab-item" onclick="switchModule('agrupador')">
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
@@ -295,33 +295,73 @@
         </div>
     </main>
 
-    <!-- MÓDULO 4: EXTRATOR DE DIFAL -->
+    <!-- MÓDULO 4: EXTRATOR DE DIFAL / GERADOR DE PROTOCOLO -->
     <main class="module" id="module-difal">
         <div class="card">
-            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolo DIFAL</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Faz extração inteligente de Difal/FCP (e agora Multa/Juros) gerando páginas ilimitadas automaticamente.</p>
-            <div id="drop-zone-difal" class="drop-zone">
-                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                <div class="drop-zone-text">
-                    <h3>Arraste PDFs das Notas/Guias aqui</h3>
-                    <p>Ou clique para selecionar</p>
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Gerador de Protocolos</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Automatize a extração do DIFAL via PDFs ou gere rapidamente protocolos de guias diversas.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                <button class="btn-aliq active" id="btn-sub-difal-auto" onclick="switchSubDifal('auto')">Protocolo DIFAL (Automatizado)</button>
+                <button class="btn-aliq" id="btn-sub-difal-manual" onclick="switchSubDifal('manual')">Guias Diversas (Manual)</button>
+            </div>
+
+            <!-- Submódulo 1: Automático -->
+            <div id="sub-mod-difal-auto">
+                <div id="drop-zone-difal" class="drop-zone">
+                    <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <div class="drop-zone-text">
+                        <h3>Arraste PDFs das Notas/Guias aqui</h3>
+                        <p>O sistema extrai o valor da GNRE/DARE e a NF pelo nome do arquivo</p>
+                    </div>
+                    <input type="file" id="pdf-input-difal" accept=".pdf" multiple style="display: none;">
                 </div>
-                <input type="file" id="pdf-input-difal" accept=".pdf" multiple style="display: none;">
+                <div id="status-difal" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
+                <div id="log-difal" style="margin-top: 12px; font-size: 13px; color: var(--text-sub); white-space: pre-wrap; max-height: 120px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
+                
+                <div id="previewSectionDifal" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border);">
+                    <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados (Paginação Automática)</h3>
+                    <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Todos os itens abaixo serão incluídos no PDF final.</p>
+                    <div class="table-responsive">
+                        <table id="tabelaPreviewDifal">
+                            <thead><tr><th style="width: 50%;">Descrição</th><th style="width: 40%;">Valor (R$)</th><th style="width: 10%; text-align: center;">Ação</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="btn-main" id="btnGerarPDFDifalAuto" onclick="gerarPDFProtocolo('auto')">📥 Baixar PDF Finalizado</button>
+                    </div>
+                </div>
             </div>
-            <div id="status-difal" style="margin-top:16px; font-weight:600; font-size:14px; color:var(--text-main);"></div>
-            <div id="log-difal" style="margin-top: 12px; font-size: 13px; color: var(--text-sub); white-space: pre-wrap; max-height: 120px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
-        </div>
-        <div id="previewSectionDifal" class="card" style="display: none;">
-            <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados (Paginação Automática)</h3>
-            <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Todos os itens abaixo serão incluídos no PDF final.</p>
-            <div class="table-responsive">
-                <table id="tabelaPreviewDifal">
-                    <thead><tr><th style="width: 50%;">Descrição</th><th style="width: 40%;">Valor (R$)</th><th style="width: 10%; text-align: center;">Ação</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button class="btn-main" id="btnGerarPDFDifal" onclick="gerarPDFFinal()">📥 Baixar PDF Finalizado</button>
+
+            <!-- Submódulo 2: Manual -->
+            <div id="sub-mod-difal-manual" style="display: none;">
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button class="btn-secondary" onclick="carregarListaPadraoDifal()">📋 Carregar Lista Padrão</button>
+                    <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="iniciarEmBrancoDifal()">🗑️ Iniciar em Branco</button>
+                    <button class="btn-main" id="btnAdicionarLinhaManual" onclick="addLinhaDifalManual()">+ Adicionar Linha</button>
+                </div>
+                
+                <div style="margin-bottom: 10px; font-size: 13px; color: var(--text-sub);">
+                    Linhas do documento: <span id="contador-linhas-manual" style="font-weight: bold;">0</span> / 18 permitidas
+                </div>
+
+                <div class="table-responsive" style="border: 1px solid var(--border); border-radius: 8px;">
+                    <table id="tabelaGuiasManuais" style="margin-top: 0;">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1;">
+                            <tr>
+                                <th style="width: 60%;">Descrição da Guia / Tributo</th>
+                                <th style="width: 25%;">Valor do Imposto</th>
+                                <th style="width: 15%; text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <button class="btn-main" id="btnGerarPDFDifalManual" onclick="gerarPDFProtocolo('manual')">📥 Baixar PDF Finalizado (Guias)</button>
+                </div>
             </div>
         </div>
     </main>
@@ -622,7 +662,6 @@
             }
         });
 
-        // Carrega as tabelas do registrador
         renderTableST();
         renderTableGeral();
     };
@@ -696,7 +735,6 @@
         const xNome = xmlDoc.getElementsByTagName("xNome")[0]?.textContent || "Desconhecido";
         const cnpj = xmlDoc.getElementsByTagName("CNPJ")[0]?.textContent || "00.000.000/0000-00";
         
-        // NOVO: Puxando dados do Destinatário
         const destTag = xmlDoc.getElementsByTagName("dest")[0];
         const destNome = destTag ? destTag.getElementsByTagName("xNome")[0]?.textContent : "N/I";
         const destCnpj = destTag ? (destTag.getElementsByTagName("CNPJ")[0]?.textContent || destTag.getElementsByTagName("CPF")[0]?.textContent) : "N/I";
@@ -1017,7 +1055,6 @@
             let valOp = extrairFloat(row['Vlr. total']) + extrairFloat(row['Vlr. Frete NF']) + extrairFloat(row['Vlr. IPI']) + extrairFloat(row['Vlr. CTE']);
             let baseST = (valOp * (1 + mva)) * fator;
             
-            // Usando 'Vlr. total' para espelhar a fórmula da base de crédito do Excel
             let baseCredito = extrairFloat(row['Vlr. total']);
             let aliqCred = extrairFloat(row['ALIQUOTA EFETIVA']) || extrairFloat(row['ALIQICMS']) || 7;
             let creditoICMS = baseCredito * (aliqCred / 100) * fator;
@@ -1025,7 +1062,6 @@
             let icmsST = (baseST * 0.17) - creditoICMS; 
             if (icmsST < 0) icmsST = 0; 
             
-            // NOVO: Abatimento de ICMS ST já destacado na nota origem (CST 10, 60 ou 70)
             let codTrib = extrairFloat(row['CODTRIB']);
             if (codTrib === 10 || codTrib === 70 || codTrib === 60) {
                 let stAntecipado = extrairFloat(row['Vlr. ICMS Antecipado']);
@@ -1136,11 +1172,137 @@
         fecharModal(); document.getElementById('search-ncm').value = ncm; buscarNCM();
     }
 
-    // --- MÓDULO 4: EXTRATOR DE DIFAL ---
-    const POS = { dataX: 140, dataY: 617, colDescX: 175, colValorX: 405, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
-    const dropZoneDifal = document.getElementById('drop-zone-difal'); const pdfInputDifal = document.getElementById('pdf-input-difal');
-    dropZoneDifal.onclick = () => pdfInputDifal.click(); pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
-    dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); }; dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
+    // =========================================================================
+    // --- MÓDULO 4: EXTRATOR DIFAL E GUIAS MANUAIS (NOVO FORMATO) ---
+    // =========================================================================
+    
+    // Coordenadas ajustadas para PDF limpo (sem DIFAL e R$ no background)
+    const POS = { dataX: 140, dataY: 617, colDescX: 95, colValorX: 400, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
+    
+    // Lista Fixa (Preset)
+    const presetsGuias = [
+        "ISSQN Devido - 01 - Kadri Tecnologia - Matriz",
+        "ISSQN Devido - 02 - Kadri Tecnologia - Isaac",
+        "ISSQN Devido - 06 - Kadri Tecnologia - Av. CPA",
+        "Retenções Federais - Kadri Empreendimentos - PCC",
+        "Retenções Federais - Kadri Empreendimentos - IR Retido",
+        "Retenções Federais - Kadri Tecnologia - PCC",
+        "Retenções Federais - Kadri Tecnologia - INSS Retido",
+        "Retenções Federais - Kadri Tecnologia - IR Retido",
+        "Retenções Federais - Condomínio Tapajos - PCC",
+        "Retenções Federais - Condomínio Tapajos - INSS Retido",
+        "Retenções Federais - Condomínio Tapajos - IR Retido",
+        "ICMS Normal - 01 - Kadri Tecnologia - Matriz",
+        "ICMS Normal - 02 - Kadri Tecnologia - Isaac",
+        "ICMS Normal - 06 - Kadri Tecnologia - Av. CPA",
+        "ICMS Normal - 50 - Samsung Pantanal",
+        "ICMS Normal - 57 - Samsung Sinop"
+    ];
+
+    let linhasGuiasManuais = [];
+
+    function switchSubDifal(tab) {
+        document.getElementById('btn-sub-difal-auto').classList.toggle('active', tab === 'auto');
+        document.getElementById('btn-sub-difal-manual').classList.toggle('active', tab === 'manual');
+        document.getElementById('sub-mod-difal-auto').style.display = tab === 'auto' ? 'block' : 'none';
+        document.getElementById('sub-mod-difal-manual').style.display = tab === 'manual' ? 'block' : 'none';
+        
+        // Inicia lista padrão caso seja o primeiro clique
+        if (tab === 'manual' && linhasGuiasManuais.length === 0) {
+            carregarListaPadraoDifal();
+        }
+    }
+
+    // ---------------------------------------------
+    // FUNÇÕES DA ABA MANUAL
+    // ---------------------------------------------
+    function carregarListaPadraoDifal() {
+        linhasGuiasManuais = presetsGuias.map(desc => ({ desc, valor: '' }));
+        renderizarGuiasManuais();
+    }
+
+    function iniciarEmBrancoDifal() {
+        if(confirm("Isso apagará todas as linhas atuais da tabela. Deseja continuar?")) {
+            linhasGuiasManuais = [{ desc: '', valor: '' }];
+            renderizarGuiasManuais();
+        }
+    }
+
+    function addLinhaDifalManual() {
+        salvarEstadoManual();
+        if (linhasGuiasManuais.length >= 18) {
+            alert("Limite máximo de 18 guias por página atingido.");
+            return;
+        }
+        linhasGuiasManuais.push({ desc: '', valor: '' });
+        renderizarGuiasManuais();
+    }
+
+    function clonarLinhaDifalManual(idx) {
+        salvarEstadoManual();
+        if (linhasGuiasManuais.length >= 18) {
+            alert("Limite máximo de 18 guias por página atingido.");
+            return;
+        }
+        const item = linhasGuiasManuais[idx];
+        linhasGuiasManuais.splice(idx + 1, 0, { desc: item.desc, valor: item.valor });
+        renderizarGuiasManuais();
+    }
+
+    function removerLinhaDifalManual(idx) {
+        salvarEstadoManual();
+        linhasGuiasManuais.splice(idx, 1);
+        renderizarGuiasManuais();
+    }
+
+    // Salva o que está na tela pro array antes de recarregar o layout
+    function salvarEstadoManual() {
+        const trs = document.querySelectorAll('#tabelaGuiasManuais tbody tr');
+        linhasGuiasManuais = Array.from(trs).map(tr => ({
+            desc: tr.querySelector('.desc-input').value,
+            valor: tr.querySelector('.val-input').value
+        }));
+    }
+
+    function renderizarGuiasManuais() {
+        const tbody = document.querySelector('#tabelaGuiasManuais tbody');
+        tbody.innerHTML = '';
+        
+        linhasGuiasManuais.forEach((linha, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="desc-input" value="${linha.desc}" placeholder="Descrição do Imposto/Guia"></td>
+                <td><input type="text" class="val-input" value="${linha.valor}" placeholder="0,00"></td>
+                <td style="text-align: center; display: flex; justify-content: center; gap: 5px;">
+                    <button class="icon-btn" onclick="clonarLinhaDifalManual(${idx})" title="Clonar Abaixo" style="color: var(--accent);">${svgCopy}</button>
+                    <button class="icon-btn delete" onclick="removerLinhaDifalManual(${idx})" title="Excluir">${svgDel}</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+        
+        const countSpan = document.getElementById('contador-linhas-manual');
+        countSpan.innerText = linhasGuiasManuais.length;
+        
+        const btnAdd = document.getElementById('btnAdicionarLinhaManual');
+        if (linhasGuiasManuais.length >= 18) {
+            countSpan.style.color = 'var(--danger)';
+            btnAdd.disabled = true;
+        } else {
+            countSpan.style.color = 'var(--success)';
+            btnAdd.disabled = false;
+        }
+    }
+
+    // ---------------------------------------------
+    // FUNÇÕES DA ABA AUTOMÁTICA (DIFAL)
+    // ---------------------------------------------
+    const dropZoneDifal = document.getElementById('drop-zone-difal'); 
+    const pdfInputDifal = document.getElementById('pdf-input-difal');
+    dropZoneDifal.onclick = () => pdfInputDifal.click(); 
+    pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
+    dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); }; 
+    dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
     dropZoneDifal.ondrop = (e) => { e.preventDefault(); dropZoneDifal.classList.remove('dragover'); processarArquivosDIFAL(e.dataTransfer.files); };
     function mostrarLogDifal(mensagem) { const logEl = document.getElementById('log-difal'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight; }
     
@@ -1149,52 +1311,147 @@
         const status = document.getElementById('status-difal'); const log = document.getElementById('log-difal');
         status.innerText = "⏳ Lendo arquivos..."; log.innerText = ""; log.style.display = 'none'; document.getElementById('previewSectionDifal').style.display = 'none';
         let dadosExtraidos = [];
+        
         for (const file of files) {
             try {
                 const text = await extractTextFromPDF(file);
-                const matchNf = text.match(/N\.\s*([\d\.]+)/); const matchDifal = text.match(/DIFAL da UF Destino R\$\s*([\d\.,]+)/); const matchFcp = text.match(/FCP R\$\s*([\d\.,]+)/);
-                const matchMulta = text.match(/Multa[\s\S]{0,30}?R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i); const matchJuros = text.match(/Juros[\s\S]{0,30}?R\$\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-                let numeroNf = matchNf ? matchNf[1] : "N/A";
-                let valorDifal = matchDifal ? parseFloat(matchDifal[1].replace(/\./g, '').replace(',', '.')) : 0; let valorFcp = matchFcp ? parseFloat(matchFcp[1].replace(/\./g, '').replace(',', '.')) : 0;
-                let valorMulta = matchMulta ? parseFloat(matchMulta[1].replace(/\./g, '').replace(',', '.')) : 0; let valorJuros = matchJuros ? parseFloat(matchJuros[1].replace(/\./g, '').replace(',', '.')) : 0;
-                let valorTotal = valorDifal + valorFcp + valorMulta + valorJuros;
-                if (numeroNf !== "N/A") { dadosExtraidos.push({ nf: numeroNf, valor: valorTotal }); mostrarLogDifal(`✅ NF ${numeroNf} lida: Difal/FCP + Multa (R$ ${valorMulta.toFixed(2).replace('.',',')}) + Juros (R$ ${valorJuros.toFixed(2).replace('.',',')})`); } else { mostrarLogDifal(`⚠️ Erro ao ler a numeração na nota: ${file.name}`); }
+                const cleanText = text.replace(/\s+/g, ' '); 
+                let valorTotal = 0; let encontrouValor = false;
+                
+                let matchDare = cleanText.match(/08\s*-\s*Valor\s*Total.{0,60}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+                if (matchDare) {
+                    valorTotal = parseFloat(matchDare[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true;
+                } else {
+                    let matchGnre = cleanText.match(/Total\s*a\s*Recolher.{0,80}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+                    if (matchGnre) {
+                        valorTotal = parseFloat(matchGnre[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true;
+                    } else {
+                        let matchGnrePrinc = cleanText.match(/Valor\s*Principal.{0,80}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
+                        if (matchGnrePrinc) { valorTotal = parseFloat(matchGnrePrinc[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true; }
+                    }
+                }
+                
+                const matchNum = file.name.match(/\d+/);
+                let descFinal = matchNum ? `DIFAL NF ${parseInt(matchNum[0], 10).toLocaleString('pt-BR')}` : `DIFAL NF S/N (${file.name})`;
+
+                if (encontrouValor) { 
+                    dadosExtraidos.push({ desc: descFinal, valor: valorTotal }); 
+                    mostrarLogDifal(`✅ Lido: ${descFinal} | Valor: R$ ${valorTotal.toFixed(2).replace('.',',')}`); 
+                } else { mostrarLogDifal(`⚠️ Erro ao encontrar o valor (GNRE/DARE) no arquivo: ${file.name}`); }
             } catch (error) { mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); }
         }
+        
         document.getElementById('pdf-input-difal').value = '';
         if (dadosExtraidos.length === 0) { status.innerText = "Nenhum dado encontrado nas notas selecionadas."; return; }
-        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; renderizarTabelaDifal(dadosExtraidos);
+        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; 
+        renderizarTabelaDifal(dadosExtraidos);
     }
+    
     function renderizarTabelaDifal(dados) {
         const tbody = document.querySelector('#tabelaPreviewDifal tbody'); tbody.innerHTML = '';
-        dados.forEach((dado, index) => {
+        dados.forEach((dado) => {
             const tr = document.createElement('tr');
-            const tdDesc = document.createElement('td'); const inputDesc = document.createElement('input'); inputDesc.type = "text"; inputDesc.value = `NF ${dado.nf}`; tdDesc.appendChild(inputDesc);
-            const tdVal = document.createElement('td'); const inputVal = document.createElement('input'); inputVal.type = "text"; inputVal.value = dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); tdVal.appendChild(inputVal);
-            const tdAcao = document.createElement('td'); tdAcao.style.textAlign = "center"; const btnDel = document.createElement('button'); btnDel.className = "icon-btn delete"; btnDel.innerHTML = svgDel; btnDel.onclick = function() { tr.remove(); }; tdAcao.appendChild(btnDel);
-            tr.appendChild(tdDesc); tr.appendChild(tdVal); tr.appendChild(tdAcao); tbody.appendChild(tr);
+            tr.innerHTML = `
+                <td><input type="text" value="${dado.desc}"></td>
+                <td><input type="text" value="${dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"></td>
+                <td style="text-align: center;"><button class="icon-btn delete" onclick="this.closest('tr').remove()">${svgDel}</button></td>
+            `;
+            tbody.appendChild(tr);
         });
         document.getElementById('previewSectionDifal').style.display = 'block';
     }
-    async function gerarPDFFinal() {
-        const btnGerar = document.getElementById('btnGerarPDFDifal'); const status = document.getElementById('status-difal'); const originalText = btnGerar.innerText; btnGerar.disabled = true; btnGerar.innerText = "⏳ Gerando Paginação Automática...";
+
+    // ---------------------------------------------
+    // MOTOR DE GERAÇÃO PDF-LIB UNIFICADO
+    // ---------------------------------------------
+    async function gerarPDFProtocolo(origem) {
+        let btnGerar, status, dataHoje;
+        let rowArray = [];
+
+        dataHoje = new Date().toLocaleDateString('pt-BR');
+
+        if (origem === 'auto') {
+            btnGerar = document.getElementById('btnGerarPDFDifalAuto');
+            status = document.getElementById('status-difal');
+            const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
+            rowArray = Array.from(linhas).map(tr => ({
+                desc: tr.querySelector('td:nth-child(1) input').value,
+                val: tr.querySelector('td:nth-child(2) input').value
+            }));
+        } else {
+            btnGerar = document.getElementById('btnGerarPDFDifalManual');
+            status = { innerText: '', style: {} }; // mock para não quebrar referências
+            salvarEstadoManual();
+            rowArray = linhasGuiasManuais.map(l => ({ desc: l.desc, val: l.valor }));
+            
+            if (rowArray.length === 0) {
+                alert("A tabela está vazia. Adicione ao menos uma linha antes de gerar.");
+                return;
+            }
+        }
+
+        const originalText = btnGerar.innerText; 
+        btnGerar.disabled = true; 
+        btnGerar.innerText = "⏳ Gerando PDF...";
+        
         try {
-            const response = await fetch('./modelo.pdf'); if (!response.ok) throw new Error("O arquivo 'modelo.pdf' não foi encontrado.");
-            const existingPdfBytes = await response.arrayBuffer(); const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
-            const pdfDoc = await PDFLib.PDFDocument.create(); const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold); const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-            const dataHoje = new Date().toLocaleDateString('pt-BR'); const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr'); const chunks = [];
-            for (let i = 0; i < linhas.length; i += 18) { chunks.push(Array.from(linhas).slice(i, i + 18)); }
+            const response = await fetch('./modelo.pdf'); 
+            if (!response.ok) throw new Error("O arquivo 'modelo.pdf' limpo não foi encontrado.");
+            
+            const existingPdfBytes = await response.arrayBuffer(); 
+            const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+            const pdfDoc = await PDFLib.PDFDocument.create(); 
+            const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold); 
+            const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            
+            const chunks = [];
+            // Divide o array em blocos de 18 pra paginação
+            for (let i = 0; i < rowArray.length; i += 18) { 
+                chunks.push(rowArray.slice(i, i + 18)); 
+            }
+
             for (const chunk of chunks) {
-                const [page] = await pdfDoc.copyPages(templateDoc, [0]); pdfDoc.addPage(page); page.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
-                chunk.forEach((tr, index) => {
-                    const descTexto = tr.querySelector('td:nth-child(1) input').value; const valTexto = tr.querySelector('td:nth-child(2) input').value; const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
-                    page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold }); page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
+                const [page] = await pdfDoc.copyPages(templateDoc, [0]); 
+                pdfDoc.addPage(page); 
+                page.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
+                
+                chunk.forEach((item, index) => {
+                    const descTexto = item.desc; 
+                    let valTexto = item.val.trim(); 
+                    
+                    // Adiciona a sigla R$ formatada dinamicamente caso o campo não esteja vazio
+                    if (valTexto !== '' && !valTexto.toLowerCase().includes('r$')) {
+                        valTexto = 'R$ ' + valTexto;
+                    }
+
+                    const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
+                    page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold }); 
+                    page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
                 });
             }
-            const pdfBytes = await pdfDoc.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `Protocolo_DIFAL_${dataHoje.replace(/\//g, '-')}.pdf`; a.click(); window.URL.revokeObjectURL(url);
-            status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`; status.style.color = "var(--success)";
-        } catch (error) { status.innerText = `Erro ao gerar PDF: ${error.message}`; status.style.color = "var(--danger)"; }
+            
+            const pdfBytes = await pdfDoc.save(); 
+            const blob = new Blob([pdfBytes], { type: "application/pdf" }); 
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; 
+            
+            const sufixoNome = origem === 'auto' ? 'DIFAL' : 'Guias_Diversas';
+            a.download = `Protocolo_${sufixoNome}_${dataHoje.replace(/\//g, '-')}.pdf`; 
+            
+            a.click(); 
+            window.URL.revokeObjectURL(url);
+            
+            if(origem === 'auto') {
+                status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`; 
+                status.style.color = "var(--success)";
+            }
+        } catch (error) { 
+            if(origem === 'auto') {
+                status.innerText = `Erro ao gerar PDF: ${error.message}`; status.style.color = "var(--danger)"; 
+            } else {
+                alert(`Erro ao gerar PDF: ${error.message}`);
+            }
+        }
         btnGerar.disabled = false; btnGerar.innerText = originalText;
     }
 
@@ -1472,7 +1729,7 @@
         
         for (let file of files) {
             let text = await extractTextFromPDF(file);
-            let regex = /(NF\s+[\d\w-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
+            let regex = /(NF\s+[\d\w\.-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
             let match;
             while ((match = regex.exec(text)) !== null) {
                 let desc = match[1];
@@ -1549,7 +1806,6 @@
     const xmlInputGnre = document.getElementById('xml-input-gnre');
     let filaGNRE = [];
 
-    // Define a data de hoje como padrão no input
     document.getElementById('gnre-vencimento').value = new Date().toISOString().split('T')[0];
 
     dropZoneGnre.onclick = () => xmlInputGnre.click();
@@ -1584,7 +1840,6 @@
         const endEmit = endEmitNodes ? (endEmitNodes.getElementsByTagName('xLgr')[0]?.textContent + ', ' + endEmitNodes.getElementsByTagName('nro')[0]?.textContent) : "N/I";
         const ufEmit = endEmitNodes?.getElementsByTagName('UF')[0]?.textContent || "";
         
-        // CORREÇÃO: Pega apenas os 5 últimos dígitos do código IBGE do Emitente
         const cMunEmitRaw = endEmitNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
         const munEmit = cMunEmitRaw.length > 5 ? cMunEmitRaw.slice(-5) : cMunEmitRaw;
 
@@ -1593,7 +1848,6 @@
         const cUF = endDestNodes?.getElementsByTagName('UF')[0]?.textContent || "";
         const razaoDest = dest?.getElementsByTagName('xNome')[0]?.textContent || "N/I";
         
-        // CORREÇÃO: Pega apenas os 5 últimos dígitos do código IBGE do Destinatário
         const cMunDestRaw = endDestNodes?.getElementsByTagName('cMun')[0]?.textContent || "";
         const munDest = cMunDestRaw.length > 5 ? cMunDestRaw.slice(-5) : cMunDestRaw;
 
@@ -1612,7 +1866,6 @@
         const anoEmi = dhEmi.split('-')[0];
         const mesEmi = dhEmi.split('-')[1];
 
-        // Pega valores do final da nota (Totalizadores)
         const totais = xmlDoc.getElementsByTagName("ICMSTot")[0];
         if (!totais) return;
 
@@ -1620,30 +1873,14 @@
         let vFCPUFDest = parseFloat(totais.getElementsByTagName("vFCPUFDest")[0]?.textContent || 0);
         let vST = parseFloat(totais.getElementsByTagName("vST")[0]?.textContent || 0);
 
-        // Define o valor base (se for DIFAL usa o ICMS Destino, se não usa ST)
         let valorPrincipal = vICMSUFDest > 0 ? vICMSUFDest : vST;
 
         if (valorPrincipal > 0 || vFCPUFDest > 0) {
             filaGNRE.push({
                 id: Date.now() + Math.random(),
-                nNF,
-                chNFe,
-                cUF,
-                cnpjEmit,
-                valorPrincipal,
-                valorFCP: vFCPUFDest,
-                total: valorPrincipal + vFCPUFDest,
-                razaoEmit,
-                endEmit,
-                ufEmit,
-                munEmit, // Agora vai estritamente com 5 dígitos
-                docDest,
-                tipoDocDest,
-                razaoDest,
-                munDest, // Agora vai estritamente com 5 dígitos
-                dhEmi,
-                mesEmi,
-                anoEmi
+                nNF, chNFe, cUF, cnpjEmit, valorPrincipal, valorFCP: vFCPUFDest,
+                total: valorPrincipal + vFCPUFDest, razaoEmit, endEmit, ufEmit, munEmit, 
+                docDest, tipoDocDest, razaoDest, munDest, dhEmi, mesEmi, anoEmi
             });
             atualizarTabelaGNRE();
         }
@@ -1664,23 +1901,11 @@
         `).join('');
     }
 
-    function removerGuiaGNRE(idx) {
-        filaGNRE.splice(idx, 1);
-        atualizarTabelaGNRE();
-    }
+    function removerGuiaGNRE(idx) { filaGNRE.splice(idx, 1); atualizarTabelaGNRE(); }
+    function limparGNRE() { filaGNRE = []; atualizarTabelaGNRE(); }
 
-    function limparGNRE() {
-        filaGNRE = [];
-        atualizarTabelaGNRE();
-    }
-
-    // --- ATUALIZAÇÃO 2: Gerador do Lote com os blocos novos ---
     function baixarLoteGNRE() {
-        if (filaGNRE.length === 0) {
-            alert("Não há notas na fila para gerar o lote.");
-            return;
-        }
-
+        if (filaGNRE.length === 0) { alert("Não há notas na fila para gerar o lote."); return; }
         const dataSelecionada = document.getElementById('gnre-vencimento').value;
         const codReceitaBase = document.getElementById('gnre-receita').value;
         const separaFCP = document.getElementById('gnre-sep-fcp').checked;
@@ -1688,34 +1913,20 @@
         if (!dataSelecionada) { alert("Informe a data de vencimento!"); return; }
 
         let xmlOutput = `<?xml version="1.0" encoding="UTF-8"?>\n<TLote_GNRE xmlns="http://www.gnre.pe.gov.br" versao="2.00">\n  <guias>\n`;
-
         filaGNRE.forEach(guia => {
             let valorGuiaPrincipal = guia.valorPrincipal;
-            
-            if (guia.valorFCP > 0 && !separaFCP) {
-                valorGuiaPrincipal += guia.valorFCP;
-            }
-
-            if (valorGuiaPrincipal > 0) {
-                xmlOutput += construirNodeGNRE(guia, codReceitaBase, dataSelecionada, valorGuiaPrincipal);
-            }
-            
-            if (guia.valorFCP > 0 && separaFCP) {
-                xmlOutput += construirNodeGNRE(guia, "100129", dataSelecionada, guia.valorFCP);
-            }
+            if (guia.valorFCP > 0 && !separaFCP) valorGuiaPrincipal += guia.valorFCP;
+            if (valorGuiaPrincipal > 0) xmlOutput += construirNodeGNRE(guia, codReceitaBase, dataSelecionada, valorGuiaPrincipal);
+            if (guia.valorFCP > 0 && separaFCP) xmlOutput += construirNodeGNRE(guia, "100129", dataSelecionada, guia.valorFCP);
         });
-
         xmlOutput += `  </guias>\n</TLote_GNRE>`;
 
         const blob = new Blob([xmlOutput], { type: "application/xml;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        
-        const dataHoje = new Date();
-        const stringData = dataHoje.toLocaleDateString('pt-BR').replace(/\//g, '');
+        const stringData = new Date().toLocaleDateString('pt-BR').replace(/\//g, '');
         a.download = `Lote_GNRE_${stringData}.xml`;
-        
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -1723,59 +1934,21 @@
     function construirNodeGNRE(guia, receita, dataPagamento, valor) {
         let camposExtrasStr = "";
         if (guia.cUF === "RJ") { 
-            camposExtrasStr = `
-          <camposExtras>
-            <campoExtra codigo="117">${guia.dhEmi}</campoExtra>
-          </camposExtras>`;
+            camposExtrasStr = `\n          <camposExtras>\n            <campoExtra codigo="117">${guia.dhEmi}</campoExtra>\n          </camposExtras>`;
         }
-
-        let node = `    <TDadosGNRE versao="2.00">\n`;
-        node += `      <ufFavorecida>${guia.cUF}</ufFavorecida>\n`;
-        node += `      <tipoGnre>0</tipoGnre>\n`;
-        
-        node += `      <contribuinteEmitente>\n`;
-        node += `        <identificacao>\n`;
-        node += `          <CNPJ>${guia.cnpjEmit.replace(/\D/g, '')}</CNPJ>\n`;
-        node += `        </identificacao>\n`;
-        node += `        <razaoSocial><![CDATA[${guia.razaoEmit}]]></razaoSocial>\n`;
-        node += `        <endereco><![CDATA[${guia.endEmit}]]></endereco>\n`;
-        node += `        <municipio>${guia.munEmit}</municipio>\n`;
-        node += `        <uf>${guia.ufEmit}</uf>\n`;
-        node += `      </contribuinteEmitente>\n`;
-
-        node += `      <itensGNRE>\n`;
-        node += `        <item>\n`;
-        node += `          <receita>${receita}</receita>\n`;
-        node += `          <documentoOrigem tipo="24">${guia.chNFe}</documentoOrigem>\n`;
-        
-        node += `          <referencia>\n`;
-        node += `            <periodo>0</periodo>\n`;
-        node += `            <mes>${guia.mesEmi}</mes>\n`;
-        node += `            <ano>${guia.anoEmi}</ano>\n`;
-        node += `          </referencia>\n`;
-        
-        node += `          <dataVencimento>${dataPagamento}</dataVencimento>\n`;
-        node += `          <valor tipo="11">${valor.toFixed(2)}</valor>\n`;
-        
+        let node = `    <TDadosGNRE versao="2.00">\n      <ufFavorecida>${guia.cUF}</ufFavorecida>\n      <tipoGnre>0</tipoGnre>\n`;
+        node += `      <contribuinteEmitente>\n        <identificacao>\n          <CNPJ>${guia.cnpjEmit.replace(/\D/g, '')}</CNPJ>\n        </identificacao>\n`;
+        node += `        <razaoSocial><![CDATA[${guia.razaoEmit}]]></razaoSocial>\n        <endereco><![CDATA[${guia.endEmit}]]></endereco>\n`;
+        node += `        <municipio>${guia.munEmit}</municipio>\n        <uf>${guia.ufEmit}</uf>\n      </contribuinteEmitente>\n`;
+        node += `      <itensGNRE>\n        <item>\n          <receita>${receita}</receita>\n          <documentoOrigem tipo="24">${guia.chNFe}</documentoOrigem>\n`;
+        node += `          <referencia>\n            <periodo>0</periodo>\n            <mes>${guia.mesEmi}</mes>\n            <ano>${guia.anoEmi}</ano>\n          </referencia>\n`;
+        node += `          <dataVencimento>${dataPagamento}</dataVencimento>\n          <valor tipo="11">${valor.toFixed(2)}</valor>\n`;
         if (guia.tipoDocDest && guia.docDest) {
-            node += `          <contribuinteDestinatario>\n`;
-            node += `            <identificacao>\n`;
-            node += `              <${guia.tipoDocDest}>${guia.docDest.replace(/\D/g, '')}</${guia.tipoDocDest}>\n`;
-            node += `            </identificacao>\n`;
-            node += `            <razaoSocial><![CDATA[${guia.razaoDest}]]></razaoSocial>\n`;
-            node += `            <municipio>${guia.munDest}</municipio>\n`;
-            node += `          </contribuinteDestinatario>\n`;
+            node += `          <contribuinteDestinatario>\n            <identificacao>\n              <${guia.tipoDocDest}>${guia.docDest.replace(/\D/g, '')}</${guia.tipoDocDest}>\n            </identificacao>\n`;
+            node += `            <razaoSocial><![CDATA[${guia.razaoDest}]]></razaoSocial>\n            <municipio>${guia.munDest}</municipio>\n          </contribuinteDestinatario>\n`;
         }
-        
-        node += camposExtrasStr ? camposExtrasStr + "\n" : "";
-
-        node += `        </item>\n`;
-        node += `      </itensGNRE>\n`;
-        
-        node += `      <valorGNRE>${valor.toFixed(2)}</valorGNRE>\n`;
-        node += `      <dataPagamento>${dataPagamento}</dataPagamento>\n`;
-        node += `    </TDadosGNRE>\n`;
-        
+        node += `${camposExtrasStr}\n        </item>\n      </itensGNRE>\n`;
+        node += `      <valorGNRE>${valor.toFixed(2)}</valorGNRE>\n      <dataPagamento>${dataPagamento}</dataPagamento>\n    </TDadosGNRE>\n`;
         return node;
     }
 </script>
