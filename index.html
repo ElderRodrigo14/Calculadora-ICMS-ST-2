@@ -1419,9 +1419,17 @@
                     const descTexto = item.desc; 
                     let valTexto = item.val.trim(); 
                     
-                    // Adiciona a sigla R$ formatada dinamicamente caso o campo não esteja vazio
-                    if (valTexto !== '' && !valTexto.toLowerCase().includes('r$')) {
-                        valTexto = 'R$ ' + valTexto;
+                    if (valTexto !== '') {
+                        // Limpa "R$", espaços, remove pontos de milhar e troca vírgula por ponto
+                        let valorLimpo = valTexto.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+                        let numAjustado = parseFloat(valorLimpo);
+                        
+                        // Se for um número válido, formata forçando 2 casas decimais. Se for texto (ex: "Isento"), só adiciona o R$.
+                        if (!isNaN(numAjustado)) {
+                            valTexto = 'R$ ' + numAjustado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        } else if (!valTexto.toLowerCase().includes('r$')) {
+                            valTexto = 'R$ ' + valTexto;
+                        }
                     }
 
                     const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
