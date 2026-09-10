@@ -681,9 +681,14 @@
 
     function switchModule(mod) {
         document.querySelectorAll('.module').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(el => {
+            el.classList.remove('active');
+            // Verifica pelo atributo onclick qual é a aba correta, evitando bugs com event.currentTarget
+            if (el.getAttribute('onclick').includes(`'${mod}'`) || el.getAttribute('onclick').includes(`"${mod}"`)) {
+                el.classList.add('active');
+            }
+        });
         document.getElementById(`module-${mod}`).classList.add('active');
-        event.currentTarget.classList.add('active');
     }
 
     function toggleTema() {
@@ -967,7 +972,6 @@
             </div>
 
             <script>
-                // Opcional: Chama o Ctrl+P sozinho logo após a janela carregar
                 window.onload = function() {
                     setTimeout(function() { window.print(); }, 400);
                 };
@@ -1304,7 +1308,13 @@
     dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); }; 
     dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
     dropZoneDifal.ondrop = (e) => { e.preventDefault(); dropZoneDifal.classList.remove('dragover'); processarArquivosDIFAL(e.dataTransfer.files); };
-    function mostrarLogDifal(mensagem) { const logEl = document.getElementById('log-difal'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight; }
+    
+    function mostrarLogDifal(mensagem) { 
+        const logEl = document.getElementById('log-difal'); 
+        logEl.style.display = 'block'; 
+        logEl.innerText += mensagem + "\n"; 
+        logEl.scrollTop = logEl.scrollHeight; 
+    }
     
     async function processarArquivosDIFAL(files) {
         if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files; 
@@ -1375,7 +1385,7 @@
         
         status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; 
         renderizarTabelaDifal(dadosExtraidos);
-    }}
+    }
     
     function renderizarTabelaDifal(dados) {
         const tbody = document.querySelector('#tabelaPreviewDifal tbody'); tbody.innerHTML = '';
