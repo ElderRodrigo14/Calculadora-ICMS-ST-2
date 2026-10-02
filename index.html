@@ -70,10 +70,10 @@
         
         input[type="text"], input[type="date"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
         input[type="text"]:focus, input[type="date"]:focus { border-color: var(--accent); }
-        .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-main:hover { opacity: 0.9; }
         .btn-main:disabled { background-color: var(--border); color: var(--text-sub); cursor: not-allowed; opacity: 0.7; }
-        .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
+        .btn-secondary { padding: 10px 18px; background: transparent; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-secondary:hover { background: var(--input-bg); }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; max-width: 300px;}
@@ -85,6 +85,7 @@
         .icon-btn { background: transparent; border: none; color: var(--text-sub); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .icon-btn:hover { background: var(--border); color: var(--text-main); }
         .icon-btn.delete:hover { background: var(--danger-bg); color: var(--danger); }
+        .icon-btn.edit:hover { background: var(--accent-bg); color: var(--accent); }
         svg { fill: currentColor; width: 18px; height: 18px; }
 
         .ncm-card-pro { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-top: 15px; position: relative; }
@@ -445,10 +446,12 @@
             </div>
 
             <div id="sub-mod-geral" style="display: none;">
-                <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; margin-bottom: 15px;">
+                <!-- ÁREA DE INSERÇÃO / EDIÇÃO MANUAL -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr auto auto; gap: 10px; margin-bottom: 15px;">
                     <input type="text" id="reg-desc" placeholder="Descrição (Ex: NF 12345)">
                     <input type="text" id="reg-val" placeholder="Valor (R$)">
-                    <button class="btn-main" onclick="addGuiaGeralManual()">+ Inserir Manualmente</button>
+                    <button class="btn-main" id="btn-add-geral" onclick="salvarGuiaGeralManual()">+ Inserir Manualmente</button>
+                    <button class="btn-secondary" id="btn-cancel-edit" style="display: none;" onclick="cancelarEdicaoGeral()">Cancelar</button>
                 </div>
                 
                 <div class="drop-zone" id="drop-registrador-geral" onclick="document.getElementById('file-reg-geral').click()">
@@ -468,7 +471,7 @@
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
                     <table id="table-registrador-geral" style="margin-top: 0;">
                         <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
-                            <tr><th>Data Entrega</th><th>Descrição / Guia</th><th>Valor (R$)</th><th style="text-align: center;">Ação</th></tr>
+                            <tr><th>Data Entrega</th><th>Descrição / Guia</th><th>Valor (R$)</th><th style="text-align: center;">Ações</th></tr>
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -567,6 +570,7 @@
 <script>
     const svgCopy = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`;
     const svgDel = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+    const svgEdit = `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
     const svgCheck = `<svg viewBox="0 0 24 24" fill="var(--success)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     const svgScale = `<svg viewBox="0 0 24 24"><path d="M12 2L1 7h22L12 2zm0 3.82L18.44 8H5.56L12 5.82zM4 10h2v7H4v-7zm6 0h2v7h-2v-7zm6 0h2v7h-2v-7zM2 19h20v2H2v-2z"/></svg>`;
     const svgTag = `<svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.41zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>`;
@@ -1190,7 +1194,7 @@
         let numMatch = desc.match(/\d+/g);
         if(!numMatch) return null;
         let numStr = numMatch.join('');
-        if(numStr.length < 2) return null; // Ignora se tiver só 1 número solto sem sentido
+        if(numStr.length < 2) return null; 
         
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
         return hist.find(h => {
@@ -1386,9 +1390,8 @@
             rowArray.forEach(item => {
                 if(item.desc.trim() !== '' && item.val.trim() !== '') {
                     let valNum = parseFloat(item.val.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
-                    // Evita registrar dois cliques seguidos acidentais verificando duplicidade na tela atual
                     if (!isNaN(valNum)) {
-                        hist.push({ id: Date.now() + Math.random(), data: dataHoje, desc: item.desc, valor: valNum });
+                        hist.push({ id: (Date.now() + Math.random()).toString(), data: dataHoje, desc: item.desc, valor: valNum });
                         qtdRegistradas++;
                     }
                 }
@@ -1575,6 +1578,8 @@
     }
 
     // --- MÓDULO 8: REGISTRADOR DE GUIAS ---
+    let editandoIdGeral = null;
+
     function switchSubRegistrador(tab) {
         document.getElementById('btn-sub-st').classList.toggle('active', tab === 'st');
         document.getElementById('btn-sub-geral').classList.toggle('active', tab === 'geral');
@@ -1661,17 +1666,52 @@
         renderTableST();
     }
 
-    function addGuiaGeralManual() {
+    function salvarGuiaGeralManual() {
         let desc = document.getElementById('reg-desc').value.trim();
         let valStr = document.getElementById('reg-val').value.trim();
         let valNum = parseFloat(valStr.replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
         if(!desc || isNaN(valNum)) return;
         
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
-        hist.push({ id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
+        
+        if (editandoIdGeral !== null) {
+            // Atualiza guia existente
+            let itemIndex = hist.findIndex(h => h.id === editandoIdGeral);
+            if (itemIndex > -1) {
+                hist[itemIndex].desc = desc;
+                hist[itemIndex].valor = valNum;
+            }
+            cancelarEdicaoGeral();
+        } else {
+            // Cria nova guia
+            hist.push({ id: (Date.now() + Math.random()).toString(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
+            document.getElementById('reg-desc').value = ''; 
+            document.getElementById('reg-val').value = '';
+        }
+        
         localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
         renderTableGeral();
-        document.getElementById('reg-desc').value = ''; document.getElementById('reg-val').value = '';
+    }
+
+    function editRowGeral(id) {
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        let item = hist.find(h => h.id === id);
+        if (item) {
+            document.getElementById('reg-desc').value = item.desc;
+            document.getElementById('reg-val').value = item.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+            editandoIdGeral = id;
+            document.getElementById('btn-add-geral').innerHTML = "💾 Salvar Edição";
+            document.getElementById('btn-cancel-edit').style.display = "inline-flex";
+            document.getElementById('reg-desc').focus();
+        }
+    }
+
+    function cancelarEdicaoGeral() {
+        editandoIdGeral = null;
+        document.getElementById('reg-desc').value = '';
+        document.getElementById('reg-val').value = '';
+        document.getElementById('btn-add-geral').innerHTML = "+ Inserir Manualmente";
+        document.getElementById('btn-cancel-edit').style.display = "none";
     }
 
     async function processarPDFGeral(files) {
@@ -1708,7 +1748,7 @@
                 }
                 
                 if(!isNaN(valNum) && !isDupe) {
-                    hist.push({ id: Date.now() + Math.random(), data: dataEntrega, desc: desc, valor: valNum });
+                    hist.push({ id: (Date.now() + Math.random()).toString(), data: dataEntrega, desc: desc, valor: valNum });
                     count++;
                 } else if(isDupe) { pularDuplicados++; }
             }
@@ -1745,11 +1785,17 @@
         const tbody = document.querySelector('#table-registrador-geral tbody');
         let total = 0;
         
-        tbody.innerHTML = histFiltrado.map((h, idx) => {
+        tbody.innerHTML = histFiltrado.map((h) => {
             total += h.valor;
-            // Busca index original caso exista um filtro ativo para poder excluir correto
-            let originalIdx = hist.findIndex(orig => orig.id === h.id);
-            return `<tr><td>${h.data}</td><td>${h.desc}</td><td>R$ ${h.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:center;"><button class="icon-btn delete" onclick="deleteRowGeral(${originalIdx})">${svgDel}</button></td></tr>`;
+            return `<tr>
+                <td>${h.data}</td>
+                <td>${h.desc}</td>
+                <td>R$ ${h.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                <td style="text-align:center; display:flex; justify-content:center; gap:5px;">
+                    <button class="icon-btn edit" onclick="editRowGeral('${h.id}')" title="Editar">${svgEdit}</button>
+                    <button class="icon-btn delete" onclick="deleteRowGeral('${h.id}')" title="Excluir">${svgDel}</button>
+                </td>
+            </tr>`;
         }).join('');
         
         if(histFiltrado.length > 0) {
@@ -1759,18 +1805,21 @@
         }
     }
 
-    function deleteRowGeral(idx) {
+    function deleteRowGeral(id) {
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral'));
-        hist.splice(idx, 1);
-        localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
-        renderTableGeral();
-        
-        // Se a guia excluída estivesse na prévia do difal e fizesse ela piscar vermelho, atualiza lá também
-        if(document.getElementById('sub-mod-difal-auto').style.display === 'block' && document.querySelectorAll('#tabelaPreviewDifal tbody tr').length > 0) {
-            let dadosRows = Array.from(document.querySelectorAll('#tabelaPreviewDifal tbody tr')).map(tr => ({ desc: tr.querySelector('td:nth-child(1) input').value, valor: parseFloat(tr.querySelector('td:nth-child(2) input').value.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) }));
-            renderizarTabelaDifal(dadosRows);
+        let idx = hist.findIndex(h => h.id === id);
+        if(idx > -1) {
+            hist.splice(idx, 1);
+            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+            renderTableGeral();
+            
+            // Atualiza prévias se estiverem abertas
+            if(document.getElementById('sub-mod-difal-auto').style.display === 'block' && document.querySelectorAll('#tabelaPreviewDifal tbody tr').length > 0) {
+                let dadosRows = Array.from(document.querySelectorAll('#tabelaPreviewDifal tbody tr')).map(tr => ({ desc: tr.querySelector('td:nth-child(1) input').value, valor: parseFloat(tr.querySelector('td:nth-child(2) input').value.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) }));
+                renderizarTabelaDifal(dadosRows);
+            }
+            if(document.getElementById('sub-mod-difal-manual').style.display === 'block') renderizarGuiasManuais();
         }
-        if(document.getElementById('sub-mod-difal-manual').style.display === 'block') renderizarGuiasManuais();
     }
 
     function limparRegistrador(type) {
