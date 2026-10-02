@@ -1769,15 +1769,27 @@
     function renderTableGeral() {
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
         
+        // Correção: Verifica se existem registros antigos sem ID e cria um para eles
+        let precisaSalvar = false;
+        hist.forEach(h => {
+            if (!h.id) {
+                h.id = (Date.now() + Math.random()).toString();
+                precisaSalvar = true;
+            }
+        });
+        if (precisaSalvar) {
+            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+        }
+
         // Aplica Filtro Inteligente
         let termo = document.getElementById('search-hist-geral') ? document.getElementById('search-hist-geral').value.toLowerCase().trim() : '';
-        let termoNumerico = termo.replace(/\D/g, ''); // Somente os números da pesquisa (ex: "5.100" vira "5100")
+        let termoNumerico = termo.replace(/\D/g, ''); 
         
         let histFiltrado = hist.filter(h => {
             if(!termo) return true;
             let hDesc = h.desc.toLowerCase();
             let hData = h.data.toLowerCase();
-            let hDescNum = h.desc.replace(/\D/g, ''); // Somente números da descrição da NF
+            let hDescNum = h.desc.replace(/\D/g, ''); 
             
             return hDesc.includes(termo) || hData.includes(termo) || (termoNumerico.length > 2 && hDescNum.includes(termoNumerico));
         });
