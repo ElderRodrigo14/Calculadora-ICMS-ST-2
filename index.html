@@ -18,7 +18,7 @@
             --input-bg: #202124; --btn-hover: #28292c;
             --danger: #f28b82; --danger-bg: rgba(242, 139, 130, 0.15);
             --success: #81c995; --success-bg: rgba(129, 201, 149, 0.15);
-            --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.15); --tag-bg: #2a2b2c;
+            --warning: #fde293; --warning-bg: rgba(253, 226, 147, 0.2); --tag-bg: #2a2b2c;
             --sankhya-green: #34a853;
         }
 
@@ -68,8 +68,8 @@
         th { text-align: left; color: var(--text-sub); padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; font-weight: 500;}
         td { padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; transition: background-color 0.4s ease; }
         
-        input[type="text"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
-        input[type="text"]:focus { border-color: var(--accent); }
+        input[type="text"], input[type="date"] { background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text-main); font-size: 14px; outline: none; width: 100%; transition: 0.2s; font-family: inherit;}
+        input[type="text"]:focus, input[type="date"]:focus { border-color: var(--accent); }
         .btn-main { padding: 10px 18px; background: var(--accent); color: var(--bg); border: none; border-radius: 8px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; font-family: inherit;}
         .btn-main:hover { opacity: 0.9; }
         .btn-main:disabled { background-color: var(--border); color: var(--text-sub); cursor: not-allowed; opacity: 0.7; }
@@ -131,6 +131,7 @@
         
         .badge-status { padding: 4px 10px; border-radius: 12px; font-weight: 500; display: inline-block; background: var(--input-bg); color: var(--text-sub); border: 1px solid var(--border); }
         .badge-status.ok { background: var(--success-bg); color: var(--success); border-color: rgba(129,201,149,0.3); }
+        .badge-warning { background: var(--warning-bg); color: var(--warning); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 8px; display: inline-block;}
     </style>
 </head>
 <body>
@@ -320,8 +321,8 @@
                 <div id="log-difal" style="margin-top: 12px; font-size: 13px; color: var(--text-sub); white-space: pre-wrap; max-height: 120px; overflow-y: auto; padding: 12px; background: var(--input-bg); border-radius: 8px; font-family: monospace; border: 1px solid var(--border); display: none;"></div>
                 
                 <div id="previewSectionDifal" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border);">
-                    <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados (Paginação Automática)</h3>
-                    <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Todos os itens abaixo serão incluídos no PDF final.</p>
+                    <h3 style="margin-top: 0; font-weight: 500; font-size: 18px;">Prévia dos Dados (Verificação Anti-Duplicidade)</h3>
+                    <p style="color: var(--text-sub); font-size: 13px; margin-bottom: 15px;">Itens destacados já foram registrados no seu Histórico de Entregas.</p>
                     <div class="table-responsive">
                         <table id="tabelaPreviewDifal">
                             <thead><tr><th style="width: 50%;">Descrição</th><th style="width: 40%;">Valor (R$)</th><th style="width: 10%; text-align: center;">Ação</th></tr></thead>
@@ -329,7 +330,7 @@
                         </table>
                     </div>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
-                        <button class="btn-main" id="btnGerarPDFDifalAuto" onclick="gerarPDFProtocolo('auto')">📥 Baixar PDF Finalizado</button>
+                        <button class="btn-main" id="btnGerarPDFDifalAuto" onclick="gerarPDFProtocolo('auto')">📥 Baixar PDF & Auto-Registrar</button>
                     </div>
                 </div>
             </div>
@@ -360,7 +361,7 @@
                 </div>
                 
                 <div style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
-                    <button class="btn-main" id="btnGerarPDFDifalManual" onclick="gerarPDFProtocolo('manual')">📥 Baixar PDF Finalizado (Guias)</button>
+                    <button class="btn-main" id="btnGerarPDFDifalManual" onclick="gerarPDFProtocolo('manual')">📥 Baixar PDF & Auto-Registrar</button>
                 </div>
             </div>
         </div>
@@ -411,12 +412,12 @@
     <!-- MÓDULO 8: REGISTRADOR DE GUIAS -->
     <main class="module" id="module-registrador">
         <div class="card">
-            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Registrador de Entregas & Guias</h2>
-            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Seu histórico de guias armazenado exclusivamente no seu navegador de forma segura.</p>
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Histórico e Registrador de Guias</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Seu histórico de entregas armazenado exclusivamente no seu navegador.</p>
             
             <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
                 <button class="btn-aliq active" id="btn-sub-st" onclick="switchSubRegistrador('st')">Guias de ST</button>
-                <button class="btn-aliq" id="btn-sub-geral" onclick="switchSubRegistrador('geral')">Guias no Geral</button>
+                <button class="btn-aliq" id="btn-sub-geral" onclick="switchSubRegistrador('geral')">Entregas Gerais (DIFAL)</button>
             </div>
 
             <div id="sub-mod-st">
@@ -447,22 +448,27 @@
                 <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; margin-bottom: 15px;">
                     <input type="text" id="reg-desc" placeholder="Descrição (Ex: NF 12345)">
                     <input type="text" id="reg-val" placeholder="Valor (R$)">
-                    <button class="btn-main" onclick="addGuiaGeralManual()">+ Inserir</button>
+                    <button class="btn-main" onclick="addGuiaGeralManual()">+ Inserir Manualmente</button>
                 </div>
                 
                 <div class="drop-zone" id="drop-registrador-geral" onclick="document.getElementById('file-reg-geral').click()">
                     <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     <div class="drop-zone-text">
-                        <h3>Importar Protocolos DIFAL Gerados (.pdf)</h3>
-                        <p>O sistema lerá os PDFs e adicionará as descrições e valores automaticamente à lista.</p>
+                        <h3>Importar Protocolos Antigos (.pdf)</h3>
+                        <p>Arraste os protocolos já gerados para salvar o histórico no sistema retrospectivamente.</p>
                     </div>
                     <input type="file" id="file-reg-geral" accept=".pdf" multiple style="display: none;" onchange="processarPDFGeral(this.files)">
                 </div>
+
+                <!-- BUSCA INTELIGENTE -->
+                <div style="margin-top: 20px; margin-bottom: 10px;">
+                    <input type="text" id="search-hist-geral" placeholder="🔍 Buscar por Nº da NF, Descrição ou Data (ex: 5100)..." onkeyup="renderTableGeral()" style="background: var(--bg);">
+                </div>
                 
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid var(--border); border-radius: 8px;">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
                     <table id="table-registrador-geral" style="margin-top: 0;">
                         <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1; box-shadow: 0 1px 0 var(--border);">
-                            <tr><th>Data Registro</th><th>Descrição</th><th>Valor (R$)</th><th style="text-align: center;">Ação</th></tr>
+                            <tr><th>Data Entrega</th><th>Descrição / Guia</th><th>Valor (R$)</th><th style="text-align: center;">Ação</th></tr>
                         </thead>
                         <tbody></tbody>
                     </table>
@@ -683,7 +689,6 @@
         document.querySelectorAll('.module').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-item').forEach(el => {
             el.classList.remove('active');
-            // Verifica pelo atributo onclick qual é a aba correta, evitando bugs com event.currentTarget
             if (el.getAttribute('onclick').includes(`'${mod}'`) || el.getAttribute('onclick').includes(`"${mod}"`)) {
                 el.classList.add('active');
             }
@@ -1180,27 +1185,27 @@
     // --- MÓDULO 4: EXTRATOR DIFAL E GUIAS MANUAIS (NOVO FORMATO) ---
     // =========================================================================
     
-    // Coordenadas ajustadas para PDF limpo (sem DIFAL e R$ no background)
+    // Helper Anti-Duplicidade Global
+    function verificarDuplicidade(desc) {
+        let numMatch = desc.match(/\d+/g);
+        if(!numMatch) return null;
+        let numStr = numMatch.join('');
+        if(numStr.length < 2) return null; // Ignora se tiver só 1 número solto sem sentido
+        
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        return hist.find(h => {
+            let hNumMatch = h.desc.match(/\d+/g);
+            return hNumMatch && hNumMatch.join('') === numStr;
+        });
+    }
+
     const POS = { dataX: 140, dataY: 617, colDescX: 95, colValorX: 400, primeiraLinhaY: 545, espacamentoLinhas: 18.0 };
-    
-    // Lista Fixa (Preset)
     const presetsGuias = [
-        "ISSQN Devido - 01 - Kadri Tecnologia - Matriz",
-        "ISSQN Devido - 02 - Kadri Tecnologia - Isaac",
-        "ISSQN Devido - 06 - Kadri Tecnologia - Av. CPA",
-        "Retenções Federais - Kadri Empreendimentos - PCC",
-        "Retenções Federais - Kadri Empreendimentos - IR Retido",
-        "Retenções Federais - Kadri Tecnologia - PCC",
-        "Retenções Federais - Kadri Tecnologia - INSS Retido",
-        "Retenções Federais - Kadri Tecnologia - IR Retido",
-        "Retenções Federais - Condomínio Tapajos - PCC",
-        "Retenções Federais - Condomínio Tapajos - INSS Retido",
-        "Retenções Federais - Condomínio Tapajos - IR Retido",
-        "ICMS Normal - 01 - Kadri Tecnologia - Matriz",
-        "ICMS Normal - 02 - Kadri Tecnologia - Isaac",
-        "ICMS Normal - 06 - Kadri Tecnologia - Av. CPA",
-        "ICMS Normal - 50 - Samsung Pantanal",
-        "ICMS Normal - 57 - Samsung Sinop"
+        "ISSQN Devido - 01 - Kadri Tecnologia - Matriz", "ISSQN Devido - 02 - Kadri Tecnologia - Isaac", "ISSQN Devido - 06 - Kadri Tecnologia - Av. CPA",
+        "Retenções Federais - Kadri Empreendimentos - PCC", "Retenções Federais - Kadri Empreendimentos - IR Retido", "Retenções Federais - Kadri Tecnologia - PCC",
+        "Retenções Federais - Kadri Tecnologia - INSS Retido", "Retenções Federais - Kadri Tecnologia - IR Retido", "Retenções Federais - Condomínio Tapajos - PCC",
+        "Retenções Federais - Condomínio Tapajos - INSS Retido", "Retenções Federais - Condomínio Tapajos - IR Retido", "ICMS Normal - 01 - Kadri Tecnologia - Matriz",
+        "ICMS Normal - 02 - Kadri Tecnologia - Isaac", "ICMS Normal - 06 - Kadri Tecnologia - Av. CPA", "ICMS Normal - 50 - Samsung Pantanal", "ICMS Normal - 57 - Samsung Sinop"
     ];
 
     let linhasGuiasManuais = [];
@@ -1210,56 +1215,26 @@
         document.getElementById('btn-sub-difal-manual').classList.toggle('active', tab === 'manual');
         document.getElementById('sub-mod-difal-auto').style.display = tab === 'auto' ? 'block' : 'none';
         document.getElementById('sub-mod-difal-manual').style.display = tab === 'manual' ? 'block' : 'none';
-        
-        // Inicia lista padrão caso seja o primeiro clique
-        if (tab === 'manual' && linhasGuiasManuais.length === 0) {
-            carregarListaPadraoDifal();
-        }
+        if (tab === 'manual' && linhasGuiasManuais.length === 0) carregarListaPadraoDifal();
     }
 
-    // ---------------------------------------------
-    // FUNÇÕES DA ABA MANUAL
-    // ---------------------------------------------
-    function carregarListaPadraoDifal() {
-        linhasGuiasManuais = presetsGuias.map(desc => ({ desc, valor: '' }));
-        renderizarGuiasManuais();
-    }
-
-    function iniciarEmBrancoDifal() {
-        if(confirm("Isso apagará todas as linhas atuais da tabela. Deseja continuar?")) {
-            linhasGuiasManuais = [{ desc: '', valor: '' }];
-            renderizarGuiasManuais();
-        }
-    }
-
+    function carregarListaPadraoDifal() { linhasGuiasManuais = presetsGuias.map(desc => ({ desc, valor: '' })); renderizarGuiasManuais(); }
+    function iniciarEmBrancoDifal() { if(confirm("Isso apagará todas as linhas atuais da tabela. Deseja continuar?")) { linhasGuiasManuais = [{ desc: '', valor: '' }]; renderizarGuiasManuais(); } }
+    
     function addLinhaDifalManual() {
         salvarEstadoManual();
-        if (linhasGuiasManuais.length >= 18) {
-            alert("Limite máximo de 18 guias por página atingido.");
-            return;
-        }
-        linhasGuiasManuais.push({ desc: '', valor: '' });
-        renderizarGuiasManuais();
+        if (linhasGuiasManuais.length >= 18) { alert("Limite máximo de 18 guias por página atingido."); return; }
+        linhasGuiasManuais.push({ desc: '', valor: '' }); renderizarGuiasManuais();
     }
 
     function clonarLinhaDifalManual(idx) {
         salvarEstadoManual();
-        if (linhasGuiasManuais.length >= 18) {
-            alert("Limite máximo de 18 guias por página atingido.");
-            return;
-        }
-        const item = linhasGuiasManuais[idx];
-        linhasGuiasManuais.splice(idx + 1, 0, { desc: item.desc, valor: item.valor });
-        renderizarGuiasManuais();
+        if (linhasGuiasManuais.length >= 18) { alert("Limite máximo de 18 guias por página atingido."); return; }
+        const item = linhasGuiasManuais[idx]; linhasGuiasManuais.splice(idx + 1, 0, { desc: item.desc, valor: item.valor }); renderizarGuiasManuais();
     }
 
-    function removerLinhaDifalManual(idx) {
-        salvarEstadoManual();
-        linhasGuiasManuais.splice(idx, 1);
-        renderizarGuiasManuais();
-    }
+    function removerLinhaDifalManual(idx) { salvarEstadoManual(); linhasGuiasManuais.splice(idx, 1); renderizarGuiasManuais(); }
 
-    // Salva o que está na tela pro array antes de recarregar o layout
     function salvarEstadoManual() {
         const trs = document.querySelectorAll('#tabelaGuiasManuais tbody tr');
         linhasGuiasManuais = Array.from(trs).map(tr => ({
@@ -1274,9 +1249,16 @@
         
         linhasGuiasManuais.forEach((linha, idx) => {
             const tr = document.createElement('tr');
+            
+            // Verificação de Duplicidade no Manual
+            let dup = verificarDuplicidade(linha.desc);
+            let bgStyle = dup ? 'background: var(--warning-bg);' : '';
+            let alertHtml = dup ? `<div style="font-size: 11px; color: var(--warning); margin-top: 4px; font-weight: bold;">⚠️ Entregue em ${dup.data} (R$ ${dup.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div>` : '';
+            
+            tr.style = bgStyle;
             tr.innerHTML = `
-                <td><input type="text" class="desc-input" value="${linha.desc}" placeholder="Descrição do Imposto/Guia"></td>
-                <td><input type="text" class="val-input" value="${linha.valor}" placeholder="0,00"></td>
+                <td><input type="text" class="desc-input" value="${linha.desc}" placeholder="Descrição" onchange="salvarEstadoManual(); renderizarGuiasManuais()" style="background: transparent;">${alertHtml}</td>
+                <td><input type="text" class="val-input" value="${linha.valor}" placeholder="0,00" onblur="salvarEstadoManual()" style="background: transparent;"></td>
                 <td style="text-align: center; display: flex; justify-content: center; gap: 5px;">
                     <button class="icon-btn" onclick="clonarLinhaDifalManual(${idx})" title="Clonar Abaixo" style="color: var(--accent);">${svgCopy}</button>
                     <button class="icon-btn delete" onclick="removerLinhaDifalManual(${idx})" title="Excluir">${svgDel}</button>
@@ -1287,113 +1269,64 @@
         
         const countSpan = document.getElementById('contador-linhas-manual');
         countSpan.innerText = linhasGuiasManuais.length;
-        
         const btnAdd = document.getElementById('btnAdicionarLinhaManual');
-        if (linhasGuiasManuais.length >= 18) {
-            countSpan.style.color = 'var(--danger)';
-            btnAdd.disabled = true;
-        } else {
-            countSpan.style.color = 'var(--success)';
-            btnAdd.disabled = false;
-        }
+        if (linhasGuiasManuais.length >= 18) { countSpan.style.color = 'var(--danger)'; btnAdd.disabled = true; } else { countSpan.style.color = 'var(--success)'; btnAdd.disabled = false; }
     }
 
-    // ---------------------------------------------
-    // FUNÇÕES DA ABA AUTOMÁTICA (DIFAL)
-    // ---------------------------------------------
-    const dropZoneDifal = document.getElementById('drop-zone-difal'); 
-    const pdfInputDifal = document.getElementById('pdf-input-difal');
-    dropZoneDifal.onclick = () => pdfInputDifal.click(); 
-    pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
-    dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); }; 
-    dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
+    const dropZoneDifal = document.getElementById('drop-zone-difal'); const pdfInputDifal = document.getElementById('pdf-input-difal');
+    dropZoneDifal.onclick = () => pdfInputDifal.click(); pdfInputDifal.onchange = (e) => processarArquivosDIFAL(e.target.files);
+    dropZoneDifal.ondragover = (e) => { e.preventDefault(); dropZoneDifal.classList.add('dragover'); }; dropZoneDifal.ondragleave = () => { dropZoneDifal.classList.remove('dragover'); };
     dropZoneDifal.ondrop = (e) => { e.preventDefault(); dropZoneDifal.classList.remove('dragover'); processarArquivosDIFAL(e.dataTransfer.files); };
-    
-    function mostrarLogDifal(mensagem) { 
-        const logEl = document.getElementById('log-difal'); 
-        logEl.style.display = 'block'; 
-        logEl.innerText += mensagem + "\n"; 
-        logEl.scrollTop = logEl.scrollHeight; 
-    }
+    function mostrarLogDifal(mensagem) { const logEl = document.getElementById('log-difal'); logEl.style.display = 'block'; logEl.innerText += mensagem + "\n"; logEl.scrollTop = logEl.scrollHeight; }
     
     async function processarArquivosDIFAL(files) {
-        if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files; 
-        if (!files || files.length === 0) return;
-        
-        const status = document.getElementById('status-difal'); 
-        const log = document.getElementById('log-difal');
-        status.innerText = "⏳ Lendo arquivos..."; 
-        log.innerText = ""; 
-        log.style.display = 'none'; 
-        document.getElementById('previewSectionDifal').style.display = 'none';
-        
+        if (!files || files.length === 0) files = document.getElementById('pdf-input-difal').files; if (!files || files.length === 0) return;
+        const status = document.getElementById('status-difal'); const log = document.getElementById('log-difal');
+        status.innerText = "⏳ Lendo arquivos..."; log.innerText = ""; log.style.display = 'none'; document.getElementById('previewSectionDifal').style.display = 'none';
         let dadosExtraidos = [];
         
         for (const file of files) {
             try {
                 const text = await extractTextFromPDF(file);
-                // Remove quebras de linha para criar um fluxo de texto único
                 const cleanText = text.replace(/\s+/g, ' '); 
+                let valorTotal = 0; let encontrouValor = false;
                 
-                let valorTotal = 0; 
-                let encontrouValor = false;
-                
-                // 1. GNRE ("Total a recolher") - Permite até 150 caracteres de "lixo" no meio (ex: Autenticação mecânica)
                 let matchGnre = cleanText.match(/Total\s*a\s*Recolher.{0,150}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-                
-                // 2. DARE-SP ("08 - Valor Total" ou apenas "Valor Total")
                 let matchDare = cleanText.match(/(?:08\s*-\s*Valor\s*Total|Valor\s*Total).{0,150}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
-                
-                // 3. Fallback GNRE antigo ("Valor Principal")
                 let matchGnrePrinc = cleanText.match(/Valor\s*Principal.{0,150}?(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/i);
 
-                if (matchGnre) {
-                    valorTotal = parseFloat(matchGnre[1].replace(/\./g, '').replace(',', '.')); 
-                    encontrouValor = true;
-                } else if (matchDare) {
-                    valorTotal = parseFloat(matchDare[1].replace(/\./g, '').replace(',', '.')); 
-                    encontrouValor = true;
-                } else if (matchGnrePrinc) { 
-                    valorTotal = parseFloat(matchGnrePrinc[1].replace(/\./g, '').replace(',', '.')); 
-                    encontrouValor = true; 
-                }
+                if (matchGnre) { valorTotal = parseFloat(matchGnre[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true;
+                } else if (matchDare) { valorTotal = parseFloat(matchDare[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true;
+                } else if (matchGnrePrinc) { valorTotal = parseFloat(matchGnrePrinc[1].replace(/\./g, '').replace(',', '.')); encontrouValor = true; }
                 
-                // Captura a sequência numérica do nome do arquivo e formata com ponto (ex: 351366 -> 351.366)
                 const matchNum = file.name.match(/\d+/);
                 let descFinal = `DIFAL NF S/N (${file.name})`;
-                if (matchNum) {
-                    const numNF = parseInt(matchNum[0], 10);
-                    descFinal = `DIFAL NF ${numNF.toLocaleString('pt-BR')}`;
-                }
+                if (matchNum) { const numNF = parseInt(matchNum[0], 10); descFinal = `DIFAL NF ${numNF.toLocaleString('pt-BR')}`; }
 
-                if (encontrouValor) { 
-                    dadosExtraidos.push({ desc: descFinal, valor: valorTotal }); 
-                    mostrarLogDifal(`✅ Lido: ${descFinal} | Valor: R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`); 
-                } else { 
-                    mostrarLogDifal(`⚠️ Erro ao encontrar o valor (GNRE/DARE) no arquivo: ${file.name}`); 
-                }
-            } catch (error) { 
-                mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); 
-            }
+                if (encontrouValor) { dadosExtraidos.push({ desc: descFinal, valor: valorTotal }); mostrarLogDifal(`✅ Lido: ${descFinal} | Valor: R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`); } 
+                else { mostrarLogDifal(`⚠️ Erro ao encontrar o valor (GNRE/DARE) no arquivo: ${file.name}`); }
+            } catch (error) { mostrarLogDifal(`❌ Erro interno ao ler: ${file.name}`); }
         }
         
         document.getElementById('pdf-input-difal').value = '';
-        if (dadosExtraidos.length === 0) { 
-            status.innerText = "Nenhum dado encontrado nas notas selecionadas."; 
-            return; 
-        }
-        
-        status.innerText = "Verifique a prévia abaixo e edite se necessário. Gera PDF automaticamente em lote."; 
-        renderizarTabelaDifal(dadosExtraidos);
+        if (dadosExtraidos.length === 0) { status.innerText = "Nenhum dado encontrado nas notas selecionadas."; return; }
+        status.innerText = "Verifique a prévia e remova linhas vermelhas (duplicadas) se houverem."; renderizarTabelaDifal(dadosExtraidos);
     }
     
     function renderizarTabelaDifal(dados) {
         const tbody = document.querySelector('#tabelaPreviewDifal tbody'); tbody.innerHTML = '';
         dados.forEach((dado) => {
             const tr = document.createElement('tr');
+            
+            // Verificação de Duplicidade no Auto
+            let dup = verificarDuplicidade(dado.desc);
+            let bgStyle = dup ? 'background: var(--warning-bg);' : '';
+            let alertHtml = dup ? `<div style="font-size: 11px; color: var(--warning); margin-top: 4px; font-weight: bold;">⚠️ Entregue em ${dup.data} (R$ ${dup.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})})</div>` : '';
+
+            tr.style = bgStyle;
             tr.innerHTML = `
-                <td><input type="text" value="${dado.desc}"></td>
-                <td><input type="text" value="${dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}"></td>
+                <td><input type="text" value="${dado.desc}" style="background: transparent;">${alertHtml}</td>
+                <td><input type="text" value="${dado.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}" style="background: transparent;"></td>
                 <td style="text-align: center;"><button class="icon-btn delete" onclick="this.closest('tr').remove()">${svgDel}</button></td>
             `;
             tbody.appendChild(tr);
@@ -1401,104 +1334,75 @@
         document.getElementById('previewSectionDifal').style.display = 'block';
     }
 
-    // ---------------------------------------------
-    // MOTOR DE GERAÇÃO PDF-LIB UNIFICADO
-    // ---------------------------------------------
     async function gerarPDFProtocolo(origem) {
-        let btnGerar, status, dataHoje;
-        let rowArray = [];
-
-        dataHoje = new Date().toLocaleDateString('pt-BR');
+        let btnGerar, status, dataHoje; let rowArray = []; dataHoje = new Date().toLocaleDateString('pt-BR');
 
         if (origem === 'auto') {
-            btnGerar = document.getElementById('btnGerarPDFDifalAuto');
-            status = document.getElementById('status-difal');
+            btnGerar = document.getElementById('btnGerarPDFDifalAuto'); status = document.getElementById('status-difal');
             const linhas = document.querySelectorAll('#tabelaPreviewDifal tbody tr');
-            rowArray = Array.from(linhas).map(tr => ({
-                desc: tr.querySelector('td:nth-child(1) input').value,
-                val: tr.querySelector('td:nth-child(2) input').value
-            }));
+            rowArray = Array.from(linhas).map(tr => ({ desc: tr.querySelector('td:nth-child(1) input').value, val: tr.querySelector('td:nth-child(2) input').value }));
         } else {
-            btnGerar = document.getElementById('btnGerarPDFDifalManual');
-            status = { innerText: '', style: {} }; // mock para não quebrar referências
-            salvarEstadoManual();
-            rowArray = linhasGuiasManuais.map(l => ({ desc: l.desc, val: l.valor }));
-            
-            if (rowArray.length === 0) {
-                alert("A tabela está vazia. Adicione ao menos uma linha antes de gerar.");
-                return;
-            }
+            btnGerar = document.getElementById('btnGerarPDFDifalManual'); status = { innerText: '', style: {} };
+            salvarEstadoManual(); rowArray = linhasGuiasManuais.map(l => ({ desc: l.desc, val: l.valor }));
+            if (rowArray.length === 0) { alert("A tabela está vazia. Adicione ao menos uma linha antes de gerar."); return; }
         }
 
-        const originalText = btnGerar.innerText; 
-        btnGerar.disabled = true; 
-        btnGerar.innerText = "⏳ Gerando PDF...";
+        const originalText = btnGerar.innerText; btnGerar.disabled = true; btnGerar.innerText = "⏳ Gerando PDF e Salvando...";
         
         try {
-            const response = await fetch('./modelo.pdf'); 
-            if (!response.ok) throw new Error("O arquivo 'modelo.pdf' limpo não foi encontrado.");
-            
-            const existingPdfBytes = await response.arrayBuffer(); 
-            const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
+            const response = await fetch('./modelo.pdf'); if (!response.ok) throw new Error("O arquivo 'modelo.pdf' limpo não foi encontrado.");
+            const existingPdfBytes = await response.arrayBuffer(); const templateDoc = await PDFLib.PDFDocument.load(existingPdfBytes);
             const pdfDoc = await PDFLib.PDFDocument.create(); 
-            const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold); 
-            const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+            const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold); const fontRegular = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
             
             const chunks = [];
-            // Divide o array em blocos de 18 pra paginação
-            for (let i = 0; i < rowArray.length; i += 18) { 
-                chunks.push(rowArray.slice(i, i + 18)); 
-            }
+            for (let i = 0; i < rowArray.length; i += 18) { chunks.push(rowArray.slice(i, i + 18)); }
 
             for (const chunk of chunks) {
-                const [page] = await pdfDoc.copyPages(templateDoc, [0]); 
-                pdfDoc.addPage(page); 
+                const [page] = await pdfDoc.copyPages(templateDoc, [0]); pdfDoc.addPage(page); 
                 page.drawText(dataHoje, { x: POS.dataX, y: POS.dataY, size: 11, font: fontBold });
                 
                 chunk.forEach((item, index) => {
-                    const descTexto = item.desc; 
-                    let valTexto = item.val.trim(); 
-                    
+                    const descTexto = item.desc; let valTexto = item.val.trim(); 
                     if (valTexto !== '') {
-                        // Limpa "R$", espaços, remove pontos de milhar e troca vírgula por ponto
-                        let valorLimpo = valTexto.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
-                        let numAjustado = parseFloat(valorLimpo);
-                        
-                        // Se for um número válido, formata forçando 2 casas decimais. Se for texto (ex: "Isento"), só adiciona o R$.
-                        if (!isNaN(numAjustado)) {
-                            valTexto = 'R$ ' + numAjustado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                        } else if (!valTexto.toLowerCase().includes('r$')) {
-                            valTexto = 'R$ ' + valTexto;
-                        }
+                        let valorLimpo = valTexto.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.'); let numAjustado = parseFloat(valorLimpo);
+                        if (!isNaN(numAjustado)) valTexto = 'R$ ' + numAjustado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        else if (!valTexto.toLowerCase().includes('r$')) valTexto = 'R$ ' + valTexto;
                     }
-
                     const yAtual = POS.primeiraLinhaY - (index * POS.espacamentoLinhas);
                     page.drawText(descTexto, { x: POS.colDescX, y: yAtual, size: 9, font: fontBold }); 
                     page.drawText(valTexto, { x: POS.colValorX, y: yAtual, size: 9, font: fontRegular });
                 });
             }
             
-            const pdfBytes = await pdfDoc.save(); 
-            const blob = new Blob([pdfBytes], { type: "application/pdf" }); 
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; 
-            
+            const pdfBytes = await pdfDoc.save(); const blob = new Blob([pdfBytes], { type: "application/pdf" }); 
+            const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
             const sufixoNome = origem === 'auto' ? 'DIFAL' : 'Guias_Diversas';
-            a.download = `Protocolo_${sufixoNome}_${dataHoje.replace(/\//g, '-')}.pdf`; 
+            a.download = `Protocolo_${sufixoNome}_${dataHoje.replace(/\//g, '-')}.pdf`; a.click(); window.URL.revokeObjectURL(url);
             
-            a.click(); 
-            window.URL.revokeObjectURL(url);
-            
+            // Auto-Registro Inteligente no Histórico
+            let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+            let qtdRegistradas = 0;
+            rowArray.forEach(item => {
+                if(item.desc.trim() !== '' && item.val.trim() !== '') {
+                    let valNum = parseFloat(item.val.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+                    // Evita registrar dois cliques seguidos acidentais verificando duplicidade na tela atual
+                    if (!isNaN(valNum)) {
+                        hist.push({ id: Date.now() + Math.random(), data: dataHoje, desc: item.desc, valor: valNum });
+                        qtdRegistradas++;
+                    }
+                }
+            });
+            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+            renderTableGeral(); // Atualiza a aba do histórico
+
             if(origem === 'auto') {
-                status.innerText = `✅ Protocolo gerado e baixado com sucesso! (${chunks.length} páginas)`; 
+                status.innerText = `✅ Protocolo baixado e ${qtdRegistradas} guias registradas no Histórico!`; 
                 status.style.color = "var(--success)";
-            }
+            } else { alert(`Protocolo baixado e ${qtdRegistradas} guias salvas no Histórico com sucesso!`); }
         } catch (error) { 
-            if(origem === 'auto') {
-                status.innerText = `Erro ao gerar PDF: ${error.message}`; status.style.color = "var(--danger)"; 
-            } else {
-                alert(`Erro ao gerar PDF: ${error.message}`);
-            }
+            if(origem === 'auto') { status.innerText = `Erro ao gerar PDF: ${error.message}`; status.style.color = "var(--danger)"; } 
+            else { alert(`Erro ao gerar PDF: ${error.message}`); }
         }
         btnGerar.disabled = false; btnGerar.innerText = originalText;
     }
@@ -1773,44 +1677,85 @@
     async function processarPDFGeral(files) {
         if (!files || files.length === 0) return;
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
-        let count = 0;
+        let count = 0; let pularDuplicados = 0;
         
         for (let file of files) {
             let text = await extractTextFromPDF(file);
-            let regex = /(NF\s+[\d\w\.-]+)[\s-]+(?:R\$)?\s*([\d\.,]+)/gi;
-            let match;
-            while ((match = regex.exec(text)) !== null) {
-                let desc = match[1];
-                let valStr = match[2];
-                let valNum = parseFloat(valStr.replace(/\./g, '').replace(',', '.'));
-                if (!isNaN(valNum)) {
-                    hist.push({ id: Date.now() + Math.random(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
-                    count++;
+            
+            // Busca Data de Entrega
+            let matchData = text.match(/Data Entrega:\s*([\d]{2}\/[\d]{2}\/[\d]{4})/i);
+            let dataEntrega = matchData ? matchData[1] : new Date().toLocaleDateString('pt-BR');
+            
+            // Regex ajustado para pegar Descrição e Valor sequencialmente para não falhar na leitura de colunas
+            let regexDesc = /(DIFAL NF [\d\.]+|ISSQN.*?|ICMS.*?|Retenções.*?)(?=\s|$|R\$)/gi;
+            let descricoes = []; let dMatch;
+            while((dMatch = regexDesc.exec(text)) !== null) { if(dMatch[1].length > 5) descricoes.push(dMatch[1].trim()); }
+            
+            let regexVal = /R\$\s*([\d\.,]+)/gi;
+            let valores = []; let vMatch;
+            while((vMatch = regexVal.exec(text)) !== null) { valores.push(vMatch[1]); }
+            
+            let qtd = Math.min(descricoes.length, valores.length);
+            for(let i=0; i<qtd; i++) {
+                let desc = descricoes[i];
+                let valNum = parseFloat(valores[i].replace(/\./g, '').replace(',', '.'));
+                
+                let numMatch = desc.match(/\d+/g);
+                let isDupe = false;
+                if(numMatch) {
+                    let nStr = numMatch.join('');
+                    isDupe = hist.some(h => { let hn = h.desc.match(/\d+/g); return hn && hn.join('') === nStr && h.data === dataEntrega; });
                 }
+                
+                if(!isNaN(valNum) && !isDupe) {
+                    hist.push({ id: Date.now() + Math.random(), data: dataEntrega, desc: desc, valor: valNum });
+                    count++;
+                } else if(isDupe) { pularDuplicados++; }
             }
         }
         
-        if(count > 0) {
-            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
-            renderTableGeral();
-            alert(`Sucesso! ${count} guias foram registradas automaticamente.`);
-        } else {
-            alert('Nenhuma guia encontrada nesses PDFs. Tem certeza que são os Protocolos DIFAL gerados pelo sistema?');
-        }
+        localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
+        renderTableGeral();
+        
+        let msg = '';
+        if(count > 0) msg += `Sucesso! ${count} guias cadastradas do protocolo retroativo.\n`;
+        if(pularDuplicados > 0) msg += `${pularDuplicados} guias ignoradas pois já existiam.\n`;
+        if(count === 0 && pularDuplicados === 0) msg += `Nenhuma guia encontrada. Verifique o arquivo.`;
+        alert(msg);
+        
         document.getElementById('file-reg-geral').value = '';
     }
 
     function renderTableGeral() {
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        
+        // Aplica Filtro Inteligente
+        let termo = document.getElementById('search-hist-geral') ? document.getElementById('search-hist-geral').value.toLowerCase().trim() : '';
+        let termoNumerico = termo.replace(/\D/g, ''); // Somente os números da pesquisa (ex: "5.100" vira "5100")
+        
+        let histFiltrado = hist.filter(h => {
+            if(!termo) return true;
+            let hDesc = h.desc.toLowerCase();
+            let hData = h.data.toLowerCase();
+            let hDescNum = h.desc.replace(/\D/g, ''); // Somente números da descrição da NF
+            
+            return hDesc.includes(termo) || hData.includes(termo) || (termoNumerico.length > 2 && hDescNum.includes(termoNumerico));
+        });
+
         const tbody = document.querySelector('#table-registrador-geral tbody');
         let total = 0;
-        tbody.innerHTML = hist.map((h, idx) => {
+        
+        tbody.innerHTML = histFiltrado.map((h, idx) => {
             total += h.valor;
-            return `<tr><td>${h.data}</td><td>${h.desc}</td><td>R$ ${h.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:center;"><button class="icon-btn delete" onclick="deleteRowGeral(${idx})">${svgDel}</button></td></tr>`;
+            // Busca index original caso exista um filtro ativo para poder excluir correto
+            let originalIdx = hist.findIndex(orig => orig.id === h.id);
+            return `<tr><td>${h.data}</td><td>${h.desc}</td><td>R$ ${h.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td><td style="text-align:center;"><button class="icon-btn delete" onclick="deleteRowGeral(${originalIdx})">${svgDel}</button></td></tr>`;
         }).join('');
         
-        if(hist.length > 0) {
-            tbody.innerHTML += `<tr style="background: var(--input-bg); font-weight: bold;"><td colspan="2" style="text-align: right;">TOTAL GERAL:</td><td colspan="2">R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+        if(histFiltrado.length > 0) {
+            tbody.innerHTML += `<tr style="background: var(--input-bg); font-weight: bold;"><td colspan="2" style="text-align: right;">TOTAL LISTADO:</td><td colspan="2">R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</td></tr>`;
+        } else {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-sub);">Nenhum registro encontrado.</td></tr>`;
         }
     }
 
@@ -1819,6 +1764,13 @@
         hist.splice(idx, 1);
         localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
         renderTableGeral();
+        
+        // Se a guia excluída estivesse na prévia do difal e fizesse ela piscar vermelho, atualiza lá também
+        if(document.getElementById('sub-mod-difal-auto').style.display === 'block' && document.querySelectorAll('#tabelaPreviewDifal tbody tr').length > 0) {
+            let dadosRows = Array.from(document.querySelectorAll('#tabelaPreviewDifal tbody tr')).map(tr => ({ desc: tr.querySelector('td:nth-child(1) input').value, valor: parseFloat(tr.querySelector('td:nth-child(2) input').value.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) }));
+            renderizarTabelaDifal(dadosRows);
+        }
+        if(document.getElementById('sub-mod-difal-manual').style.display === 'block') renderizarGuiasManuais();
     }
 
     function limparRegistrador(type) {
