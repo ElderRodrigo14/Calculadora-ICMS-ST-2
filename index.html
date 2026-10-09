@@ -256,13 +256,18 @@
     </main>
 
     <!-- MÓDULO 10: DIFAL MENSAL (NOVO) -->
+    <!-- MÓDULO 10: DIFAL MENSAL (NOVO) -->
     <main class="module" id="module-difal-mensal">
         <div class="card">
             <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Apuração Mensal - DIFAL</h2>
             <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">
-                Arraste a planilha de <strong>Relação de Notas</strong> (com as colunas "Nro. nota", "Vlr. total do DIFAL", etc.). O sistema vai gerar a Memória de Cálculo consolidada totalizando as notas e o valor a recolher.
+                Arraste a planilha de <strong>Relação de Notas</strong> ou insira as notas manualmente. A tabela abaixo é editável!
             </p>
             
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="btn-secondary" onclick="addLinhaDifalMensal()">+ Adicionar NF Manualmente</button>
+            </div>
+
             <div id="drop-zone-difal-mensal" class="drop-zone">
                 <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 <div class="drop-zone-text">
@@ -280,7 +285,15 @@
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
                     <table style="width: 100%; margin-top: 0;">
                         <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1;">
-                            <tr><th>Nº Nota</th><th>Data</th><th>Cliente</th><th>UF</th><th>Vlr. Nota</th><th>Vlr. DIFAL</th></tr>
+                            <tr>
+                                <th>Nº Nota</th>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>UF</th>
+                                <th>Vlr. Nota</th>
+                                <th>Vlr. DIFAL</th>
+                                <th style="text-align: center;">Ação</th>
+                            </tr>
                         </thead>
                         <tbody id="corpo-tabela-difal-mensal"></tbody>
                     </table>
@@ -1192,7 +1205,7 @@
     dropZoneDifalMensal.ondrop = (e) => { e.preventDefault(); dropZoneDifalMensal.classList.remove('dragover'); processarPlanilhaDifalMensal(e.dataTransfer.files); };
 
     let dadosDifalMensal = [];
-    let totaisDifalMensal = { valorNota: 0, valorDifal: 0, empresa: '' };
+    let totaisDifalMensal = { valorNota: 0, valorDifal: 0, empresa: 'KADRI TECNOLOGIA' };
 
     function formatarDataExcel(val) {
         if (!val) return '';
@@ -1240,8 +1253,6 @@
                 }
 
                 dadosDifalMensal.push({ nota, data: dataVenda, cliente, uf, vlrNota, vlrDifal });
-                totaisDifalMensal.valorNota += vlrNota;
-                totaisDifalMensal.valorDifal += vlrDifal;
             });
 
             if (!totaisDifalMensal.empresa) totaisDifalMensal.empresa = 'KADRI TECNOLOGIA';
@@ -1251,22 +1262,51 @@
         excelInputDifalMensal.value = '';
     }
 
+    // --- FUNÇÕES MANUAIS DE EDIÇÃO ---
+    function addLinhaDifalMensal() {
+        dadosDifalMensal.push({
+            nota: '', data: new Date().toLocaleDateString('pt-BR'), cliente: '', uf: '', vlrNota: 0, vlrDifal: 0
+        });
+        renderizarTabelaDifalMensal();
+    }
+
+    function atualizarDifalMensal(idx, campo, valorStr) {
+        let num = parseFloat(valorStr.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+        if (!isNaN(num)) dadosDifalMensal[idx][campo] = num;
+        renderizarTabelaDifalMensal();
+    }
+
+    function removerDifalMensal(idx) {
+        dadosDifalMensal.splice(idx, 1);
+        renderizarTabelaDifalMensal();
+    }
+
     function renderizarTabelaDifalMensal() {
         const tbody = document.getElementById('corpo-tabela-difal-mensal');
         let html = '';
-        dadosDifalMensal.forEach(r => {
+        
+        // Zera os totais para recalcular do zero com base na tabela atual
+        totaisDifalMensal.valorNota = 0;
+        totaisDifalMensal.valorDifal = 0;
+
+        dadosDifalMensal.forEach((r, idx) => {
+            totaisDifalMensal.valorNota += r.vlrNota || 0;
+            totaisDifalMensal.valorDifal += r.vlrDifal || 0;
+
             html += `<tr>
-                <td>${r.nota}</td>
-                <td>${r.data}</td>
-                <td>${String(r.cliente).substring(0, 30)}</td>
-                <td><span class="uf-badge">${r.uf}</span></td>
-                <td>R$ ${r.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                <td><strong style="color:var(--success);">R$ ${r.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                <td><input type="text" value="${r.nota}" onchange="dadosDifalMensal[${idx}].nota = this.value" style="background: transparent; border: 1px solid transparent; width: 100%; min-width: 60px; color: var(--text-main); font-family: inherit;"></td>
+                <td><input type="text" value="${r.data}" onchange="dadosDifalMensal[${idx}].data = this.value" style="background: transparent; border: 1px solid transparent; width: 100%; min-width: 80px; color: var(--text-main); font-family: inherit;"></td>
+                <td><input type="text" value="${r.cliente}" onchange="dadosDifalMensal[${idx}].cliente = this.value" style="background: transparent; border: 1px solid transparent; width: 100%; min-width: 150px; color: var(--text-main); font-family: inherit;"></td>
+                <td><input type="text" value="${r.uf}" onchange="dadosDifalMensal[${idx}].uf = this.value.toUpperCase()" style="background: transparent; border: 1px solid transparent; width: 100%; min-width: 40px; color: var(--text-main); font-weight: bold; font-family: inherit; text-transform: uppercase;"></td>
+                <td><input type="text" value="${(r.vlrNota||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}" onchange="atualizarDifalMensal(${idx}, 'vlrNota', this.value)" style="background: transparent; border: 1px solid var(--border); border-radius: 4px; padding: 4px; width: 100%; min-width: 90px; color: var(--text-main); font-family: inherit;"></td>
+                <td><input type="text" value="${(r.vlrDifal||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}" onchange="atualizarDifalMensal(${idx}, 'vlrDifal', this.value)" style="background: var(--input-bg); border: 1px solid var(--border); border-radius: 4px; padding: 4px; width: 100%; min-width: 90px; color: var(--success); font-weight: bold; font-family: inherit;"></td>
+                <td style="text-align: center;"><button class="icon-btn delete" onclick="removerDifalMensal(${idx})" style="margin: 0 auto;">${svgDel}</button></td>
             </tr>`;
         });
+        
         tbody.innerHTML = html;
         document.getElementById('total-difal-mensal').innerText = `Total a Recolher: R$ ${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-        document.getElementById('res-difal-mensal-card').style.display = 'block';
+        document.getElementById('res-difal-mensal-card').style.display = dadosDifalMensal.length > 0 ? 'block' : 'none';
     }
 
     function imprimirRelatorioDifalMensal() {
@@ -1350,8 +1390,8 @@
                                 <td>${it.data}</td>
                                 <td>${it.cliente}</td>
                                 <td>${it.uf}</td>
-                                <td>R$ ${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td><strong>R$ ${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                                <td>R$ ${(it.vlrNota||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ ${(it.vlrDifal||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
                             </tr>`;
                         }).join('')}
                     </tbody>
