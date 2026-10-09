@@ -1274,6 +1274,8 @@
         const dataImpressao = new Date().toLocaleDateString('pt-BR');
         const horaImpressao = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
         
+        let ufDestino = dadosDifalMensal.length > 0 ? dadosDifalMensal[0].uf : 'N/I';
+        
         const htmlStr = `<!DOCTYPE html>
         <html lang="pt-br">
         <head>
@@ -1286,21 +1288,22 @@
                 #folha-a4 { background: #fff; width: 210mm; min-height: 297mm; padding: 20px 30px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.5); position: relative; }
                 .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
                 .logo { max-width: 130px; }
-                .header-title { font-size: 16px; text-align: center; flex-grow: 1; margin-right: 130px; font-weight: bold; text-transform: uppercase;}
+                .title-container { text-align: center; flex-grow: 1; margin-right: 130px; }
+                .header-title { font-size: 15px; font-weight: bold; text-transform: uppercase; }
                 .line-separator { border-top: 1px solid #000; margin-bottom: 10px; }
                 .info-grid { display: grid; grid-template-columns: 80px 1fr 80px; row-gap: 4px; margin-bottom: 15px; font-size: 11px; }
                 .info-grid span { white-space: nowrap; }
                 .calc-col { display: flex; flex-direction: column; gap: 3px; font-size: 10px;}
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 10px; page-break-inside: auto; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 9px; page-break-inside: auto; }
                 thead { display: table-header-group; } tr { page-break-inside: avoid; page-break-after: auto; }
-                th { background-color: #333; color: #fff; text-align: right; padding: 6px 4px; border: none; }
+                th { background-color: #333; color: #fff; text-align: right; padding: 4px 4px; border: none; }
                 th:nth-child(1), th:nth-child(2), th:nth-child(3), th:nth-child(4) { text-align: left; }
-                td { padding: 5px 4px; text-align: right; border: 1px solid #000; }
+                td { padding: 4px 4px; text-align: right; border: 1px solid #000; }
                 td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4) { text-align: left; }
-                .totals-container { display: flex; justify-content: space-around; margin-top: 25px; text-align: center; page-break-inside: avoid; }
+                .totals-container { display: flex; justify-content: space-around; margin-top: 20px; text-align: center; page-break-inside: avoid; }
                 .total-box { display: flex; flex-direction: column; align-items: center; }
-                .total-title { font-size: 12px; margin-bottom: 5px; max-width: 130px; font-weight: bold; color: #333; text-transform: uppercase;}
-                .total-val { font-size: 15px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 5px; width: 100%; color: #000;}
+                .total-title { font-size: 11px; margin-bottom: 5px; max-width: 130px; font-weight: bold; color: #333; text-transform: uppercase;}
+                .total-val { font-size: 14px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 5px; width: 100%; color: #000;}
                 @media print { 
                     @page { size: A4 portrait; margin: 10mm; }
                     body { background: none; padding: 0; }
@@ -1314,14 +1317,16 @@
             <div id="folha-a4">
                 <div class="header-top">
                     <img src="logo_horizontal_azul.png" class="logo" alt="Logo">
-                    <div class="header-title">Memória de Cálculo - DIFAL (Recolhimento Mensal)</div>
+                    <div class="title-container">
+                        <span class="header-title">ICMS DIFAL - RECOLHIMENTO POR APURAÇÃO</span>
+                    </div>
                 </div>
                 <div class="line-separator"></div>
                 <div class="info-grid">
                     <span>Empresa:</span><span><strong>${totaisDifalMensal.empresa}</strong></span><span></span>
-                    <span>Referência:</span><span>Apuração Mensal de DIFAL</span><span></span>
+                    <span>UF Destino:</span><span><strong>${ufDestino}</strong></span><span></span>
                 </div>
-                <div style="display:flex; margin-bottom: 15px;">
+                <div style="display:flex; margin-bottom: 10px;">
                     <div class="calc-col" style="width: 200px;">
                         <div>Emitido por: SISTEMA ST PRO</div>
                         <div>Data de Emissão: ${dataImpressao} ${horaImpressao}</div>
@@ -1340,29 +1345,25 @@
                     </thead>
                     <tbody>
                         ${dadosDifalMensal.map(it => {
-                            return `<tr>
-                                <td>${it.nota}</td>
-                                <td>${it.data}</td>
-                                <td>${it.cliente}</td>
-                                <td>${it.uf}</td>
-                                <td>R$ ${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td><strong>R$ ${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                            </tr>`;
+                            return \`<tr>
+                                <td>\${it.nota}</td>
+                                <td>\${it.data}</td>
+                                <td>\${it.cliente}</td>
+                                <td>\${it.uf}</td>
+                                <td>R$ \${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ \${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                            </tr>\`;
                         }).join('')}
                     </tbody>
                 </table>
                 <div class="totals-container">
                     <div class="total-box">
                         <div class="total-title">Total de Notas</div>
-                        <div class="total-val">${dadosDifalMensal.length}</div>
-                    </div>
-                    <div class="total-box">
-                        <div class="total-title">Total Base (Vlr. Notas)</div>
-                        <div class="total-val">R$ ${totaisDifalMensal.valorNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                        <div class="total-val">\${dadosDifalMensal.length}</div>
                     </div>
                     <div class="total-box">
                         <div class="total-title">Valor a Recolher (DIFAL)</div>
-                        <div class="total-val">R$ ${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                        <div class="total-val">R$ \${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
                     </div>
                 </div>
             </div>
@@ -2026,7 +2027,6 @@
             let hDesc = h.desc.toLowerCase();
             let hData = h.data.toLowerCase();
             let hDescNum = h.desc.replace(/\D/g, ''); 
-            
             return hDesc.includes(termo) || hData.includes(termo) || (termoNumerico.length > 2 && hDescNum.includes(termoNumerico));
         });
 
@@ -2118,7 +2118,6 @@
 
         let tsv = "";
         histFiltrado.forEach(h => {
-            // Extrai só o número da nota se existir
             let numMatch = h.desc.match(/\d+/);
             let num = numMatch ? numMatch[0] : h.desc;
             let valorFmt = h.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
