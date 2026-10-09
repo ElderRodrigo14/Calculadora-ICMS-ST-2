@@ -1345,25 +1345,25 @@
                     </thead>
                     <tbody>
                         ${dadosDifalMensal.map(it => {
-                            return \`<tr>
-                                <td>\${it.nota}</td>
-                                <td>\${it.data}</td>
-                                <td>\${it.cliente}</td>
-                                <td>\${it.uf}</td>
-                                <td>R$ \${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-                                <td><strong>R$ \${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                            </tr>\`;
+                            return `<tr>
+                                <td>${it.nota}</td>
+                                <td>${it.data}</td>
+                                <td>${it.cliente}</td>
+                                <td>${it.uf}</td>
+                                <td>R$ ${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ ${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                            </tr>`;
                         }).join('')}
                     </tbody>
                 </table>
                 <div class="totals-container">
                     <div class="total-box">
                         <div class="total-title">Total de Notas</div>
-                        <div class="total-val">\${dadosDifalMensal.length}</div>
+                        <div class="total-val">${dadosDifalMensal.length}</div>
                     </div>
                     <div class="total-box">
                         <div class="total-title">Valor a Recolher (DIFAL)</div>
-                        <div class="total-val">R$ \${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                        <div class="total-val">R$ ${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
                     </div>
                 </div>
             </div>
