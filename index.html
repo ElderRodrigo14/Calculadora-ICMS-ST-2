@@ -159,6 +159,11 @@
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
                 ST Mensal (Lote)
             </div>
+            <!-- NOVA ABA: DIFAL MENSAL -->
+            <div class="tab-item" onclick="switchModule('difal-mensal')">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 14H7v-2h10v2zm0-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                DIFAL Mensal
+            </div>
             <div class="tab-item" onclick="switchModule('manual')">
                 <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8 14H7v-2h4v2zm0-4H7v-2h4v2zm0-4H7V7h4v2zm6 8h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z"/></svg>
                 Cálculo Manual
@@ -247,6 +252,41 @@
                 </table>
             </div>
             <div class="total-box-manual" id="total-st-mensal">Total ST Mensal: R$ 0,00</div>
+        </div>
+    </main>
+
+    <!-- MÓDULO 10: DIFAL MENSAL (NOVO) -->
+    <main class="module" id="module-difal-mensal">
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 5px; color: var(--text-main); font-weight: 500;">Apuração Mensal - DIFAL</h2>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">
+                Arraste a planilha de <strong>Relação de Notas</strong> (com as colunas "Nro. nota", "Vlr. total do DIFAL", etc.). O sistema vai gerar a Memória de Cálculo consolidada totalizando as notas e o valor a recolher.
+            </p>
+            
+            <div id="drop-zone-difal-mensal" class="drop-zone">
+                <svg style="width: 28px; height: 28px;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                <div class="drop-zone-text">
+                    <h3>Arraste a Planilha "Relação de Notas" aqui</h3>
+                    <p>Formatos suportados: .xls, .xlsx</p>
+                </div>
+                <input type="file" id="excel-input-difal-mensal" accept=".xls,.xlsx" style="display: none;">
+            </div>
+
+            <div id="res-difal-mensal-card" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="margin: 0; font-weight: 500;">Resumo da Apuração - DIFAL</h3>
+                    <button class="btn-main" onclick="imprimirRelatorioDifalMensal()">🖨️ Imprimir Memória de Cálculo</button>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                    <table style="width: 100%; margin-top: 0;">
+                        <thead style="position: sticky; top: 0; background: var(--card-bg); z-index: 1;">
+                            <tr><th>Nº Nota</th><th>Data</th><th>Cliente</th><th>UF</th><th>Vlr. Nota</th><th>Vlr. DIFAL</th></tr>
+                        </thead>
+                        <tbody id="corpo-tabela-difal-mensal"></tbody>
+                    </table>
+                </div>
+                <div class="total-box-manual" id="total-difal-mensal">Total a Recolher: R$ 0,00</div>
+            </div>
         </div>
     </main>
 
@@ -479,6 +519,8 @@
                 
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
                     <button class="btn-main" onclick="exportExcel('geral')">📥 Exportar para Excel</button>
+                    <!-- NOVO BOTÃO COPIAR COLUNAS (EXCEL) -->
+                    <button class="btn-main" onclick="copiarColunasDIFAL()" style="background: var(--sankhya-green); color: white;">📋 Copiar Colunas (Nº e Valor)</button>
                     <button class="btn-secondary" style="color: var(--danger); border-color: var(--danger);" onclick="limparRegistrador('geral')">Limpar Histórico</button>
                 </div>
             </div>
@@ -1138,6 +1180,206 @@
         document.getElementById('mensal-result-card').style.display = 'none'; document.getElementById('excel-input-mensal').value = '';
     }
 
+    // ==========================================
+    // --- MÓDULO 10: DIFAL MENSAL (NOVO) ---
+    // ==========================================
+    const dropZoneDifalMensal = document.getElementById('drop-zone-difal-mensal');
+    const excelInputDifalMensal = document.getElementById('excel-input-difal-mensal');
+    dropZoneDifalMensal.onclick = () => excelInputDifalMensal.click();
+    excelInputDifalMensal.onchange = (e) => processarPlanilhaDifalMensal(e.target.files);
+    dropZoneDifalMensal.ondragover = (e) => { e.preventDefault(); dropZoneDifalMensal.classList.add('dragover'); };
+    dropZoneDifalMensal.ondragleave = () => dropZoneDifalMensal.classList.remove('dragover');
+    dropZoneDifalMensal.ondrop = (e) => { e.preventDefault(); dropZoneDifalMensal.classList.remove('dragover'); processarPlanilhaDifalMensal(e.dataTransfer.files); };
+
+    let dadosDifalMensal = [];
+    let totaisDifalMensal = { valorNota: 0, valorDifal: 0, empresa: '' };
+
+    function formatarDataExcel(val) {
+        if (!val) return '';
+        if (typeof val === 'number') {
+            let d = new Date((val - 25569) * 86400 * 1000);
+            return d.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+        }
+        if (typeof val === 'string' && val.length > 9) {
+            let partes = val.split(' ')[0].split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        }
+        return val;
+    }
+
+    function processarPlanilhaDifalMensal(files) {
+        if (!files || files.length === 0) return;
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, {defval: ""});
+            
+            if (json.length === 0) { alert("Planilha vazia ou formato não reconhecido."); return; }
+
+            dadosDifalMensal = [];
+            totaisDifalMensal = { valorNota: 0, valorDifal: 0, empresa: '' };
+
+            json.forEach(row => {
+                let nota = row['Nro. nota'] || row['Nro. Nota'] || '';
+                if (!nota || String(nota).toLowerCase().includes('total')) return;
+                
+                let dataVenda = formatarDataExcel(row['Data de venda'] || row['Data'] || '');
+                let cliente = row['Nome Parceiro'] || row['Cliente'] || '';
+                let uf = row['UF Destino'] || row['UF'] || '';
+                
+                let vlrNota = extrairFloat(row['Vlr. Nota'] || row['Valor Nota'] || 0);
+                let vlrDifal = extrairFloat(row['Vlr. total do DIFAL'] || row['Vlr. Difal'] || 0);
+                
+                if (!totaisDifalMensal.empresa && row['Nome Fantasia']) {
+                    totaisDifalMensal.empresa = row['Nome Fantasia'];
+                } else if (!totaisDifalMensal.empresa && row['Empresa']) {
+                    totaisDifalMensal.empresa = row['Empresa'];
+                }
+
+                dadosDifalMensal.push({ nota, data: dataVenda, cliente, uf, vlrNota, vlrDifal });
+                totaisDifalMensal.valorNota += vlrNota;
+                totaisDifalMensal.valorDifal += vlrDifal;
+            });
+
+            if (!totaisDifalMensal.empresa) totaisDifalMensal.empresa = 'KADRI TECNOLOGIA';
+            renderizarTabelaDifalMensal();
+        };
+        reader.readAsArrayBuffer(file);
+        excelInputDifalMensal.value = '';
+    }
+
+    function renderizarTabelaDifalMensal() {
+        const tbody = document.getElementById('corpo-tabela-difal-mensal');
+        let html = '';
+        dadosDifalMensal.forEach(r => {
+            html += `<tr>
+                <td>${r.nota}</td>
+                <td>${r.data}</td>
+                <td>${String(r.cliente).substring(0, 30)}</td>
+                <td><span class="uf-badge">${r.uf}</span></td>
+                <td>R$ ${r.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                <td><strong style="color:var(--success);">R$ ${r.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+        document.getElementById('total-difal-mensal').innerText = `Total a Recolher: R$ ${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+        document.getElementById('res-difal-mensal-card').style.display = 'block';
+    }
+
+    function imprimirRelatorioDifalMensal() {
+        if(dadosDifalMensal.length === 0) return;
+        const dataImpressao = new Date().toLocaleDateString('pt-BR');
+        const horaImpressao = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        
+        const htmlStr = `<!DOCTYPE html>
+        <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>Memória de Cálculo - DIFAL</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; padding: 20px; background: #525659; display: flex; justify-content: center; }
+                .btn-imprimir { position: fixed; top: 20px; right: 20px; background: #0056b3; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+                .btn-imprimir:hover { background: #004494; }
+                #folha-a4 { background: #fff; width: 210mm; min-height: 297mm; padding: 20px 30px; box-sizing: border-box; box-shadow: 0 0 10px rgba(0,0,0,0.5); position: relative; }
+                .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+                .logo { max-width: 130px; }
+                .header-title { font-size: 16px; text-align: center; flex-grow: 1; margin-right: 130px; font-weight: bold; text-transform: uppercase;}
+                .line-separator { border-top: 1px solid #000; margin-bottom: 10px; }
+                .info-grid { display: grid; grid-template-columns: 80px 1fr 80px; row-gap: 4px; margin-bottom: 15px; font-size: 11px; }
+                .info-grid span { white-space: nowrap; }
+                .calc-col { display: flex; flex-direction: column; gap: 3px; font-size: 10px;}
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 10px; page-break-inside: auto; }
+                thead { display: table-header-group; } tr { page-break-inside: avoid; page-break-after: auto; }
+                th { background-color: #333; color: #fff; text-align: right; padding: 6px 4px; border: none; }
+                th:nth-child(1), th:nth-child(2), th:nth-child(3), th:nth-child(4) { text-align: left; }
+                td { padding: 5px 4px; text-align: right; border: 1px solid #000; }
+                td:nth-child(1), td:nth-child(2), td:nth-child(3), td:nth-child(4) { text-align: left; }
+                .totals-container { display: flex; justify-content: space-around; margin-top: 25px; text-align: center; page-break-inside: avoid; }
+                .total-box { display: flex; flex-direction: column; align-items: center; }
+                .total-title { font-size: 12px; margin-bottom: 5px; max-width: 130px; font-weight: bold; color: #333; text-transform: uppercase;}
+                .total-val { font-size: 15px; font-weight: bold; border-top: 2px solid #d4af37; padding-top: 5px; width: 100%; color: #000;}
+                @media print { 
+                    @page { size: A4 portrait; margin: 10mm; }
+                    body { background: none; padding: 0; }
+                    .btn-imprimir { display: none !important; }
+                    #folha-a4 { box-shadow: none; margin: 0; padding: 0; width: 100%; min-height: auto;}
+                }
+            </style>
+        </head>
+        <body>
+            <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir (Ctrl+P)</button>
+            <div id="folha-a4">
+                <div class="header-top">
+                    <img src="logo_horizontal_azul.png" class="logo" alt="Logo">
+                    <div class="header-title">Memória de Cálculo - DIFAL (Recolhimento Mensal)</div>
+                </div>
+                <div class="line-separator"></div>
+                <div class="info-grid">
+                    <span>Empresa:</span><span><strong>${totaisDifalMensal.empresa}</strong></span><span></span>
+                    <span>Referência:</span><span>Apuração Mensal de DIFAL</span><span></span>
+                </div>
+                <div style="display:flex; margin-bottom: 15px;">
+                    <div class="calc-col" style="width: 200px;">
+                        <div>Emitido por: SISTEMA ST PRO</div>
+                        <div>Data de Emissão: ${dataImpressao} ${horaImpressao}</div>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nº Nota</th>
+                            <th>Data Venda</th>
+                            <th>Cliente / Parceiro</th>
+                            <th>UF Dest.</th>
+                            <th>Valor da Nota</th>
+                            <th>Valor do DIFAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${dadosDifalMensal.map(it => {
+                            return \`<tr>
+                                <td>\${it.nota}</td>
+                                <td>\${it.data}</td>
+                                <td>\${it.cliente}</td>
+                                <td>\${it.uf}</td>
+                                <td>R$ \${it.vlrNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                                <td><strong>R$ \${it.vlrDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
+                            </tr>\`;
+                        }).join('')}
+                    </tbody>
+                </table>
+                <div class="totals-container">
+                    <div class="total-box">
+                        <div class="total-title">Total de Notas</div>
+                        <div class="total-val">\${dadosDifalMensal.length}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Total Base (Vlr. Notas)</div>
+                        <div class="total-val">R$ \${totaisDifalMensal.valorNota.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                    <div class="total-box">
+                        <div class="total-title">Valor a Recolher (DIFAL)</div>
+                        <div class="total-val">R$ \${totaisDifalMensal.valorDifal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                window.onload = function() {
+                    setTimeout(function() { window.print(); }, 500);
+                };
+            <\/script>
+        </body>
+        </html>`;
+
+        const janela = window.open('', '_blank'); 
+        janela.document.write(htmlStr); 
+        janela.document.close();
+    }
+
+
     // --- MÓDULO 2: CÁLCULO MANUAL ---
     function limparNum(t) { if(!t) return 0; return parseFloat(t.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) || 0; }
     function setAliq(v) { aliqAtivaManual = v; document.getElementById('a4').classList.toggle('active', v === 0.04); document.getElementById('a7').classList.toggle('active', v === 0.07); }
@@ -1675,7 +1917,6 @@
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
         
         if (editandoIdGeral !== null) {
-            // Atualiza guia existente
             let itemIndex = hist.findIndex(h => h.id === editandoIdGeral);
             if (itemIndex > -1) {
                 hist[itemIndex].desc = desc;
@@ -1683,7 +1924,6 @@
             }
             cancelarEdicaoGeral();
         } else {
-            // Cria nova guia
             hist.push({ id: (Date.now() + Math.random()).toString(), data: new Date().toLocaleDateString('pt-BR'), desc: desc, valor: valNum });
             document.getElementById('reg-desc').value = ''; 
             document.getElementById('reg-val').value = '';
@@ -1726,7 +1966,6 @@
             let matchData = text.match(/Data Entrega:\s*([\d]{2}\/[\d]{2}\/[\d]{4})/i);
             let dataEntrega = matchData ? matchData[1] : new Date().toLocaleDateString('pt-BR');
             
-            // Regex ajustado para pegar Descrição e Valor sequencialmente para não falhar na leitura de colunas
             let regexDesc = /(DIFAL NF [\d\.]+|ISSQN.*?|ICMS.*?|Retenções.*?)(?=\s|$|R\$)/gi;
             let descricoes = []; let dMatch;
             while((dMatch = regexDesc.exec(text)) !== null) { if(dMatch[1].length > 5) descricoes.push(dMatch[1].trim()); }
@@ -1769,7 +2008,7 @@
     function renderTableGeral() {
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
         
-        // Correção: Verifica se existem registros antigos sem ID e cria um para eles
+        // Auto-fix IDs antigos
         let precisaSalvar = false;
         hist.forEach(h => {
             if (!h.id) {
@@ -1777,11 +2016,8 @@
                 precisaSalvar = true;
             }
         });
-        if (precisaSalvar) {
-            localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
-        }
+        if (precisaSalvar) localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
 
-        // Aplica Filtro Inteligente
         let termo = document.getElementById('search-hist-geral') ? document.getElementById('search-hist-geral').value.toLowerCase().trim() : '';
         let termoNumerico = termo.replace(/\D/g, ''); 
         
@@ -1825,7 +2061,6 @@
             localStorage.setItem('histGuiasGeral', JSON.stringify(hist));
             renderTableGeral();
             
-            // Atualiza prévias se estiverem abertas
             if(document.getElementById('sub-mod-difal-auto').style.display === 'block' && document.querySelectorAll('#tabelaPreviewDifal tbody tr').length > 0) {
                 let dadosRows = Array.from(document.querySelectorAll('#tabelaPreviewDifal tbody tr')).map(tr => ({ desc: tr.querySelector('td:nth-child(1) input').value, valor: parseFloat(tr.querySelector('td:nth-child(2) input').value.replace(/R\$/gi, '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.')) }));
                 renderizarTabelaDifal(dadosRows);
@@ -1862,6 +2097,43 @@
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Historico"); XLSX.writeFile(wb, filename);
     }
     
+    // NOVA FUNÇÃO PARA COPIAR COLUNAS DIRETAS (EXCEL)
+    function copiarColunasDIFAL() {
+        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+        let termo = document.getElementById('search-hist-geral') ? document.getElementById('search-hist-geral').value.toLowerCase().trim() : '';
+        let termoNumerico = termo.replace(/\D/g, ''); 
+        
+        let histFiltrado = hist.filter(h => {
+            if(!termo) return true;
+            let hDesc = h.desc.toLowerCase();
+            let hData = h.data.toLowerCase();
+            let hDescNum = h.desc.replace(/\D/g, ''); 
+            return hDesc.includes(termo) || hData.includes(termo) || (termoNumerico.length > 2 && hDescNum.includes(termoNumerico));
+        });
+
+        if(histFiltrado.length === 0) {
+            alert("Nenhum dado na tabela para copiar.");
+            return;
+        }
+
+        let tsv = "";
+        histFiltrado.forEach(h => {
+            // Extrai só o número da nota se existir
+            let numMatch = h.desc.match(/\d+/);
+            let num = numMatch ? numMatch[0] : h.desc;
+            let valorFmt = h.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            tsv += `${num}\t${valorFmt}\n`;
+        });
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(tsv).then(() => {
+                alert("As colunas (Nº da Nota e Valor) foram copiadas com sucesso!\n\nAgora é só dar Ctrl+V na sua planilha.");
+            }).catch(err => { alert("Erro ao copiar: " + err); });
+        } else {
+            alert("Seu navegador bloqueou a cópia automática. Use a função de Exportar para Excel.");
+        }
+    }
+
     // --- MÓDULO 9: GERADOR DE LOTE GNRE ---
     const dropZoneGnre = document.getElementById('drop-zone-gnre');
     const xmlInputGnre = document.getElementById('xml-input-gnre');
