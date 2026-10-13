@@ -2138,6 +2138,7 @@
     }
     
     // NOVA FUNÇÃO PARA COPIAR COLUNAS DIRETAS (EXCEL)
+    // NOVA FUNÇÃO PARA COPIAR COLUNAS DIRETAS (EXCEL)
     function copiarColunasDIFAL() {
         let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
         let termo = document.getElementById('search-hist-geral') ? document.getElementById('search-hist-geral').value.toLowerCase().trim() : '';
@@ -2155,6 +2156,23 @@
             alert("Nenhum dado na tabela para copiar.");
             return;
         }
+
+        // Monta o texto separado por tabulações (\t) para o Excel entender como colunas
+        let tsv = "";
+        histFiltrado.forEach(h => {
+            let valorFmt = h.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            // Adiciona Data -> Tab -> Descrição -> Tab -> Valor -> Quebra de Linha
+            tsv += `${h.data}\t${h.desc}\t${valorFmt}\n`;
+        });
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(tsv).then(() => {
+                alert("As colunas (Data de Entrega, Descrição e Valor) foram copiadas com sucesso!\n\nAgora é só dar Ctrl+V na sua planilha.");
+            }).catch(err => { alert("Erro ao copiar: " + err); });
+        } else {
+            alert("Seu navegador bloqueou a cópia automática. Use a função de Exportar para Excel.");
+        }
+    }
 
         let tsv = "";
         histFiltrado.forEach(h => {
