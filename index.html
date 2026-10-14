@@ -2028,11 +2028,20 @@
     }
 
     function copiarColunasDIFAL() {
-        let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
-        let text = hist.map(h => `${h.data}\t${h.desc}\t${h.valor}`).join('\n');
-        navigator.clipboard.writeText(text).then(() => alert("Copiado para a área de transferência!"));
-    }
-
+    let hist = JSON.parse(localStorage.getItem('histGuiasGeral')) || [];
+    
+    let text = hist.map(h => {
+        // Converte 159.84 para "R$ 159,84"
+        let valorFormatado = "R$ " + h.valor.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2
+        });
+        
+        return `${h.data}\t${h.desc}\t${valorFormatado}`;
+    }).join('\n');
+    
+    navigator.clipboard.writeText(text).then(() => alert("Copiado para a área de transferência com formato R$!"));
+}
     // Stubs para funções de botões menores do HTML para não gerarem erros no console
     function exportExcel(tipo) { alert("Módulo de exportação de Excel não incluído neste snippet base."); }
     function processarPDFGeral(files) { alert("Arraste os PDFs de protocolo gerados anteriormente na área correta."); }
